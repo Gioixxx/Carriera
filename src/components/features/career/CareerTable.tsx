@@ -15,7 +15,7 @@ export function CareerTable({ player, pendingLabel }: CareerTableProps) {
   }
 
   return (
-    <div className="overflow-x-auto rounded-xl border border-(--color-border) bg-(--color-surface)">
+    <div className="overflow-x-auto rounded-xl border border-(--color-border) bg-(--color-surface) shadow-sm">
       <table className="w-full min-w-[420px] text-sm">
         <thead>
           <tr className="border-b border-(--color-border) text-left text-xs text-(--color-text-muted) uppercase">
@@ -31,7 +31,10 @@ export function CareerTable({ player, pendingLabel }: CareerTableProps) {
           {player.clubHistory.map((stint, index) => {
             const trophyCount = trophiesByAge.get(stint.ageTo) ?? 0;
             return (
-              <tr key={index} className="border-b border-(--color-border) last:border-0">
+              <tr
+                key={index}
+                className="border-b border-(--color-border) last:border-0 odd:bg-(--color-surface-raised)/40"
+              >
                 <td className="px-3 py-2 text-(--color-text-muted)">{stint.ageFrom}</td>
                 <td className="px-3 py-2">
                   <span className="font-medium text-(--color-text)">{stint.club.name}</span>
@@ -39,9 +42,12 @@ export function CareerTable({ player, pendingLabel }: CareerTableProps) {
                     <span className="ml-1.5 text-xs text-(--color-text-muted)">(prestito)</span>
                   ) : null}
                   {trophyCount > 0 ? (
-                    <span className="ml-1.5 inline-flex items-center gap-0.5 text-(--color-ovr-gold)">
-                      <Trophy size={12} aria-hidden="true" />
-                      {trophyCount > 1 ? <span className="text-xs">×{trophyCount}</span> : null}
+                    <span
+                      className="ml-1.5 inline-flex items-center gap-0.5 rounded-full bg-(--color-ovr-gold)/15 px-1.5 py-0.5 text-(--color-ovr-gold)"
+                      title={`${trophyCount} ${trophyCount === 1 ? "trofeo vinto" : "trofei vinti"} in questo ciclo`}
+                    >
+                      <Trophy size={13} aria-hidden="true" />
+                      {trophyCount > 1 ? <span className="text-xs font-semibold">×{trophyCount}</span> : null}
                     </span>
                   ) : null}
                 </td>

@@ -1,5 +1,6 @@
 "use client";
 
+import { Star } from "lucide-react";
 import type { Decision } from "@/types/career";
 import { cn } from "@/lib/utils";
 
@@ -8,7 +9,23 @@ interface OfferPanelProps {
   onChoose: (optionId: string) => void;
 }
 
-const PRESTIGE_STARS = "★";
+function PrestigeStars({ prestige }: { prestige: number }) {
+  if (prestige <= 0) {
+    return <span className="text-xs text-(--color-text-muted)">Club emergente</span>;
+  }
+  return (
+    <span className="flex items-center gap-0.5" aria-label={`Prestigio ${prestige} su 3`}>
+      {Array.from({ length: 3 }, (_, i) => (
+        <Star
+          key={i}
+          size={13}
+          aria-hidden="true"
+          className={i < prestige ? "fill-(--color-accent) text-(--color-accent)" : "text-(--color-border)"}
+        />
+      ))}
+    </span>
+  );
+}
 
 export function OfferPanel({ decision, onChoose }: OfferPanelProps) {
   return (
@@ -27,8 +44,8 @@ export function OfferPanel({ decision, onChoose }: OfferPanelProps) {
             type="button"
             onClick={() => onChoose(option.id)}
             className={cn(
-              "flex flex-col items-start gap-1 rounded-lg border border-(--color-border) bg-(--color-surface-raised) p-4 text-left",
-              "transition-colors duration-150 hover:border-(--color-accent)",
+              "flex flex-col items-start gap-1.5 rounded-lg border border-(--color-border) bg-(--color-surface-raised) p-4 text-left",
+              "transition-all duration-150 hover:-translate-y-0.5 hover:border-(--color-accent) hover:shadow-md",
               "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-(--color-accent)",
             )}
           >
@@ -38,9 +55,7 @@ export function OfferPanel({ decision, onChoose }: OfferPanelProps) {
                 <span className="text-xs text-(--color-text-muted)">
                   {option.club.country} · {option.club.competitions.league}
                 </span>
-                <span className="text-(--color-accent)" aria-label={`Prestigio ${option.club.prestige} su 3`}>
-                  {PRESTIGE_STARS.repeat(option.club.prestige) || "—"}
-                </span>
+                <PrestigeStars prestige={option.club.prestige} />
               </>
             ) : null}
             {option.retire ? (

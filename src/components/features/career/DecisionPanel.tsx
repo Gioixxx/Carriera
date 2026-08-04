@@ -51,7 +51,7 @@ export function DecisionPanel({ decision, onChoose }: DecisionPanelProps) {
             onClick={() => onChoose(option.id)}
             className={cn(
               "flex flex-col items-start gap-2 rounded-lg border border-(--color-border) bg-(--color-surface-raised) p-4 text-left",
-              "transition-colors duration-150 hover:border-(--color-accent)",
+              "transition-all duration-150 hover:-translate-y-0.5 hover:border-(--color-accent) hover:shadow-md",
               "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-(--color-accent)",
             )}
           >

@@ -1,4 +1,5 @@
 import { cn } from "@/lib/utils";
+import { JerseyBadge } from "./JerseyBadge";
 
 interface JerseyCardProps {
   lastName: string;
@@ -6,9 +7,6 @@ interface JerseyCardProps {
   flag?: string;
   className?: string;
 }
-
-const JERSEY_CLIP_PATH =
-  "polygon(50% 0%, 80% 0%, 100% 20%, 85% 35%, 85% 100%, 15% 100%, 15% 35%, 0% 20%, 20% 0%)";
 
 export function JerseyCard({ lastName, number, flag, className }: JerseyCardProps) {
   const displayName = lastName.trim() ? lastName.trim().toUpperCase() : "COGNOME";
@@ -19,7 +17,7 @@ export function JerseyCard({ lastName, number, flag, className }: JerseyCardProp
     <div
       className={cn(
         "dossier-perforated flex flex-col items-center gap-4 rounded-2xl border border-(--color-accent)/40",
-        "bg-(--color-surface-raised) px-6 pt-5 pb-6",
+        "bg-(--color-surface-raised) px-6 pt-5 pb-6 shadow-lg shadow-black/5",
         className,
       )}
     >
@@ -27,17 +25,7 @@ export function JerseyCard({ lastName, number, flag, className }: JerseyCardProp
         Cartellino del giocatore
       </span>
 
-      <div
-        className="relative flex h-36 w-36 items-center justify-center bg-(--color-pitch) text-white"
-        style={{ clipPath: JERSEY_CLIP_PATH }}
-      >
-        {flag ? (
-          <span className="absolute top-7 text-base" aria-hidden="true">
-            {flag}
-          </span>
-        ) : null}
-        <span className="font-display text-5xl leading-none">{displayNumber}</span>
-      </div>
+      <JerseyBadge number={displayNumber} flag={flag} size="lg" />
 
       <div className="flex flex-col items-center gap-1 text-center">
         <p className="font-display max-w-[12rem] truncate text-xl text-(--color-text)">

@@ -68,6 +68,24 @@ body {
   font-family: var(--font-sans), Arial, Helvetica, sans-serif;
 }
 
+/*
+ * Atmosfera di sfondo — vignettatura radiale col verde campo + una texture a righe
+ * larghe che richiama le fasce tosate di un terreno di gioco visto dall'alto. Riempie lo
+ * spazio ai lati della colonna centrale con qualcosa di intenzionale invece del vuoto piatto.
+ */
+.field-atmosphere {
+  background-image:
+    radial-gradient(ellipse 80% 50% at 50% -10%, color-mix(in srgb, var(--color-pitch) 22%, transparent), transparent),
+    repeating-linear-gradient(
+      120deg,
+      color-mix(in srgb, var(--color-pitch) 4%, transparent) 0px,
+      color-mix(in srgb, var(--color-pitch) 4%, transparent) 2px,
+      transparent 2px,
+      transparent 120px
+    );
+  background-attachment: fixed;
+}
+
 .font-display {
   font-family: var(--font-display), sans-serif;
   letter-spacing: 0.02em;
