@@ -6,6 +6,7 @@ import { useCareerGame } from "@/hooks/useCareerGame";
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
 import { cn } from "@/lib/utils";
+import { CareerSummary } from "./CareerSummary";
 import { CareerTable } from "./CareerTable";
 import { DecisionPanel } from "./DecisionPanel";
 import { IdentityForm } from "./IdentityForm";
@@ -112,20 +113,7 @@ export function CareerGame() {
                 ) : null}
 
                 {state.retired ? (
-                  <Card className="animate-step-in flex flex-col items-center gap-3 p-10 text-center">
-                    <p className="font-display text-xs tracking-[0.35em] text-(--color-accent)">
-                      Carriera conclusa
-                    </p>
-                    <h2 className="font-display text-3xl text-(--color-text)">
-                      {state.player.lastName.toUpperCase()}
-                    </h2>
-                    <p className="text-(--color-text-muted)">
-                      La schermata di riepilogo completa arriverà nella prossima fase dello sviluppo.
-                    </p>
-                    <Button variant="secondary" onClick={handleRestart}>
-                      Ricomincia
-                    </Button>
-                  </Card>
+                  <CareerSummary player={state.player} onRestart={handleRestart} />
                 ) : null}
 
                 {!state.retired && state.currentDecision ? (

@@ -19,7 +19,7 @@ Stato lavoro in corso. Aggiornato con /sprint. Backlog in [[backlog]], debito in
 - [x] Fase 4 — decisions.ts: pool completo decisioni, generatori club-dipendenti, eventi condizionati dal contesto
 - [x] Fase 5 — UI creazione personaggio: IdentityForm, SpeedSelect, design "Cartellino del giocatore" (verde campo/pergamena/oro)
 - [x] Fase 6 — UI loop di gioco: lib/career/loop.ts (orchestrazione ciclo, contesto prestiti), trophies.ts (trofei club/nazionale/award), hooks/useCareerGame.ts (stato + autosave/resume localStorage), PlayerCard/CareerTable/OfferPanel/DecisionPanel/PenaltyShootout — verificato end-to-end nel browser (academy offer → transfer → loan → loan-return → sign permanente → eventi lifestyle probabilistici → refresh con persistenza corretta)
-- [ ] Fase 7 — Fine carriera: retirement automatico (già nel motore), CareerSummary vero (breakdown per club, nazionale, awards, trofei) al posto del placeholder attuale, "Play again"
+- [x] Fase 7 — Fine carriera: `lib/career/summary.ts` (dominio puro: `summarizeClubHistory` accorpa `clubHistory` per club sommando le statistiche di cicli separati, `peakOvr`), `CareerSummary.tsx` vero al posto del placeholder (stats OVR max/presenze/gol/assist, tabella club aggregata, sezione nazionale, lista trofei+premi con label italiane per `AwardType`, bottone "Gioca ancora"), 6 nuovi test in `summary.test.ts` — verificato end-to-end nel browser (carriera giocata fino a "Ritirati" in end-of-cycle, riepilogo con aggregazione multi-club/multi-ciclo corretta, "Gioca ancora" resetta al passo 1)
 - [ ] Fase 8 — Polish: dark mode toggle in UI, responsive, accessibilità
 - [x] Commit iniziale (60ce3b1) — fasi 1-5
 - [x] Commit fase 6 (f73f0a1)
