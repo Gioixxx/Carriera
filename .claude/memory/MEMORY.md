@@ -1,16 +1,20 @@
 ---
 type: memory
 tags: [memory, index]
-updated: [data]
+updated: [2026-08-04]
 ---
 
-# [Progetto] — [Stack]
+# Carriera — Next.js
 > Contesto persistente. Aggiornato da /remember. Vault Obsidian: vedi workflows/obsidian-vault.md.
 
-**Stack:** [tecnologie]  **Sprint:** [obiettivo]  **Aggiornamento:** [data]
+**Stack:** Next.js 16 (App Router) · TypeScript strict · Tailwind v4 · Vitest  **Sprint:** Fasi 6-8 (loop di gioco, fine carriera, polish)  **Aggiornamento:** 2026-08-04
 
 ## Contesto
-2-3 righe su progetto e stato attuale.
+Clone testuale di "Copero — Simulador de carrera" (https://copero.com.ar/juegos/simulador-carrera):
+simulatore della carriera di un calciatore, tutto in italiano, nomi reali di club/leghe/nazionali,
+solo locale (localStorage, no backend). Piano completo con 4 sezioni di ricerca sul gioco originale
+in `C:\Users\Gioix\.claude\plans\piped-bouncing-cocke.md`. Fasi 1-5/8 completate e committate
+(60ce3b1): scaffold, dominio puro, dati (84 club/41 paesi), decisioni, UI creazione personaggio.
 
 ## File memoria (carica su richiesta)
 > `@file.md` = import Claude · `[[file]]` = wikilink Obsidian (graph). Tieni entrambi.
@@ -23,4 +27,6 @@ updated: [data]
 - @adr.md — [[adr]] — ADR formali
 
 ## Segnalibri critici
-- [decisioni o vincoli da tenere sempre a mente]
+- Il piano di implementazione dettagliato vive FUORI dal repo, in `C:\Users\Gioix\.claude\plans\piped-bouncing-cocke.md` — leggerlo prima di riprendere lo sviluppo, contiene le meccaniche osservate su 10+ carriere giocate sul sito originale.
+- Nell'originale gli award individuali (Pallone d'Oro) e le probabilità di nazionale/coppa continentale sono praticamente irraggiungibili anche in carriere-record — il clone li implementa con soglie deliberatamente più generose (vedi [[decisions]]).
+- Stemmi dei club: solo hotlink a URL esterni (mai download di loghi), vedi ricerca in `.claude/research/team-crests.md` (se già completata).
