@@ -6,3 +6,5 @@
 @.claude/libs/CLAUDE.md
 @.claude/memory/MEMORY.md
 <!-- claude-libs:modules:end -->
+
+@AGENTS.md

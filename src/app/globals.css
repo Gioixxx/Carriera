@@ -1,0 +1,110 @@
+@import "tailwindcss";
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+:root {
+  --color-background: #edf0e6;
+  --color-surface: #ffffff;
+  --color-surface-raised: #f3eedd;
+  --color-border: #d8d2bd;
+  --color-text: #1b2320;
+  --color-text-muted: #5b6660;
+  --color-primary: #14352b;
+  --color-primary-hover: #3f8f5f;
+  --color-accent: #c9a24b;
+  --color-pitch: #14352b;
+  --color-success: #3f8f5f;
+  --color-warning: #c9a24b;
+  --color-error: #b23a3a;
+  --color-ovr-bronze: #9c6b3e;
+  --color-ovr-silver: #5b6a75;
+  --color-ovr-gold: #c9a24b;
+}
+
+.dark {
+  --color-background: #0b1210;
+  --color-surface: #132019;
+  --color-surface-raised: #1a2921;
+  --color-border: #28382f;
+  --color-text: #f3eedd;
+  --color-text-muted: #93a39a;
+  --color-primary: #d4b268;
+  --color-primary-hover: #c9a24b;
+  --color-accent: #d4b268;
+  --color-pitch: #14352b;
+  --color-success: #3f8f5f;
+  --color-warning: #d4b268;
+  --color-error: #d9645f;
+  --color-ovr-bronze: #b48653;
+  --color-ovr-silver: #8b95a0;
+  --color-ovr-gold: #d4b268;
+}
+
+@theme inline {
+  --color-background: var(--color-background);
+  --color-surface: var(--color-surface);
+  --color-surface-raised: var(--color-surface-raised);
+  --color-border: var(--color-border);
+  --color-text: var(--color-text);
+  --color-text-muted: var(--color-text-muted);
+  --color-primary: var(--color-primary);
+  --color-primary-hover: var(--color-primary-hover);
+  --color-accent: var(--color-accent);
+  --color-pitch: var(--color-pitch);
+  --color-success: var(--color-success);
+  --color-warning: var(--color-warning);
+  --color-error: var(--color-error);
+  --color-ovr-bronze: var(--color-ovr-bronze);
+  --color-ovr-silver: var(--color-ovr-silver);
+  --color-ovr-gold: var(--color-ovr-gold);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+  --font-display: var(--font-bebas-neue);
+}
+
+body {
+  background: var(--color-background);
+  color: var(--color-text);
+  font-family: var(--font-sans), Arial, Helvetica, sans-serif;
+}
+
+.font-display {
+  font-family: var(--font-display), sans-serif;
+  letter-spacing: 0.02em;
+}
+
+@keyframes fade-in-up {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-step-in {
+  animation: fade-in-up 0.35s ease-out;
+}
+
+/* Bordo "perforato" del cartellino — richiama il taglio di un vero tesserino. */
+.dossier-perforated {
+  background-image: radial-gradient(
+    circle,
+    var(--color-background) 1.5px,
+    transparent 1.6px
+  );
+  background-size: 10px 10px;
+  background-position: 0 -1px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
+}

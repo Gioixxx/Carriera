@@ -1,7 +1,7 @@
 {
     "name":  "Carriera",
     "kit":  "custom",
-    "stack":  "custom",
+    "stack":  "nextjs",
     "claudeLibsVersion":  "1.30.2",
     "buildCommand":  "npm run build",
     "testCommand":  "npm test",
@@ -13,6 +13,10 @@
                      "enforcementHooks":  true
                  },
     "modules":  [
-
+                    "stacks/nextjs.md",
+                    "snippets/nextjs-patterns.md",
+                    "stacks/style-system.md",
+                    "workflows/iterative-dev.md",
+                    "workflows/testing.md"
                 ]
 }
