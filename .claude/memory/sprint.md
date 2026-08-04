@@ -18,14 +18,19 @@ Stato lavoro in corso. Aggiornato con /sprint. Backlog in [[backlog]], debito in
 - [x] Fase 3 — Dati: clubs.ts (84 club, 4 paesi/8 leghe), countries.ts (41 nazionalità)
 - [x] Fase 4 — decisions.ts: pool completo decisioni, generatori club-dipendenti, eventi condizionati dal contesto
 - [x] Fase 5 — UI creazione personaggio: IdentityForm, SpeedSelect, design "Cartellino del giocatore" (verde campo/pergamena/oro)
-- [ ] Fase 6 — UI loop di gioco: PlayerCard, CareerTable, OfferPanel, DecisionPanel, PenaltyShootout, orchestratore CareerGame con reducer + persistenza localStorage
-- [ ] Fase 7 — Fine carriera: retirement automatico, CareerSummary (breakdown per club, nazionale, awards, trofei), "Play again"
+- [x] Fase 6 — UI loop di gioco: lib/career/loop.ts (orchestrazione ciclo, contesto prestiti), trophies.ts (trofei club/nazionale/award), hooks/useCareerGame.ts (stato + autosave/resume localStorage), PlayerCard/CareerTable/OfferPanel/DecisionPanel/PenaltyShootout — verificato end-to-end nel browser (academy offer → transfer → loan → loan-return → sign permanente → eventi lifestyle probabilistici → refresh con persistenza corretta)
+- [ ] Fase 7 — Fine carriera: retirement automatico (già nel motore), CareerSummary vero (breakdown per club, nazionale, awards, trofei) al posto del placeholder attuale, "Play again"
 - [ ] Fase 8 — Polish: dark mode toggle in UI, responsive, accessibilità
 - [x] Commit iniziale (60ce3b1) — fasi 1-5
+- [ ] Commit fase 6 (in corso, non ancora fatto)
 
 ## Ricerca in corso (agenti background)
-- 4 sezioni "Esplorazione aggiuntiva" nel piano da carriere giocate sul sito originale (10+ carriere totali)
-- Ricerca URL hotlink per stemmi club/competizioni in `.claude/research/team-crests.md` (in corso)
+- 4 sezioni "Esplorazione aggiuntiva" nel piano da carriere giocate sul sito originale (13+ carriere totali) — l'ultima (3) ha confermato ritiro automatico esattamente a 40 anni (3 osservazioni concordanti) e Express = 3 stagioni/ciclo (già implementato correttamente)
+- Ricerca URL hotlink per stemmi club/competizioni completata in `.claude/research/team-crests.md` — nomi reali confermati, integrazione nella UI non ancora decisa (solo testuale per ora)
+
+## Note tecniche emerse in fase 6
+- jsdom 30 + Node 22+ non espone `window.localStorage` di default (ExperimentalWarning nativa) — polyfill minimale in `vitest.setup.ts`, non è un problema di codice applicativo
+- `ClubStint` ora ha un campo `ovr` (OVR del giocatore alla fine di quel ciclo) — necessario per la CareerTable, che deve mostrare l'OVR storico per riga, non quello attuale
 
 ## Storico
 - [sprint completati archiviati qui]

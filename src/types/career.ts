@@ -53,6 +53,8 @@ export interface ClubStint {
   ageTo: number;
   type: "permanent" | "loan";
   stats: StatLine;
+  /** OVR del giocatore alla fine di questo ciclo (per la riga storica della career table). */
+  ovr: number;
 }
 
 export interface Trophy {

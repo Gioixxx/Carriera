@@ -131,13 +131,13 @@ describe("checkRetirement", () => {
     expect(checkRetirement(player, () => 0)).toBe(false);
   });
 
-  it("dovrebbe restituire true se il giocatore ha 41 anni o più", () => {
-    const player = { ...createPlayer(IDENTITY), age: 41 };
+  it("dovrebbe restituire true se il giocatore ha 40 anni o più", () => {
+    const player = { ...createPlayer(IDENTITY), age: 40 };
     expect(checkRetirement(player, () => 0.999)).toBe(true);
   });
 
-  it("dovrebbe essere probabilistico tra i 34 e i 41 anni", () => {
-    const player = { ...createPlayer(IDENTITY), age: 37 }; // progress = 3/7, chance = (3/7)^2 ≈ 0.184
+  it("dovrebbe essere probabilistico tra i 34 e i 40 anni", () => {
+    const player = { ...createPlayer(IDENTITY), age: 37 }; // progress = 3/6, chance = (3/6)^2 = 0.25
     expect(checkRetirement(player, () => 0)).toBe(true); // roll 0 < chance
     expect(checkRetirement(player, () => 0.9)).toBe(false); // roll 0.9 > chance
   });

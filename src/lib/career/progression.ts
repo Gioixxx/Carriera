@@ -43,7 +43,7 @@ interface RoleWeights {
   assists: number;
 }
 
-const ROLE_WEIGHTS: Record<Position, RoleWeights> = {
+export const ROLE_WEIGHTS: Record<Position, RoleWeights> = {
   GK: { goals: 0, assists: 0.02 },
   CB: { goals: 0.05, assists: 0.08 },
   LB: { goals: 0.08, assists: 0.22 },
@@ -93,6 +93,45 @@ export function projectStats(
   let total: StatLine = { apps: 0, goals: 0, assists: 0 };
   for (let i = 0; i < seasons; i++) {
     const season = projectSeasonStats(ovr, position, clubTier, rng);
+    total = {
+      apps: total.apps + season.apps,
+      goals: total.goals + season.goals,
+      assists: total.assists + season.assists,
+    };
+  }
+  return total;
+}
+
+/**
+ * Statistiche con la nazionale per una singola stagione — molto più basse di quelle di club
+ * (poche convocazioni all'anno), proporzionali a OVR/ruolo.
+ */
+export function projectNationalSeasonStats(
+  ovr: number,
+  position: Position,
+  rng: Rng = Math.random,
+): StatLine {
+  const apps = clamp(Math.round(2 + (ovr - 75) / 8 + (rng() - 0.5) * 3), 0, 12);
+  const weights = ROLE_WEIGHTS[position];
+  const ovrFactor = Math.max(0, (ovr - 70) / 30);
+  const variance = () => 0.6 + rng() * 0.6;
+
+  const goals = Math.max(0, Math.round(apps * weights.goals * ovrFactor * variance()));
+  const assists = Math.max(0, Math.round(apps * weights.assists * ovrFactor * variance()));
+
+  return { apps, goals, assists };
+}
+
+/** Somma le statistiche con la nazionale su più stagioni consecutive. */
+export function projectNationalStats(
+  ovr: number,
+  position: Position,
+  seasons: number,
+  rng: Rng = Math.random,
+): StatLine {
+  let total: StatLine = { apps: 0, goals: 0, assists: 0 };
+  for (let i = 0; i < seasons; i++) {
+    const season = projectNationalSeasonStats(ovr, position, rng);
     total = {
       apps: total.apps + season.apps,
       goals: total.goals + season.goals,

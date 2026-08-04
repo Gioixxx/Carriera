@@ -87,6 +87,7 @@ export function advanceSeasons(
     ageTo,
     type: stintType,
     stats: seasonStats,
+    ovr: nextOvr,
   };
 
   return {
@@ -128,10 +129,14 @@ export function resolveOutcome(
 }
 
 /** Probabilità di ritiro crescente tra i 34 e i 41 anni; automatico da 41 in su. */
+/**
+ * Ritiro probabilistico crescente dai 34 anni, automatico da 40 — soglia allineata a 3
+ * osservazioni concordanti sul gioco originale (vedi piano, esplorazione aggiuntiva 3).
+ */
 export function checkRetirement(player: Player, rng: Rng = Math.random): boolean {
   if (player.age < 34) return false;
-  if (player.age >= 41) return true;
-  const progress = (player.age - 34) / (41 - 34);
+  if (player.age >= 40) return true;
+  const progress = (player.age - 34) / (40 - 34);
   const chance = clamp(progress * progress, 0, 1);
   return rng() < chance;
 }
