@@ -25,9 +25,9 @@ Stato lavoro in corso. Aggiornato con /sprint. Backlog in [[backlog]], debito in
 - [x] Commit fase 6 (f73f0a1)
 - [x] Redesign visivo del loop di gioco — su richiesta esplicita dell'utente ("tutto visibile e stilisticamente accattivante"): layout a due colonne su desktop (PlayerCard sticky + contenuto), PlayerCard ridisegnata in stile "cartellino" (perforato, JerseyBadge condiviso con la schermata di creazione, conteggio trofei/premi sempre visibile), stelle di prestigio come icone lucide invece di testo, hover/elevazione sulle card decisione, sfondo con atmosfera texture-campo (`field-atmosphere` in globals.css) per non lasciare vuoto lo spazio ai lati su schermi larghi
 
-## Ricerca in corso (agenti background)
+## Ricerca completata (agenti background)
 - 4 sezioni "Esplorazione aggiuntiva" nel piano da carriere giocate sul sito originale (13+ carriere totali) — l'ultima (3) ha confermato ritiro automatico esattamente a 40 anni (3 osservazioni concordanti) e Express = 3 stagioni/ciclo (già implementato correttamente)
-- Ricerca URL hotlink per stemmi club/competizioni completata in `.claude/research/team-crests.md` — nomi reali confermati, integrazione nella UI non ancora decisa (solo testuale per ora)
+- Ricerca URL hotlink per stemmi club/competizioni completata in `.claude/research/team-crests.md` — nomi reali confermati, integrazione nella UI non ancora decisa (solo testuale per ora) → vedi [[backlog]]
 
 ## Note tecniche emerse in fase 6
 - jsdom 30 + Node 22+ non espone `window.localStorage` di default (ExperimentalWarning nativa) — polyfill minimale in `vitest.setup.ts`, non è un problema di codice applicativo
