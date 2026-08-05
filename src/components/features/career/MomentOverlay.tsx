@@ -1,9 +1,10 @@
 "use client";
 
-import { useEffect, useId, useMemo, useRef, useState, type ReactNode } from "react";
+import { useEffect, useId, useMemo, useRef, type ReactNode } from "react";
 import { Flag } from "lucide-react";
 import type { Award, Trophy } from "@/types/career";
 import { AWARD_LABELS } from "@/lib/career/award-labels";
+import { usePrefersReducedMotion } from "@/hooks/useMotion";
 import { Button } from "@/components/ui/Button";
 import { AwardBadge } from "./AwardBadge";
 import { CompetitionBadge } from "./CompetitionBadge";
@@ -42,26 +43,10 @@ function buildConfetti(count = 24): ConfettiPiece[] {
     left: Math.round(Math.random() * 100),
     color: CONFETTI_COLORS[Math.floor(Math.random() * CONFETTI_COLORS.length)]!,
     delay: Number((Math.random() * 0.5).toFixed(2)),
-    duration: Number((1.3 + Math.random() * 0.9).toFixed(2)),
+    duration: Number((1.6 + Math.random() * 0.8).toFixed(2)),
     size: Math.round(6 + Math.random() * 6),
     rotate: Math.round(Math.random() * 360),
   }));
-}
-
-function usePrefersReducedMotion(): boolean {
-  const [reduced, setReduced] = useState(true);
-
-  useEffect(() => {
-    const mq = window.matchMedia("(prefers-reduced-motion: reduce)");
-    setReduced(mq.matches);
-    function onChange(event: MediaQueryListEvent) {
-      setReduced(event.matches);
-    }
-    mq.addEventListener("change", onChange);
-    return () => mq.removeEventListener("change", onChange);
-  }, []);
-
-  return reduced;
 }
 
 export function MomentOverlay({ moment, onContinue }: MomentOverlayProps) {

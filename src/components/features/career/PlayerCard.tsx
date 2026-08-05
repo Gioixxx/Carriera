@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { Award as AwardIcon, Trophy as TrophyIcon } from "lucide-react";
 import type { Player } from "@/types/career";
 import { countries } from "@/data/countries";
+import { useCountUp } from "@/hooks/useMotion";
 import { cn } from "@/lib/utils";
 import { ClubCrest } from "./ClubCrest";
 import { JerseyBadge } from "./JerseyBadge";
@@ -26,6 +27,11 @@ export function PlayerCard({ player, compact = false }: PlayerCardProps) {
   const flag = countries.find((c) => c.name === player.nationality)?.flag;
   const trophyCount = player.trophies.length;
   const awardCount = player.awards.length;
+
+  const displayOvr = useCountUp(player.ovr, 800);
+  const displayApps = useCountUp(player.career.apps, 800);
+  const displayGoals = useCountUp(player.career.goals, 800);
+  const displayAssists = useCountUp(player.career.assists, 800);
 
   const prevCounts = useRef({ trophies: trophyCount, awards: awardCount });
   const [flashTrophies, setFlashTrophies] = useState(false);
@@ -80,7 +86,7 @@ export function PlayerCard({ player, compact = false }: PlayerCardProps) {
             {player.club ? player.club.name : "Svincolato"} · {player.age} anni
           </p>
         </div>
-        <OvrBadge ovr={player.ovr} />
+        <OvrBadge ovr={displayOvr} />
       </div>
 
       {!compact ? (
@@ -94,15 +100,15 @@ export function PlayerCard({ player, compact = false }: PlayerCardProps) {
 
       <div className={cn("grid grid-cols-3 gap-2 text-center", compact && "hidden sm:grid")}>
         <div className="rounded-lg bg-(--color-surface) py-2">
-          <p className="font-display text-lg text-(--color-text)">{player.career.apps}</p>
+          <p className="font-display text-lg text-(--color-text)">{displayApps}</p>
           <p className="text-[10px] tracking-wide text-(--color-text-muted) uppercase">Pres.</p>
         </div>
         <div className="rounded-lg bg-(--color-surface) py-2">
-          <p className="font-display text-lg text-(--color-text)">{player.career.goals}</p>
+          <p className="font-display text-lg text-(--color-text)">{displayGoals}</p>
           <p className="text-[10px] tracking-wide text-(--color-text-muted) uppercase">Gol</p>
         </div>
         <div className="rounded-lg bg-(--color-surface) py-2">
-          <p className="font-display text-lg text-(--color-text)">{player.career.assists}</p>
+          <p className="font-display text-lg text-(--color-text)">{displayAssists}</p>
           <p className="text-[10px] tracking-wide text-(--color-text-muted) uppercase">Assist</p>
         </div>
       </div>
@@ -113,7 +119,7 @@ export function PlayerCard({ player, compact = false }: PlayerCardProps) {
             {VALUE_FORMATTER.format(player.marketValueEur)}
           </span>
           <span className="text-(--color-text-muted)">
-            {player.career.apps}P · {player.career.goals}G · {player.career.assists}A
+            {displayApps}P · {displayGoals}G · {displayAssists}A
           </span>
         </div>
       ) : null}
@@ -136,7 +142,11 @@ export function PlayerCard({ player, compact = false }: PlayerCardProps) {
             aria-hidden="true"
             className={trophyCount > 0 ? "text-(--color-ovr-gold)" : "text-(--color-text-muted)"}
           />
-          <span className={trophyCount > 0 ? "font-semibold text-(--color-text)" : "text-(--color-text-muted)"}>
+          <span
+            className={
+              trophyCount > 0 ? "font-semibold text-(--color-text)" : "text-(--color-text-muted)"
+            }
+          >
             {trophyCount} {trophyCount === 1 ? "trofeo" : "trofei"}
           </span>
         </span>
@@ -145,14 +155,20 @@ export function PlayerCard({ player, compact = false }: PlayerCardProps) {
             "flex items-center gap-1.5 rounded-md px-1.5 py-0.5 transition-colors",
             flashAwards && "animate-count-flash bg-(--color-ovr-gold)/20",
           )}
-          title={awardCount > 0 ? `${awardCount} premi individuali` : "Nessun premio individuale finora"}
+          title={
+            awardCount > 0 ? `${awardCount} premi individuali` : "Nessun premio individuale finora"
+          }
         >
           <AwardIcon
             size={14}
             aria-hidden="true"
             className={awardCount > 0 ? "text-(--color-ovr-gold)" : "text-(--color-text-muted)"}
           />
-          <span className={awardCount > 0 ? "font-semibold text-(--color-text)" : "text-(--color-text-muted)"}>
+          <span
+            className={
+              awardCount > 0 ? "font-semibold text-(--color-text)" : "text-(--color-text-muted)"
+            }
+          >
             {awardCount} {awardCount === 1 ? "premio" : "premi"}
           </span>
         </span>

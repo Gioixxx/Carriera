@@ -59,7 +59,7 @@ export function CareerTimeline({ player }: CareerTimelineProps) {
           </span>
         ))}
         <span
-          className="absolute top-1.5 size-3 -translate-x-1/2 -translate-y-1/2 rounded-full border-2 border-(--color-surface) bg-(--color-accent) transition-[left] duration-400 ease-out"
+          className="absolute top-1.5 size-3 -translate-x-1/2 -translate-y-1/2 rounded-full border-2 border-(--color-surface) bg-(--color-accent) transition-[left] duration-[900ms] ease-out"
           style={{
             left: `${progress}%`,
             boxShadow: "0 0 0 3px color-mix(in srgb, var(--color-accent) 30%, transparent)",

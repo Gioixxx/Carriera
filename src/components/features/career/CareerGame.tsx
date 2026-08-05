@@ -1,8 +1,10 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
+import { TrendingDown, TrendingUp } from "lucide-react";
 import type { GameSpeed, PlayerIdentity } from "@/types/career";
 import { useCareerGame, type CycleOutcomeSummary } from "@/hooks/useCareerGame";
+import { usePrefersReducedMotion } from "@/hooks/useMotion";
 import { AWARD_LABELS } from "@/lib/career/award-labels";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { Button } from "@/components/ui/Button";
@@ -20,9 +22,47 @@ import { OfferPanel } from "./OfferPanel";
 import { PenaltyShootout } from "./PenaltyShootout";
 import { PlayerCard } from "./PlayerCard";
 import { SpeedSelect } from "./SpeedSelect";
+import { ClubCrest } from "./ClubCrest";
 
 type Step = "speed" | "identity";
-type ResolvePhase = "moments" | "outcome" | null;
+type ResolvePhase = "season" | "moments" | "outcome" | null;
+
+const DECISION_EXIT_MS = 320;
+const SEASON_BEAT_MS = 1200;
+const OUTCOME_CONTINUE_MS = 1000;
+
+function SeasonBeat({
+  playerAge,
+  ageBefore,
+  clubName,
+  crestUrl,
+}: {
+  playerAge: number;
+  ageBefore: number;
+  clubName: string | null;
+  crestUrl?: string;
+}) {
+  return (
+    <Card className="animate-step-in flex flex-col items-center gap-3 border-(--color-accent)/30 p-6 text-center sm:p-8">
+      <p className="font-display text-xs tracking-[0.35em] text-(--color-accent)">Ciclo in corso</p>
+      <div className="flex items-center gap-2 text-(--color-text-muted)">
+        {crestUrl && clubName ? (
+          <ClubCrest crestUrl={crestUrl} clubName={clubName} size={22} />
+        ) : null}
+        <span className="text-sm font-medium text-(--color-text)">
+          {clubName ?? "Svincolato"}
+        </span>
+      </div>
+      <p className="font-display text-3xl text-(--color-text)">
+        {ageBefore}
+        <span className="mx-2 text-(--color-accent)">→</span>
+        {playerAge}
+        <span className="ml-2 text-lg tracking-wide text-(--color-text-muted)">anni</span>
+      </p>
+      <p className="animate-pulse text-sm text-(--color-text-muted)">Stagione in corso…</p>
+    </Card>
+  );
+}
 
 function OutcomeBanner({
   outcome,
@@ -31,40 +71,117 @@ function OutcomeBanner({
   outcome: CycleOutcomeSummary;
   onContinue: () => void;
 }) {
+  const [stage, setStage] = useState(0);
+  const [canContinue, setCanContinue] = useState(false);
+
+  useEffect(() => {
+    const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    if (reduced) {
+      setStage(3);
+      setCanContinue(true);
+      return;
+    }
+
+    setStage(0);
+    setCanContinue(false);
+    const t1 = setTimeout(() => setStage(1), 280);
+    const t2 = setTimeout(() => setStage(2), 560);
+    const t3 = setTimeout(() => setStage(3), 840);
+    const t4 = setTimeout(() => setCanContinue(true), OUTCOME_CONTINUE_MS);
+    return () => {
+      clearTimeout(t1);
+      clearTimeout(t2);
+      clearTimeout(t3);
+      clearTimeout(t4);
+    };
+  }, [outcome]);
+
+  const delta = outcome.ovrDelta;
+  const deltaPositive = delta > 0;
+  const deltaNegative = delta < 0;
+
   return (
     <Card className="animate-step-in flex flex-col gap-3 border-(--color-accent)/40 p-4 sm:p-5">
       <div>
         <p className="font-display text-xs tracking-[0.3em] text-(--color-accent)">Esito</p>
-        <p className="font-semibold text-(--color-text)">{outcome.optionLabel}</p>
-        <p className="mt-1 text-sm text-(--color-text-muted)">{outcome.outcomeText}</p>
+        <p
+          className={cn(
+            "font-semibold text-(--color-text) transition-opacity duration-300",
+            stage >= 0 ? "opacity-100" : "opacity-0",
+          )}
+        >
+          {outcome.optionLabel}
+        </p>
+        <p
+          className={cn(
+            "mt-1 text-sm text-(--color-text-muted) transition-opacity duration-300",
+            stage >= 1 ? "opacity-100" : "opacity-0",
+          )}
+        >
+          {outcome.outcomeText}
+        </p>
       </div>
 
-      {outcome.nationalCallup ? (
-        <p className="text-sm font-medium text-(--color-accent)">Convocato in nazionale!</p>
-      ) : null}
+      <div
+        className={cn(
+          "flex flex-col gap-2 transition-opacity duration-300",
+          stage >= 2 ? "opacity-100" : "opacity-0",
+        )}
+      >
+        {delta !== 0 ? (
+          <p
+            className={cn(
+              "flex items-center gap-1.5 text-sm font-semibold",
+              deltaPositive && "text-(--color-success)",
+              deltaNegative && "text-(--color-error)",
+            )}
+          >
+            {deltaPositive ? <TrendingUp size={16} aria-hidden="true" /> : null}
+            {deltaNegative ? <TrendingDown size={16} aria-hidden="true" /> : null}
+            OVR {deltaPositive ? "+" : ""}
+            {delta}
+            <span className="font-normal text-(--color-text-muted)">
+              ({outcome.ovrBefore} → {outcome.ovrBefore + delta})
+            </span>
+          </p>
+        ) : (
+          <p className="text-sm text-(--color-text-muted)">OVR invariato ({outcome.ovrBefore})</p>
+        )}
 
-      {outcome.newTrophies.length > 0 ? (
-        <ul className="flex flex-col gap-1.5">
-          {outcome.newTrophies.map((trophy, i) => (
-            <li
-              key={i}
-              className="flex items-center gap-2 text-sm font-medium text-(--color-ovr-gold)"
-            >
-              <CompetitionBadge competition={trophy.competition} size={18} />
-              <span>Vinci: {trophy.competition}</span>
-            </li>
-          ))}
-        </ul>
-      ) : null}
+        {outcome.nationalCallup ? (
+          <p className="text-sm font-medium text-(--color-accent)">Convocato in nazionale!</p>
+        ) : null}
 
-      {outcome.newAward ? (
-        <p className="flex items-center gap-2 text-sm font-medium text-(--color-ovr-gold)">
-          <AwardBadge size={18} />
-          {AWARD_LABELS[outcome.newAward.type]}
-        </p>
-      ) : null}
+        {outcome.newTrophies.length > 0 ? (
+          <ul className="flex flex-col gap-1.5">
+            {outcome.newTrophies.map((trophy, i) => (
+              <li
+                key={i}
+                className="flex items-center gap-2 text-sm font-medium text-(--color-ovr-gold)"
+              >
+                <CompetitionBadge competition={trophy.competition} size={18} />
+                <span>Vinci: {trophy.competition}</span>
+              </li>
+            ))}
+          </ul>
+        ) : null}
 
-      <Button onClick={onContinue} className="self-start">
+        {outcome.newAward ? (
+          <p className="flex items-center gap-2 text-sm font-medium text-(--color-ovr-gold)">
+            <AwardBadge size={18} />
+            {AWARD_LABELS[outcome.newAward.type]}
+          </p>
+        ) : null}
+      </div>
+
+      <Button
+        onClick={onContinue}
+        disabled={!canContinue}
+        className={cn(
+          "self-start transition-opacity duration-300",
+          canContinue ? "opacity-100" : "opacity-40",
+        )}
+      >
         Continua
       </Button>
     </Card>
@@ -94,15 +211,25 @@ export function CareerGame() {
   const [step, setStep] = useState<Step>("speed");
   const [speed, setSpeed] = useState<GameSpeed | null>(null);
   const { state, startCareer, chooseOption, restart, isResuming } = useCareerGame();
+  const prefersReducedMotion = usePrefersReducedMotion();
 
   const [resolvePhase, setResolvePhase] = useState<ResolvePhase>(null);
   const [moments, setMoments] = useState<CareerMoment[]>([]);
   const [momentIndex, setMomentIndex] = useState(0);
+  const [decisionExiting, setDecisionExiting] = useState(false);
   const seenOutcome = useRef<CycleOutcomeSummary | null>(null);
+  const chooseTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const cycleBusy = useRef(false);
 
   const showPlaying = state !== null;
   const isRetired = state?.retired ?? false;
-  const awaitingResolve = resolvePhase !== null;
+  const awaitingResolve = resolvePhase !== null || decisionExiting;
+
+  useEffect(() => {
+    return () => {
+      if (chooseTimeout.current) clearTimeout(chooseTimeout.current);
+    };
+  }, []);
 
   useEffect(() => {
     const outcome = state?.lastOutcome ?? null;
@@ -119,8 +246,20 @@ export function CareerGame() {
     const nextMoments = buildCareerMoments(outcome);
     setMoments(nextMoments);
     setMomentIndex(0);
-    setResolvePhase(nextMoments.length > 0 ? "moments" : "outcome");
+    setResolvePhase("season");
   }, [state?.lastOutcome]);
+
+  // Auto-advance from season beat → moments or outcome
+  useEffect(() => {
+    if (resolvePhase !== "season") return;
+
+    const delay = prefersReducedMotion ? 0 : SEASON_BEAT_MS;
+    const timer = setTimeout(() => {
+      setResolvePhase(moments.length > 0 ? "moments" : "outcome");
+    }, delay);
+
+    return () => clearTimeout(timer);
+  }, [resolvePhase, moments.length, prefersReducedMotion]);
 
   const handleSpeedSelected = useCallback((selected: GameSpeed) => {
     setSpeed(selected);
@@ -136,14 +275,36 @@ export function CareerGame() {
   );
 
   const handleRestart = useCallback(() => {
+    if (chooseTimeout.current) clearTimeout(chooseTimeout.current);
+    cycleBusy.current = false;
     restart();
     setSpeed(null);
     setStep("speed");
     setResolvePhase(null);
     setMoments([]);
     setMomentIndex(0);
+    setDecisionExiting(false);
     seenOutcome.current = null;
   }, [restart]);
+
+  const handleChoose = useCallback(
+    (optionId: string) => {
+      if (cycleBusy.current || resolvePhase !== null || decisionExiting) return;
+      cycleBusy.current = true;
+
+      if (prefersReducedMotion) {
+        chooseOption(optionId);
+        return;
+      }
+
+      setDecisionExiting(true);
+      chooseTimeout.current = setTimeout(() => {
+        chooseOption(optionId);
+        setDecisionExiting(false);
+      }, DECISION_EXIT_MS);
+    },
+    [chooseOption, decisionExiting, prefersReducedMotion, resolvePhase],
+  );
 
   const handleMomentContinue = useCallback(() => {
     if (momentIndex + 1 < moments.length) {
@@ -154,6 +315,7 @@ export function CareerGame() {
   }, [momentIndex, moments.length]);
 
   const handleOutcomeContinue = useCallback(() => {
+    cycleBusy.current = false;
     setResolvePhase(null);
   }, []);
 
@@ -161,8 +323,10 @@ export function CareerGame() {
     state?.currentDecision?.options.some((o) => o.club || o.retire) ?? false;
 
   const currentMoment = resolvePhase === "moments" ? moments[momentIndex] ?? null : null;
-  const showDecision =
-    Boolean(state && !state.retired && state.currentDecision && !awaitingResolve);
+  const showDecision = Boolean(
+    state && !state.retired && state.currentDecision && (!awaitingResolve || decisionExiting),
+  );
+  const showSeason = Boolean(state?.lastOutcome && resolvePhase === "season");
   const showOutcome = Boolean(state?.lastOutcome && resolvePhase === "outcome");
   const showSummary = Boolean(state?.retired && !awaitingResolve);
   const showPlayShell = Boolean(state && (!isRetired || awaitingResolve));
@@ -255,6 +419,16 @@ export function CareerGame() {
 
                 <div className="flex min-h-0 min-w-0 flex-col gap-3">
                   <div className="min-w-0 shrink-0">
+                    {showSeason && state.lastOutcome ? (
+                      <SeasonBeat
+                        key={`season-${outcomeKey}`}
+                        playerAge={state.player.age}
+                        ageBefore={state.lastOutcome.ageBefore}
+                        clubName={state.player.club?.name ?? null}
+                        crestUrl={state.player.club?.crestUrl}
+                      />
+                    ) : null}
+
                     {showOutcome && state.lastOutcome ? (
                       <OutcomeBanner
                         key={`outcome-${outcomeKey}`}
@@ -266,19 +440,22 @@ export function CareerGame() {
                     {showDecision && state.currentDecision ? (
                       <Card
                         key={`decision-${decisionKey}`}
-                        className="animate-step-in p-4 shadow-lg shadow-black/5 sm:p-5"
+                        className={cn(
+                          "p-4 shadow-lg shadow-black/5 sm:p-5",
+                          decisionExiting ? "animate-step-out" : "animate-step-in",
+                        )}
                       >
                         {state.currentCategory === "continental-final" ? (
                           <PenaltyShootout
                             decision={state.currentDecision}
-                            onChoose={chooseOption}
+                            onChoose={handleChoose}
                           />
                         ) : decisionUsesOffers ? (
-                          <OfferPanel decision={state.currentDecision} onChoose={chooseOption} />
+                          <OfferPanel decision={state.currentDecision} onChoose={handleChoose} />
                         ) : (
                           <DecisionPanel
                             decision={state.currentDecision}
-                            onChoose={chooseOption}
+                            onChoose={handleChoose}
                           />
                         )}
                       </Card>
@@ -293,7 +470,9 @@ export function CareerGame() {
                       <CareerTable
                         player={state.player}
                         pendingLabel={
-                          awaitingResolve && !isRetired ? "Prossimo ciclo…" : undefined
+                          (resolvePhase === "season" || decisionExiting) && !isRetired
+                            ? "Ciclo in corso…"
+                            : undefined
                         }
                       />
                     </div>

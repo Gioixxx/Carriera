@@ -27,6 +27,9 @@ export interface CycleOutcomeSummary {
   newTrophies: Trophy[];
   newAward: Award | null;
   nationalCallup: boolean;
+  ovrBefore: number;
+  ovrDelta: number;
+  ageBefore: number;
 }
 
 interface CareerGameState {
@@ -135,6 +138,9 @@ export function useCareerGame(): UseCareerGame {
         newTrophies: result.newTrophies,
         newAward: result.newAward,
         nationalCallup: result.nationalCallup,
+        ovrBefore: prev.player.ovr,
+        ovrDelta: result.player.ovr - prev.player.ovr,
+        ageBefore: prev.player.age,
       };
 
       if (result.retired) {
