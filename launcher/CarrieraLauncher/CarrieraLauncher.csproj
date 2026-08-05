@@ -9,6 +9,7 @@
     <AssemblyName>Carriera</AssemblyName>
     <RootNamespace>CarrieraLauncher</RootNamespace>
     <InvariantGlobalization>true</InvariantGlobalization>
+    <ApplicationIcon>assets/app.ico</ApplicationIcon>
   </PropertyGroup>
 
   <ItemGroup>
@@ -20,6 +21,13 @@
   <ItemGroup>
     <EmbeddedResource Include="wwwroot/**/*" Exclude="wwwroot/.gitkeep">
       <LogicalName>wwwroot/%(RecursiveDir)%(Filename)%(Extension)</LogicalName>
+    </EmbeddedResource>
+  </ItemGroup>
+
+  <!-- Sfondo mostrato dietro al WebView2 durante l'avvio, prima che la pagina finisca di caricare. -->
+  <ItemGroup>
+    <EmbeddedResource Include="assets/sfondo.png">
+      <LogicalName>assets/sfondo.png</LogicalName>
     </EmbeddedResource>
   </ItemGroup>
 

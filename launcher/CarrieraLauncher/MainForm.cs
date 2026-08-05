@@ -1,3 +1,4 @@
+using System.Reflection;
 using Microsoft.Web.WebView2.Core;
 using Microsoft.Web.WebView2.WinForms;
 
@@ -6,7 +7,13 @@ namespace CarrieraLauncher;
 internal sealed class MainForm : Form
 {
     private readonly EmbeddedStaticServer _server;
-    private readonly WebView2 _webView = new() { Dock = DockStyle.Fill };
+    private readonly WebView2 _webView = new() { Dock = DockStyle.Fill, Visible = false };
+    private readonly PictureBox _splash = new()
+    {
+        Dock = DockStyle.Fill,
+        SizeMode = PictureBoxSizeMode.Zoom,
+        BackColor = Color.Black,
+    };
 
     public MainForm(EmbeddedStaticServer server)
     {
@@ -17,9 +24,41 @@ internal sealed class MainForm : Form
         Height = 860;
         StartPosition = FormStartPosition.CenterScreen;
 
+        // L'icona applicativa (ApplicationIcon nel csproj) finisce già nella risorsa nativa
+        // dell'exe pubblicato: estrarla da lì evita di incorporarla una seconda volta.
+        try
+        {
+            Icon = Icon.ExtractAssociatedIcon(Application.ExecutablePath);
+        }
+        catch
+        {
+            // Best-effort: se l'estrazione fallisce resta l'icona di default di Windows.
+        }
+
+        _splash.Image = LoadEmbeddedImage("assets/sfondo.png");
+
         Controls.Add(_webView);
+        Controls.Add(_splash); // aggiunta per ultima: resta sopra il WebView2 finché non si nasconde
         Load += OnLoad;
         FormClosed += (_, _) => _server.Dispose();
+    }
+
+    /// <summary>
+    /// Cerca la risorsa incorporata per nome logico, tollerando sia "cartella/file.ext" sia
+    /// "cartella.file.ext" (il toolchain .NET normalizza il separatore in modo diverso a seconda
+    /// dei casi — stesso problema già gestito in EmbeddedStaticServer per wwwroot/).
+    /// </summary>
+    private static Image? LoadEmbeddedImage(string logicalName)
+    {
+        var assembly = Assembly.GetExecutingAssembly();
+        var dottedName = logicalName.Replace('/', '.');
+        var resourceName = assembly.GetManifestResourceNames().FirstOrDefault(n =>
+            string.Equals(n, logicalName, StringComparison.OrdinalIgnoreCase)
+            || string.Equals(n, dottedName, StringComparison.OrdinalIgnoreCase));
+        if (resourceName is null) return null;
+
+        using var stream = assembly.GetManifestResourceStream(resourceName);
+        return stream is null ? null : Image.FromStream(stream);
     }
 
     private async void OnLoad(object? sender, EventArgs e)
@@ -36,6 +75,13 @@ internal sealed class MainForm : Form
             var environment = await CoreWebView2Environment.CreateAsync(userDataFolder: userDataFolder);
 
             await _webView.EnsureCoreWebView2Async(environment);
+            // Lo sfondo resta visibile finché la pagina non ha finito di caricare, poi lascia
+            // spazio al gioco vero e proprio invece di sparire non appena la navigazione parte.
+            _webView.CoreWebView2.NavigationCompleted += (_, _) =>
+            {
+                _webView.Visible = true;
+                _splash.Visible = false;
+            };
             _webView.CoreWebView2.Navigate($"http://127.0.0.1:{_server.Port}/index.html");
         }
         catch (Exception ex)

@@ -16,9 +16,13 @@ ottenerlo senza buildarlo localmente è la Release.
 - `EmbeddedStaticServer.cs` — legge l'export statico (`npm run build`, `output: "export"` in
   `next.config.ts`) incorporato come embedded resource e lo serve su loopback.
 - `MainForm.cs` — finestra WinForms con un controllo `WebView2` a tutto schermo, naviga verso
-  il server locale.
+  il server locale. Mostra `assets/sfondo.png` (embedded resource) come sfondo finché la pagina
+  non ha finito di caricare, poi lascia spazio al `WebView2`.
 - Il gioco resta interamente client-side (nessuna API route): l'export statico non richiede un
   runtime Node lato server.
+- `assets/app.ico` — icona dell'eseguibile (`<ApplicationIcon>` nel `.csproj`), estratta a
+  runtime dall'exe stesso (`Icon.ExtractAssociatedIcon`) per la finestra, senza incorporarla due
+  volte.
 
 ## Rigenerare `dist/Carriera.exe`
 
