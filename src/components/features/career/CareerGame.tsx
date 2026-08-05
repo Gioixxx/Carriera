@@ -11,6 +11,7 @@ import { cn } from "@/lib/utils";
 import { AwardBadge } from "./AwardBadge";
 import { CareerSummary } from "./CareerSummary";
 import { CareerTable } from "./CareerTable";
+import { CareerTimeline } from "./CareerTimeline";
 import { CompetitionBadge } from "./CompetitionBadge";
 import { DecisionPanel } from "./DecisionPanel";
 import { IdentityForm } from "./IdentityForm";
@@ -67,6 +68,25 @@ function OutcomeBanner({
         Continua
       </Button>
     </Card>
+  );
+}
+
+function SetupStepDots({ current }: { current: Step }) {
+  return (
+    <div className="flex justify-center gap-2" aria-hidden="true">
+      <div
+        className={cn(
+          "h-1 w-5 rounded-full transition-colors duration-150",
+          current === "speed" ? "bg-(--color-accent)" : "bg-(--color-border)",
+        )}
+      />
+      <div
+        className={cn(
+          "h-1 w-5 rounded-full transition-colors duration-150",
+          current === "identity" ? "bg-(--color-accent)" : "bg-(--color-border)",
+        )}
+      />
+    </div>
   );
 }
 
@@ -149,6 +169,12 @@ export function CareerGame() {
 
   const isSetup = !showPlaying;
   const isIdentity = isSetup && step === "identity";
+  const outcomeKey = state?.lastOutcome
+    ? `${state.player.age}-${state.lastOutcome.optionLabel}-${state.lastOutcome.outcomeText}`
+    : "none";
+  const decisionKey = state?.currentDecision
+    ? `${state.player.age}-${state.currentDecision.id}`
+    : "none";
 
   return (
     <div
@@ -174,7 +200,7 @@ export function CareerGame() {
           </div>
         </header>
       ) : (
-        <header className="flex shrink-0 flex-col gap-1.5">
+        <header className="flex shrink-0 flex-col gap-2">
           <div className="flex justify-end">
             <ThemeToggle />
           </div>
@@ -189,8 +215,13 @@ export function CareerGame() {
               <p className="mt-0.5 text-sm text-(--color-text-muted)">
                 Scegli chi sei, affronta le decisioni che contano, scrivi la tua leggenda.
               </p>
-            ) : null}
+            ) : (
+              <p className="mt-0.5 font-display text-xs tracking-[0.3em] text-(--color-accent)">
+                Passo 2 di 2
+              </p>
+            )}
           </div>
+          <SetupStepDots current={step} />
         </header>
       )}
 
@@ -199,51 +230,73 @@ export function CareerGame() {
       ) : (
         <>
           {!showPlaying && step === "speed" ? (
-            <Card className="animate-step-in p-5 sm:p-7">
+            <Card key="step-speed" className="animate-step-in p-5 sm:p-7">
               <SpeedSelect onSelect={handleSpeedSelected} />
             </Card>
           ) : null}
 
           {!showPlaying && step === "identity" ? (
-            <Card className="animate-step-in flex min-h-0 flex-1 flex-col overflow-y-auto p-3 sm:p-5 lg:overflow-hidden">
+            <Card
+              key="step-identity"
+              className="animate-step-in flex min-h-0 flex-1 flex-col overflow-y-auto p-3 sm:p-5 lg:overflow-hidden"
+            >
               <IdentityForm onSubmit={handleIdentitySubmitted} />
             </Card>
           ) : null}
 
           {showPlayShell && state ? (
-            <div className="grid min-h-0 min-w-0 flex-1 gap-3 lg:grid-cols-[18rem_1fr] lg:items-stretch xl:grid-cols-[20rem_1fr]">
-              <div className="min-w-0 shrink-0 lg:max-h-full lg:overflow-y-auto">
-                <PlayerCard player={state.player} compact />
-              </div>
+            <div className="flex min-h-0 min-w-0 flex-1 flex-col gap-3">
+              <CareerTimeline player={state.player} />
 
-              <div className="flex min-h-0 min-w-0 flex-col gap-3">
-                <div className="min-w-0 shrink-0">
-                  {showOutcome && state.lastOutcome ? (
-                    <OutcomeBanner outcome={state.lastOutcome} onContinue={handleOutcomeContinue} />
-                  ) : null}
-
-                  {showDecision && state.currentDecision ? (
-                    <Card className="p-4 shadow-lg shadow-black/5 sm:p-5">
-                      {state.currentCategory === "continental-final" ? (
-                        <PenaltyShootout decision={state.currentDecision} onChoose={chooseOption} />
-                      ) : decisionUsesOffers ? (
-                        <OfferPanel decision={state.currentDecision} onChoose={chooseOption} />
-                      ) : (
-                        <DecisionPanel decision={state.currentDecision} onChoose={chooseOption} />
-                      )}
-                    </Card>
-                  ) : null}
+              <div className="grid min-h-0 min-w-0 flex-1 gap-3 lg:grid-cols-[18rem_1fr] lg:items-stretch xl:grid-cols-[20rem_1fr]">
+                <div className="min-w-0 shrink-0 lg:max-h-full lg:overflow-y-auto">
+                  <PlayerCard player={state.player} compact />
                 </div>
 
-                <div className="flex min-h-0 min-w-0 flex-1 flex-col gap-2">
-                  <p className="shrink-0 font-display text-xs tracking-[0.2em] text-(--color-text-muted) uppercase">
-                    Storico
-                  </p>
-                  <div className="min-h-0 min-w-0 flex-1 overflow-x-hidden overflow-y-auto">
-                    <CareerTable
-                      player={state.player}
-                      pendingLabel={awaitingResolve && !isRetired ? "Prossimo ciclo…" : undefined}
-                    />
+                <div className="flex min-h-0 min-w-0 flex-col gap-3">
+                  <div className="min-w-0 shrink-0">
+                    {showOutcome && state.lastOutcome ? (
+                      <OutcomeBanner
+                        key={`outcome-${outcomeKey}`}
+                        outcome={state.lastOutcome}
+                        onContinue={handleOutcomeContinue}
+                      />
+                    ) : null}
+
+                    {showDecision && state.currentDecision ? (
+                      <Card
+                        key={`decision-${decisionKey}`}
+                        className="animate-step-in p-4 shadow-lg shadow-black/5 sm:p-5"
+                      >
+                        {state.currentCategory === "continental-final" ? (
+                          <PenaltyShootout
+                            decision={state.currentDecision}
+                            onChoose={chooseOption}
+                          />
+                        ) : decisionUsesOffers ? (
+                          <OfferPanel decision={state.currentDecision} onChoose={chooseOption} />
+                        ) : (
+                          <DecisionPanel
+                            decision={state.currentDecision}
+                            onChoose={chooseOption}
+                          />
+                        )}
+                      </Card>
+                    ) : null}
+                  </div>
+
+                  <div className="flex min-h-0 min-w-0 flex-1 flex-col gap-2">
+                    <p className="shrink-0 font-display text-xs tracking-[0.2em] text-(--color-text-muted) uppercase">
+                      Storico
+                    </p>
+                    <div className="min-h-0 min-w-0 flex-1 overflow-x-hidden overflow-y-auto">
+                      <CareerTable
+                        player={state.player}
+                        pendingLabel={
+                          awaitingResolve && !isRetired ? "Prossimo ciclo…" : undefined
+                        }
+                      />
+                    </div>
                   </div>
                 </div>
               </div>
@@ -251,13 +304,21 @@ export function CareerGame() {
           ) : null}
 
           {showSummary && state ? (
-            <CareerSummary player={state.player} onRestart={handleRestart} />
+            <CareerSummary
+              key={`summary-${state.player.lastName}-${state.player.age}`}
+              player={state.player}
+              onRestart={handleRestart}
+            />
           ) : null}
         </>
       )}
 
       {currentMoment ? (
-        <MomentOverlay moment={currentMoment} onContinue={handleMomentContinue} />
+        <MomentOverlay
+          key={`moment-${momentIndex}-${currentMoment.kind}`}
+          moment={currentMoment}
+          onContinue={handleMomentContinue}
+        />
       ) : null}
     </div>
   );

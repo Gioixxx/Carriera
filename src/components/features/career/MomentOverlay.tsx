@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useId, useRef, type ReactNode } from "react";
+import { useEffect, useId, useMemo, useRef, useState, type ReactNode } from "react";
 import { Flag } from "lucide-react";
 import type { Award, Trophy } from "@/types/career";
 import { AWARD_LABELS } from "@/lib/career/award-labels";
@@ -18,10 +18,63 @@ interface MomentOverlayProps {
   onContinue: () => void;
 }
 
+interface ConfettiPiece {
+  id: number;
+  left: number;
+  color: string;
+  delay: number;
+  duration: number;
+  size: number;
+  rotate: number;
+}
+
+const CONFETTI_COLORS = [
+  "var(--color-accent)",
+  "var(--color-ovr-gold)",
+  "var(--color-success)",
+  "var(--color-error)",
+  "#ffffff",
+];
+
+function buildConfetti(count = 24): ConfettiPiece[] {
+  return Array.from({ length: count }, (_, i) => ({
+    id: i,
+    left: Math.round(Math.random() * 100),
+    color: CONFETTI_COLORS[Math.floor(Math.random() * CONFETTI_COLORS.length)]!,
+    delay: Number((Math.random() * 0.5).toFixed(2)),
+    duration: Number((1.3 + Math.random() * 0.9).toFixed(2)),
+    size: Math.round(6 + Math.random() * 6),
+    rotate: Math.round(Math.random() * 360),
+  }));
+}
+
+function usePrefersReducedMotion(): boolean {
+  const [reduced, setReduced] = useState(true);
+
+  useEffect(() => {
+    const mq = window.matchMedia("(prefers-reduced-motion: reduce)");
+    setReduced(mq.matches);
+    function onChange(event: MediaQueryListEvent) {
+      setReduced(event.matches);
+    }
+    mq.addEventListener("change", onChange);
+    return () => mq.removeEventListener("change", onChange);
+  }, []);
+
+  return reduced;
+}
+
 export function MomentOverlay({ moment, onContinue }: MomentOverlayProps) {
   const titleId = useId();
   const continueRef = useRef<HTMLButtonElement>(null);
   const previouslyFocused = useRef<HTMLElement | null>(null);
+  const prefersReducedMotion = usePrefersReducedMotion();
+  const confetti = useMemo(
+    () => (prefersReducedMotion ? [] : buildConfetti()),
+    // Regenerate when the celebrated moment changes
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- moment identity drives confetti burst
+    [moment, prefersReducedMotion],
+  );
 
   useEffect(() => {
     previouslyFocused.current = document.activeElement as HTMLElement | null;
@@ -34,7 +87,6 @@ export function MomentOverlay({ moment, onContinue }: MomentOverlayProps) {
         return;
       }
       if (event.key !== "Tab") return;
-      // Single focusable control — keep focus trapped on Continua
       event.preventDefault();
       continueRef.current?.focus();
     }
@@ -82,12 +134,29 @@ export function MomentOverlay({ moment, onContinue }: MomentOverlayProps) {
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/55 p-4 backdrop-blur-[2px]"
+      className="fixed inset-0 z-50 flex items-center justify-center overflow-hidden bg-black/55 p-4 backdrop-blur-[2px]"
       role="dialog"
       aria-modal="true"
       aria-labelledby={titleId}
     >
-      <div className="animate-moment-in flex w-full max-w-sm flex-col items-center gap-5 rounded-2xl border border-(--color-ovr-gold)/40 bg-(--color-surface) p-8 text-center shadow-2xl">
+      {confetti.map((piece) => (
+        <div
+          key={piece.id}
+          aria-hidden="true"
+          className="animate-confetti-fall pointer-events-none absolute top-[-20px] rounded-sm"
+          style={{
+            left: `${piece.left}%`,
+            width: piece.size,
+            height: piece.size,
+            background: piece.color,
+            transform: `rotate(${piece.rotate}deg)`,
+            animationDuration: `${piece.duration}s`,
+            animationDelay: `${piece.delay}s`,
+          }}
+        />
+      ))}
+
+      <div className="animate-moment-in relative z-2 flex w-full max-w-sm flex-col items-center gap-5 rounded-2xl border-2 border-(--color-accent) bg-(--color-surface-raised) p-8 text-center shadow-2xl">
         <p className="font-display text-xs tracking-[0.35em] text-(--color-ovr-gold)">{eyebrow}</p>
         <div className="flex items-center justify-center">{visual}</div>
         <h2 id={titleId} className="font-display text-2xl text-(--color-text) sm:text-3xl">

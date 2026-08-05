@@ -3,7 +3,7 @@
 import { useState } from "react";
 import type { GameSpeed } from "@/types/career";
 import { Button } from "@/components/ui/Button";
-import { SegmentedControl } from "@/components/ui/SegmentedControl";
+import { cn } from "@/lib/utils";
 
 interface SpeedSelectProps {
   onSelect: (speed: GameSpeed) => void;
@@ -28,19 +28,43 @@ export function SpeedSelect({ onSelect }: SpeedSelectProps) {
   const [speed, setSpeed] = useState<GameSpeed>("normal");
 
   return (
-    <div className="flex min-w-0 flex-col items-center gap-4 text-center sm:gap-5">
+    <div className="flex min-w-0 flex-col items-center gap-5 text-center">
       <div>
-        <p className="font-display text-xs tracking-[0.3em] text-(--color-accent)">Passo 1</p>
+        <p className="font-display text-xs tracking-[0.3em] text-(--color-accent)">Passo 1 di 2</p>
         <h2 className="font-display text-2xl text-(--color-text)">Scegli il ritmo di carriera</h2>
       </div>
-      <SegmentedControl
-        name="Ritmo di carriera"
-        value={speed}
-        onChange={setSpeed}
-        className="w-full max-w-md"
-        options={SPEED_ORDER.map((s) => ({ value: s, label: SPEED_LABELS[s] }))}
-      />
-      <p className="max-w-sm text-sm text-(--color-text-muted)">{SPEED_DESCRIPTIONS[speed]}</p>
+
+      <div
+        role="radiogroup"
+        aria-label="Ritmo di carriera"
+        className="flex w-full flex-col gap-3 sm:flex-row"
+      >
+        {SPEED_ORDER.map((option) => {
+          const selected = option === speed;
+          return (
+            <button
+              key={option}
+              type="button"
+              role="radio"
+              aria-checked={selected}
+              onClick={() => setSpeed(option)}
+              className={cn(
+                "flex-1 rounded-xl border-2 p-4 text-left transition-[border-color,background-color] duration-150",
+                "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-(--color-accent)",
+                selected
+                  ? "border-(--color-accent) bg-(--color-surface-raised)"
+                  : "border-(--color-border) bg-(--color-surface) hover:border-(--color-accent)/50",
+              )}
+            >
+              <p className="mb-1.5 text-sm font-bold text-(--color-text)">{SPEED_LABELS[option]}</p>
+              <p className="text-xs leading-snug text-(--color-text-muted)">
+                {SPEED_DESCRIPTIONS[option]}
+              </p>
+            </button>
+          );
+        })}
+      </div>
+
       <Button onClick={() => onSelect(speed)}>Inizia la carriera</Button>
     </div>
   );
