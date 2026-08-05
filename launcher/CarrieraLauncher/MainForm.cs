@@ -6,6 +6,10 @@ namespace CarrieraLauncher;
 
 internal sealed class MainForm : Form
 {
+    // Il caricamento da server locale è quasi istantaneo: senza un minimo forzato lo sfondo
+    // sparirebbe troppo in fretta per essere visto.
+    private static readonly TimeSpan MinSplashDuration = TimeSpan.FromSeconds(1.5);
+
     private readonly EmbeddedStaticServer _server;
     private readonly WebView2 _webView = new() { Dock = DockStyle.Fill, Visible = false };
     private readonly PictureBox _splash = new()
@@ -23,6 +27,7 @@ internal sealed class MainForm : Form
         Width = 1280;
         Height = 860;
         StartPosition = FormStartPosition.CenterScreen;
+        WindowState = FormWindowState.Maximized;
 
         // L'icona applicativa (ApplicationIcon nel csproj) finisce già nella risorsa nativa
         // dell'exe pubblicato: estrarla da lì evita di incorporarla una seconda volta.
@@ -74,11 +79,17 @@ internal sealed class MainForm : Form
                 "WebView2");
             var environment = await CoreWebView2Environment.CreateAsync(userDataFolder: userDataFolder);
 
+            var splashShownAt = DateTime.UtcNow;
             await _webView.EnsureCoreWebView2Async(environment);
-            // Lo sfondo resta visibile finché la pagina non ha finito di caricare, poi lascia
-            // spazio al gioco vero e proprio invece di sparire non appena la navigazione parte.
-            _webView.CoreWebView2.NavigationCompleted += (_, _) =>
+            // Lo sfondo resta visibile finché la pagina non ha finito di caricare, con un minimo
+            // forzato (MinSplashDuration) perché il caricamento da server locale è troppo rapido
+            // per farlo notare altrimenti; poi lascia spazio al gioco vero e proprio.
+            _webView.CoreWebView2.NavigationCompleted += async (_, _) =>
             {
+                var elapsed = DateTime.UtcNow - splashShownAt;
+                var remaining = MinSplashDuration - elapsed;
+                if (remaining > TimeSpan.Zero) await Task.Delay(remaining);
+
                 _webView.Visible = true;
                 _splash.Visible = false;
             };
