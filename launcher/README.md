@@ -7,10 +7,9 @@ nell'assembly) e lo mostra in una finestra nativa, senza chrome del browser.
 
 ## Download
 
-Modo più semplice: [GitHub Release](https://github.com/Gioixxx/Carriera/releases/latest) —
-scarica `Carriera.exe` dagli asset e avvialo (repo privata: serve accesso al repo per vedere
-la pagina della release). In alternativa `dist/Carriera.exe` è anche committato direttamente
-nel repo, per chi preferisce/deve prenderlo da lì.
+[GitHub Release](https://github.com/Gioixxx/Carriera/releases/latest) — scarica `Carriera.exe`
+dagli asset e avvialo. Non è più committato nel repo (vedi `.gitignore`): l'unico modo per
+ottenerlo senza buildarlo localmente è la Release.
 
 ## Come funziona
 
@@ -30,7 +29,8 @@ powershell -File scripts/build-launcher.ps1
 Lo script: builda l'export statico (`npm run build`), lo copia in
 `launcher/CarrieraLauncher/wwwroot/` (rigenerato ad ogni run, non versionato), pubblica il
 progetto .NET come singolo file self-contained per `win-x64`, copia il risultato in
-`dist/Carriera.exe` (l'unico artefatto committato nel repo).
+`dist/Carriera.exe` (non versionato — vedi `.gitignore` — va allegato a mano a una GitHub
+Release dopo la build).
 
 Richiede: Node/npm (già usati dal resto del progetto) e .NET SDK 10+ (`dotnet --version`).
 
@@ -42,5 +42,5 @@ Richiede: Node/npm (già usati dal resto del progetto) e .NET SDK 10+ (`dotnet -
   statico del gioco è ~1 MB); non si è usato un bundle Chromium proprio (Electron/Tauri con
   webview compilata) per tenere l'eseguibile più leggero, sfruttando invece il WebView2 già
   presente nel sistema operativo.
-- Repo attualmente privata; se in futuro diventasse pubblica, rivalutare l'esposizione dell'exe
-  in relazione ai nomi reali di club/competizioni usati nei dati (vedi `backlog.md`).
+- Repo pubblica dal 2026-08-05 — l'exe non è più committato proprio per questo (vedi
+  `.claude/memory/decisions.md`), resta distribuito solo via GitHub Release.

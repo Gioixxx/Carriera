@@ -55,9 +55,18 @@ Registro debito tecnico con priorità. Aggiornato da /session-end. Origine spess
 - **Impatto:** minimo — al più una leggera differenza di "sapore" nella varietà degli eventi rispetto all'originale, nessun impatto funzionale.
 - **Risoluzione suggerita:** nessuna azione necessaria a meno che una ricerca futura non fornisca dati sulla frequenza relativa osservata nell'originale.
 
+### Momenti celebrativi/timeline/animazioni non verificati end-to-end nel browser
+- **Priorità:** Media
+- **Area:** `MomentOverlay.tsx`, `CareerTimeline.tsx`, `hooks/useMotion.ts`, `CareerGame.tsx`
+- **Data:** 2026-08-05
+- **Descrizione:** i 3 commit che hanno introdotto overlay celebrativi, confetti, timeline di carriera e count-up statistiche (ba0083c, 41b9a01, c882a44) non erano stati registrati in memoria al momento del commit; questa sessione li ha documentati leggendo il codice, ma non ha rigiocato una carriera nel browser per confermare che overlay/focus-trap/coda dei momenti/rispetto di `prefers-reduced-motion` funzionino davvero come da codice.
+- **Perché rimandato:** sessione dedicata al recupero della memoria disallineata, non a un giro di test funzionale.
+- **Impatto:** rischio medio — è UI nuova e non banale (focus trap, coda di overlay multipli, animazioni condizionate), un bug qui sarebbe visibile all'utente ad ogni trofeo/premio vinto.
+- **Risoluzione suggerita:** prima della prossima release, giocare una carriera fino a ottenere almeno un trofeo, un premio e una convocazione in nazionale nella stessa sessione per vedere la coda di overlay in sequenza; testare anche con `prefers-reduced-motion: reduce` attivo nel sistema.
+
 ## Priorità
 - **Alta:** —
-- **Media:** statistiche portiere; probabilità trofei/award/nazionale non validate con playtest (vedi sopra)
+- **Media:** statistiche portiere; probabilità trofei/award/nazionale non validate con playtest; momenti celebrativi/timeline non verificati end-to-end (vedi sopra)
 - **Bassa:** soglia di ritiro automatico; generatori club-crisis con probabilità uniforme (vedi sopra)
 
 ## Archiviato

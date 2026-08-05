@@ -16,6 +16,9 @@ solo locale (localStorage, no backend). Piano completo con 4 sezioni di ricerca 
 in `C:\Users\Gioix\.claude\plans\piped-bouncing-cocke.md`. Tutte le 8 fasi della build iniziale
 completate: scaffold, dominio puro, dati (84 club/41 paesi), decisioni, UI creazione personaggio,
 loop di gioco, fine carriera (CareerSummary), polish (dark mode toggle, empty state, a11y).
+Dopo la build iniziale: immagini reali via hotlink (stemmi club, badge competizioni, bandiere
+nazionali), packaging `.exe` desktop, e un giro di polish su animazioni/momenti celebrativi
+(overlay trofeo/premio/convocazione, timeline di carriera) — vedi [[sprint]].
 
 ## File memoria (carica su richiesta)
 > `@file.md` = import Claude · `[[file]]` = wikilink Obsidian (graph). Tieni entrambi.
@@ -32,4 +35,5 @@ loop di gioco, fine carriera (CareerSummary), polish (dark mode toggle, empty st
 - Il piano di implementazione dettagliato vive FUORI dal repo, in `C:\Users\Gioix\.claude\plans\piped-bouncing-cocke.md` — leggerlo prima di riprendere lo sviluppo, contiene le meccaniche osservate su 10+ carriere giocate sul sito originale.
 - Nell'originale gli award individuali (Pallone d'Oro) e le probabilità di nazionale/coppa continentale sono praticamente irraggiungibili anche in carriere-record — il clone li implementa con soglie deliberatamente più generose (vedi [[decisions]]).
 - Stemmi club/competizioni: hotlink TheSportsDB (mai download), integrati nella UI (`Club.crestUrl`, `COMPETITION_BADGES`) — vedi [[decisions]]. Premi individuali (Pallone d'Oro ecc.): icona generica Twemoji, deliberatamente NON una foto del trofeo reale (rischio trademark diverso dagli stemmi club, vedi [[decisions]]).
-- Eseguibile Windows: `dist/Carriera.exe`, distribuito anche via GitHub Release — vedi [[decisions]] per la scelta tecnica (.NET/WebView2) e `launcher/README.md`.
+- Eseguibile Windows: `dist/Carriera.exe`, **non più committato nel repo** dal 2026-08-05 (solo `.gitignore`d, distribuito via GitHub Release) — vedi [[decisions]] per la scelta tecnica (.NET/WebView2) e per la decisione di rimuoverlo dal tracking git, e `launcher/README.md` per come rigenerarlo.
+- Momenti celebrativi (trofeo/premio/convocazione nazionale) mostrati come overlay modale animato (`MomentOverlay.tsx`) con confetti, rispettando sempre `prefers-reduced-motion` — vedi [[decisions]].

@@ -41,11 +41,13 @@ yarn-error.log*
 next-env.d.ts
 
 # launcher desktop (.NET) — vedi launcher/README.md e scripts/build-launcher.ps1
-# solo dist/Carriera.exe va committato, non gli artefatti intermedi
+# dist/*.exe non è più committato: si rigenera con scripts/build-launcher.ps1 e si
+# distribuisce solo via GitHub Release (vedi .claude/memory/decisions.md)
 /launcher/CarrieraLauncher/wwwroot/
 /launcher/CarrieraLauncher/bin/
 /launcher/CarrieraLauncher/obj/
 /launcher/CarrieraLauncher/publish/
+/dist/*.exe
 # profilo/cache WebView2 se mai creato accanto all'exe (non dovrebbe più succedere, vedi MainForm.cs)
 /dist/*.WebView2/
 
