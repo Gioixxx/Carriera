@@ -1,7 +1,7 @@
 ---
 type: sprint
 tags: [memory, sprint]
-updated: [2026-08-04]
+updated: [2026-08-05]
 ---
 
 # Sprint Corrente
@@ -30,6 +30,8 @@ Stato lavoro in corso. Aggiornato con /sprint. Backlog in [[backlog]], debito in
 - Ricerca URL hotlink per stemmi club/competizioni completata in `.claude/research/team-crests.md` — nomi reali confermati, integrazione nella UI non ancora decisa (solo testuale per ora) → vedi [[backlog]]
 
 - [x] **Integrazione immagini club/competizioni/premi** (2026-08-05, dopo che la repo è diventata pubblica): `Club.crestUrl` (84/84, TheSportsDB) + `data/competition-badges.ts` (`COMPETITION_BADGES`, 14 club + Mondiale/Europei) + `AwardBadge.tsx` (icona Twemoji generica per i 3 `AwardType`, non foto reale — vedi [[decisions]]). Componenti nuovi `ClubCrest`/`CompetitionBadge`/`AwardBadge` (stesso pattern `onError` → fallback), wired in `PlayerCard`/`OfferPanel`/`CareerTable`/`CareerSummary`. `next.config.ts` passato a `output: "export"` (già fatto per il launcher .exe, riusato qui). Verificato end-to-end nel browser: stemmi visibili su offerte/club corrente/storico, badge reali Serie A + Premier League nella lista trofei del summary, URL Twemoji verificato via rete (200, image/svg+xml). 129 test (era 124, +5 su `clubs.ts`/`competition-badges.ts`), lint/typecheck/build puliti. `dist/Carriera.exe` rigenerato con la nuova build.
+
+- [x] **Bandiere nazionali via hotlink flagcdn.com** (2026-08-05): nuovo `CountryFlag.tsx` (stesso pattern `onError` di `ClubCrest`), sostituisce l'emoji diretta in `JerseyBadge`/`JerseyCard`/`NationalitySelect`/`IdentityForm`/`PlayerCard` (prop `flag?: string` → `country?: Country`) — vedi [[decisions]] per il perché (emoji bandiera inaffidabile su Windows, incluse le nazionali britanniche). Verificato end-to-end nel browser: dropdown nazionalità con bandiere reali (incluse Inghilterra/Scozia/Galles), bandiera sul cartellino in creazione personaggio e sulla PlayerCard in partita. 129 test invariati, typecheck/lint puliti sui file toccati.
 
 ## Ricerca completata (agenti background, 2026-08-05)
 - **Esplorazione aggiuntiva 4** sul sito originale (scritta in `piped-bouncing-cocke.md`, fuori dal repo): catene di prestito ancora mai osservate (0/47 cicli aggiuntivi, conclusione: probabilmente non serve modellarle); esito di "Look for a way out" chiarito (trasferimento immediato deterministico, stesso pattern di un'offerta normale accettata); **correzione importante**: l'originale usa sempre nomi di trofeo reali (World Cup, Copa América, Champions League, Europa League, Copa Libertadores, Copa Argentina) mai un placeholder generico "Eurocup" come assunto prima — rilevante per [[backlog]] (nomi confederazione-specifici per trofei nazionale); awards individuali confermati vuoti in 14/14 carriere cumulative anche nel caso più estremo osservato finora (OVR 90, Mondiale + 3x Copa América, 9 trofei di club)

@@ -24,7 +24,7 @@ const VALUE_FORMATTER = new Intl.NumberFormat("it-IT", {
 });
 
 export function PlayerCard({ player, compact = false }: PlayerCardProps) {
-  const flag = countries.find((c) => c.name === player.nationality)?.flag;
+  const country = countries.find((c) => c.name === player.nationality);
   const trophyCount = player.trophies.length;
   const awardCount = player.awards.length;
 
@@ -66,7 +66,7 @@ export function PlayerCard({ player, compact = false }: PlayerCardProps) {
       )}
     >
       <div className="flex items-center gap-3 sm:gap-4">
-        <JerseyBadge number={player.number} flag={flag} size="sm" />
+        <JerseyBadge number={player.number} country={country} size="sm" />
         <div className="min-w-0 flex-1">
           <span className="rounded bg-(--color-surface) px-1.5 py-0.5 text-[10px] font-semibold tracking-wide text-(--color-text-muted) uppercase">
             {player.position}

@@ -29,7 +29,7 @@ export function IdentityForm({ onSubmit }: IdentityFormProps) {
   const [position, setPosition] = useState<Position | null>(null);
   const [errors, setErrors] = useState<FormErrors>({});
 
-  const flag = countries.find((c) => c.name === nationality)?.flag;
+  const country = countries.find((c) => c.name === nationality);
 
   function handleSubmit() {
     const nextErrors: FormErrors = {};
@@ -56,7 +56,7 @@ export function IdentityForm({ onSubmit }: IdentityFormProps) {
     <div className="flex h-full min-h-0 min-w-0 flex-1 flex-col">
       <div className="grid min-h-0 min-w-0 flex-1 gap-4 lg:grid-cols-[auto_1fr_auto] lg:items-stretch lg:gap-6">
         <div className="flex justify-center lg:h-full lg:items-center lg:justify-start">
-          <JerseyCard lastName={lastName} number={number} flag={flag} />
+          <JerseyCard lastName={lastName} number={number} country={country} />
         </div>
 
         <div className="flex min-w-0 flex-col gap-3 lg:h-full lg:justify-between lg:gap-0 lg:py-1">

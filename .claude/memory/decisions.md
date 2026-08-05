@@ -1,7 +1,7 @@
 ---
 type: decisions
 tags: [memory, architecture]
-updated: [2026-08-04]
+updated: [2026-08-05]
 ---
 
 # Decisioni Architetturali
@@ -56,6 +56,13 @@ Registro scelte tecniche con motivazioni.
 - **Perché:** Windows 11 (target primario dell'utente) include già il runtime WebView2 di serie, quindi non serve imbarcare un intero Chromium come farebbe Electron (~150-250 MB) — il costo residuo è solo il runtime .NET self-contained. `.NET SDK` era già installato sulla macchina, mentre Tauri avrebbe richiesto l'installazione di Rust+toolchain MSVC assente. La build è riproducibile con uno script (`scripts/build-launcher.ps1`), non un artefatto costruito a mano.
 - **Alternative:** Electron (scartato: troppo pesante da committare in git permanentemente); Tauri (scartato: nessun toolchain Rust disponibile su questa macchina); Node.js Single Executable Application (scartato: il solo `node.exe` da imbarcare è grande quanto/superiore al runtime .NET, nessun vantaggio di dimensione).
 - **Impatto:** `next.config.ts`, `launcher/CarrieraLauncher/**`, `scripts/build-launcher.ps1`, `dist/Carriera.exe` (unico artefatto binario committato — `wwwroot`/`bin`/`obj`/`publish` sono gitignored, rigenerati ad ogni build). Nota tecnica: WebView2 salva profilo/cache in `%LOCALAPPDATA%\Carriera\WebView2` (esplicitamente configurato in `MainForm.cs`) e non accanto all'exe, per non sporcare la cartella del repo.
+
+### Bandiere nazionali via hotlink flagcdn.com, non solo emoji
+- **Data:** 2026-08-05
+- **Decisione:** nuovo componente `CountryFlag.tsx` (stesso pattern `onError` di `ClubCrest`/`CompetitionBadge`) che mostra la bandiera reale in hotlink da `https://flagcdn.com/{code}.svg` (SVG, per codice ISO 3166-1 alpha-2 — inclusi i codici regione `gb-eng`/`gb-sct`/`gb-wls` per le nazionali britanniche, verificati 200 su flagcdn). Ripiega sull'emoji bandiera già presente in `Country.flag` solo se l'host esterno non risponde. Sostituisce l'uso diretto dell'emoji in `JerseyBadge`/`NationalitySelect` (che ora passano un `Country` invece di una stringa emoji).
+- **Perché:** Windows non ha supporto nativo affidabile per le emoji bandiera — mostra il codice ISO in un riquadro invece del vessillo, e le sequenze tag delle nazionali britanniche (Inghilterra/Scozia/Galles) non renderizzano quasi ovunque tranne Apple. Dato che l'app gira anche come `.exe` Windows via WebView2/Edge (vedi launcher sotto), l'emoji da sola non era affidabile per l'utente target.
+- **Alternative:** libreria di bandiere SVG locali (es. `flag-icons` via npm) — scartata per coerenza con il pattern già stabilito nel progetto (hotlink, mai asset scaricati/committati, vedi stemmi club/badge competizioni).
+- **Impatto:** `src/components/features/career/CountryFlag.tsx` (nuovo), `JerseyBadge.tsx`/`JerseyCard.tsx`/`NationalitySelect.tsx`/`IdentityForm.tsx`/`PlayerCard.tsx` (prop `flag?: string` → `country?: Country`). `Country.flag` (emoji) resta nel dominio solo come fallback.
 
 ### Piano di implementazione vive fuori dal repo
 - **Data:** 2026-08-04

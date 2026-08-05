@@ -1,10 +1,11 @@
+import type { Country } from "@/data/countries";
 import { cn } from "@/lib/utils";
 import { JerseyBadge } from "./JerseyBadge";
 
 interface JerseyCardProps {
   lastName: string;
   number: number | null;
-  flag?: string;
+  country?: Country;
   className?: string;
   /** Always compact. If false, compact on small screens and larger from lg up. */
   compact?: boolean;
@@ -13,7 +14,7 @@ interface JerseyCardProps {
 export function JerseyCard({
   lastName,
   number,
-  flag,
+  country,
   className,
   compact = false,
 }: JerseyCardProps) {
@@ -42,11 +43,11 @@ export function JerseyCard({
       </span>
 
       {compact ? (
-        <JerseyBadge number={displayNumber} flag={flag} size="md" />
+        <JerseyBadge number={displayNumber} country={country} size="md" />
       ) : (
         <>
-          <JerseyBadge number={displayNumber} flag={flag} size="md" className="lg:hidden" />
-          <JerseyBadge number={displayNumber} flag={flag} size="lg" className="hidden lg:flex" />
+          <JerseyBadge number={displayNumber} country={country} size="md" className="lg:hidden" />
+          <JerseyBadge number={displayNumber} country={country} size="lg" className="hidden lg:flex" />
         </>
       )}
 

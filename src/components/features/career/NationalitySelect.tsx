@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { countries } from "@/data/countries";
 import { cn } from "@/lib/utils";
+import { CountryFlag } from "./CountryFlag";
 
 interface NationalitySelectProps {
   value: string | null;
@@ -50,7 +51,12 @@ export function NationalitySelect({ value, onChange, id }: NationalitySelectProp
       >
         {selected ? (
           <span className="flex items-center gap-2">
-            <span aria-hidden="true">{selected.flag}</span>
+            <CountryFlag
+              code={selected.code}
+              name={selected.name}
+              fallbackEmoji={selected.flag}
+              size={18}
+            />
             {selected.name}
           </span>
         ) : (
@@ -93,7 +99,7 @@ export function NationalitySelect({ value, onChange, id }: NationalitySelectProp
                       c.name === value && "bg-(--color-surface-raised) font-semibold",
                     )}
                   >
-                    <span aria-hidden="true">{c.flag}</span>
+                    <CountryFlag code={c.code} name={c.name} fallbackEmoji={c.flag} size={18} />
                     {c.name}
                   </button>
                 </li>
