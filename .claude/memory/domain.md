@@ -13,6 +13,8 @@ Termini, entità, regole di business del progetto. Decisioni correlate in [[deci
 - **ClubStint**: una riga di `clubHistory` — un club per un intervallo di età, con statistiche del periodo. **Una riga per ciclo**, non accorpata per club (replica il comportamento osservato nell'originale: restare 3 cicli nello stesso club produce 3 righe distinte).
 - **Decision / DecisionOption / DecisionOutcome**: un bivio con opzioni; ogni opzione ha uno o più outcome pesati (i pesi di un'opzione sommano a 100). Un solo outcome = esito deterministico.
 - **Trophy / Award**: trofei di club/nazionale (nome reale competizione) vs premi individuali (Pallone d'Oro, capocannoniere, ecc.).
+- **PersonalRecords / OvrMilestone / SeasonTitleEntry** (`types/career.ts`, logica in `lib/career/satisfaction.ts`): record personali del giocatore (miglior stagione per gol/assist/presenze, picco valore di mercato, età prima convocazione), soglie OVR celebrate (60/70/80/85/90) e titoli di stagione assegnati a fine ciclo (8 varianti, es. "Campione"/"Rivelazione"/"Anno difficile") — vedi [[decisions]].
+- **ArchivedCareer / Hall of Fame**: ogni carriera ritirata viene archiviata (`carriera:archive`, cap FIFO 100); `computeHallOfFame` seleziona su tutto l'archivio la carriera con OVR più alto, più trofei, più ricca e più popolare — mostrate con badge "HoF" in `CareerArchive.tsx`.
 
 ## Glossario
 | Termine | Definizione nel progetto |

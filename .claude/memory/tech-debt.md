@@ -76,11 +76,20 @@ Registro debito tecnico con priorità. Aggiornato da /session-end. Origine spess
 ### Card di decisione probabilistica senza percentuali visibili (a differenza dell'originale)
 - **Priorità:** Bassa
 - **Area:** `components/features/career/DecisionPanel.tsx`
-- **Data:** 2026-08-05
-- **Descrizione:** l'originale mostra badge percentuale colorati direttamente sulla card prima della scelta (es. "Starter 50%" verde / "Low rotation 50%" rosso) per gli outcome pesati. Verificato via grep che `DecisionPanel.tsx` non stampa alcuna percentuale/peso — la scelta è "al buio" nel clone.
+- **Data:** 2026-08-05 (parzialmente mitigato 2026-08-06)
+- **Descrizione:** l'originale mostra badge percentuale colorati direttamente sulla card prima della scelta (es. "Starter 50%" verde / "Low rotation 50%" rosso) per gli outcome pesati. Verificato via grep che `DecisionPanel.tsx` non stampa alcuna percentuale/peso — la scelta è "al buio" nel clone. **Aggiornamento 2026-08-06:** il commit 46f180a ha aggiunto `DecisionOption.hint` (sottotitolo testuale libero, wired in `DecisionPanel`/`OfferPanel`/`PenaltyShootout`) — dà un indizio qualitativo sul trade-off ma **non** i pesi numerici reali, quindi il gap con l'originale resta, solo attenuato.
 - **Perché rimandato:** non bloccante, differenza di trasparenza/tensione del gameplay più che di funzionalità; scoperta solo in questa sessione di confronto diretto.
-- **Impatto:** basso — il clone resta giocabile, ma il giocatore ha meno informazione su cui basare la scelta rispetto all'originale.
-- **Risoluzione suggerita:** esporre i pesi già presenti su `DecisionOption`/`DecisionOutcome` come badge percentuale sulla card in `DecisionPanel.tsx`; dato dominio già disponibile, tocca solo la UI.
+- **Impatto:** basso — il clone resta giocabile, ma il giocatore ha meno informazione numerica su cui basare la scelta rispetto all'originale.
+- **Risoluzione suggerita:** esporre i pesi già presenti su `DecisionOption`/`DecisionOutcome` come badge percentuale sulla card in `DecisionPanel.tsx`; dato dominio già disponibile, tocca solo la UI. Valutare se `hint` è sufficiente per l'obiettivo di gameplay o se serve comunque la percentuale esplicita.
+
+### Sistema "satisfaction" (Hall of Fame, record personali, milestone OVR, titoli di stagione) non verificato end-to-end nel browser
+- **Priorità:** Media
+- **Area:** `lib/career/satisfaction.ts`, `CareerArchive.tsx`, `CareerSummary.tsx`, `PlayerCard.tsx`, `OutcomeBanner` in `CareerGame.tsx`
+- **Data:** 2026-08-06
+- **Descrizione:** i commit 46f180a (Hall of Fame + satisfaction) e b13fac9 (record infranti spostati in banner) sono stati documentati in memoria leggendo diff e codice, ma non è stata rigiocata una carriera nel browser per verificare: la sezione Hall of Fame in `CareerArchive` con più carriere archiviate, il "miglior titolo" mostrato in `CareerSummary`, il banner dei record infranti con più record nello stesso ciclo, lo stile condizionale delle statistiche-record in `PlayerCard`.
+- **Perché rimandato:** sessione di aggiornamento memoria, non di test funzionale — stesso pattern già visto con i momenti celebrativi (vedi voce sopra, ancora aperta).
+- **Impatto:** rischio medio — logica di selezione (rank titoli, Hall of Fame su 4 categorie, cap 12 titoli) non banale, un bug qui sarebbe visibile solo dopo diverse carriere giocate/archiviate, quindi difficile da notare per caso.
+- **Risoluzione suggerita:** giocare/archiviare almeno 2-3 carriere con profili diversi (una con OVR alto, una con tanti trofei, una con alta popolarità) per vedere la Hall of Fame popolarsi correttamente in `CareerArchive`; forzare un ciclo con più record infranti insieme per verificare la lista nel banner.
 
 ### Evento "Grandfather from another country" (switch nazionalità) mai implementato
 - **Priorità:** Bassa
@@ -102,8 +111,8 @@ Registro debito tecnico con priorità. Aggiornato da /session-end. Origine spess
 
 ## Priorità
 - **Alta:** —
-- **Media:** statistiche portiere; probabilità trofei/award/nazionale non validate con playtest; momenti celebrativi/timeline non verificati end-to-end; eventi narrativi mancanti rispetto all'originale (vedi sopra)
-- **Bassa:** soglia di ritiro automatico; generatori club-crisis con probabilità uniforme; percentuali outcome non visibili in `DecisionPanel`; evento cambio-nazionalità mai implementato; possibile assenza di finestra anti-ripetizione eventi lifestyle (vedi sopra)
+- **Media:** statistiche portiere; probabilità trofei/award/nazionale non validate con playtest; momenti celebrativi/timeline non verificati end-to-end; eventi narrativi mancanti rispetto all'originale; sistema "satisfaction" (Hall of Fame/record/milestone/titoli) non verificato end-to-end (vedi sopra)
+- **Bassa:** soglia di ritiro automatico; generatori club-crisis con probabilità uniforme; percentuali outcome non visibili in `DecisionPanel` (parzialmente mitigato da `hint`); evento cambio-nazionalità mai implementato; possibile assenza di finestra anti-ripetizione eventi lifestyle (vedi sopra)
 
 ## Archiviato
 - **Champions League ed Europa League non distinte** — risolto 2026-08-05: i club UEFA di tier 1 assegnano "Champions League" se prestige ≥2, "Europa League" altrimenti (`continentalCompetition` in `data/clubs.ts`), badge Europa League aggiunto in `data/competition-badges.ts`. Test dedicato in `clubs.test.ts`.

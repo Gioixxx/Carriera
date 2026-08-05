@@ -91,6 +91,25 @@ Stato lavoro in corso. Aggiornato con /sprint. Backlog in [[backlog]], debito in
   tech-debt.md 4 item dei 6 trovati dal confronto: eventi narrativi mancanti, percentuali su
   `DecisionPanel`, evento cambio-nazionalità, anti-ripetizione lifestyle.
 
+- [x] **Sistema "satisfaction": Hall of Fame, record personali, milestone OVR, titoli di stagione**
+  (2026-08-06, commit 46f180a): nuovo `lib/career/satisfaction.ts` (402 righe + 266 di test) —
+  milestone OVR (60/70/80/85/90), record personali (`PersonalRecords`: miglior stagione
+  gol/assist/presenze, picco valore di mercato, età prima convocazione), 8 titoli di stagione
+  (`SeasonTitleId`, con rank di priorità e cap 12 in lista), Hall of Fame calcolata sull'archivio
+  multi-carriera (OVR più alto/più trofei/più ricco/più popolare, badge "HoF" in
+  `CareerArchive.tsx`). `CareerSummary` mostra il miglior titolo di carriera + eventuali vittorie
+  Hall of Fame. Nuovo campo `DecisionOption.hint` (sottotitolo testuale sul trade-off, non un
+  peso numerico) wired in `DecisionPanel`/`OfferPanel`/`PenaltyShootout`. Vedi [[decisions]] per
+  il ragionamento completo. **Non ancora verificato end-to-end nel browser** — vedi [[tech-debt]].
+
+- [x] **Record infranti spostati da overlay modale a banner persistente** (2026-08-06, commit
+  b13fac9): rimosso `{ kind: "record" }` da `MomentOverlay`/`buildCareerMoments` (mostrava solo
+  il primo record infranto del ciclo); `OutcomeBanner` in `CareerGame.tsx` ora mostra la lista
+  completa di `outcome.brokenRecords` come righe di testo sempre visibili, non più nella coda di
+  overlay modali. `PlayerCard` evidenzia con stile condizionale le statistiche che hanno appena
+  battuto un record. Vedi [[decisions]] per il perché (un ciclo può rompere più record insieme,
+  l'overlay "solo il primo" ne nascondeva altri).
+
 ## Ricerca completata (agenti background, 2026-08-05)
 - **Esplorazione aggiuntiva 4** sul sito originale (scritta in `piped-bouncing-cocke.md`, fuori dal repo): catene di prestito ancora mai osservate (0/47 cicli aggiuntivi, conclusione: probabilmente non serve modellarle); esito di "Look for a way out" chiarito (trasferimento immediato deterministico, stesso pattern di un'offerta normale accettata); **correzione importante**: l'originale usa sempre nomi di trofeo reali (World Cup, Copa América, Champions League, Europa League, Copa Libertadores, Copa Argentina) mai un placeholder generico "Eurocup" come assunto prima — rilevante per [[backlog]] (nomi confederazione-specifici per trofei nazionale); awards individuali confermati vuoti in 14/14 carriere cumulative anche nel caso più estremo osservato finora (OVR 90, Mondiale + 3x Copa América, 9 trofei di club)
 - **Ricerca immagini premi + coppe nazionali** (estende `.claude/research/team-crests.md`, sezioni 5-6): badge TheSportsDB per 6 tornei di confederazione (Mondiale/Europei/Copa América/Asian Cup/Africa Cup of Nations/Gold Cup) trovati e verificati, non ancora cablati in `COMPETITION_BADGES` (serve prima la logica di confederazione, vedi [[backlog]]); valutazione premi individuali con raccomandazione icona generica (Twemoji) invece di foto reale del trofeo Ballon d'Or — già implementata, vedi sopra e [[decisions]]
