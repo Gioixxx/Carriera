@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useId, useMemo, useRef, type ReactNode } from "react";
-import { Flag, Star, Trophy as TrophyIcon } from "lucide-react";
+import { Flag, Star } from "lucide-react";
 import type { Award, Trophy } from "@/types/career";
 import { AWARD_LABELS } from "@/lib/career/award-labels";
 import { usePrefersReducedMotion } from "@/hooks/useMotion";
@@ -13,8 +13,7 @@ export type CareerMoment =
   | { kind: "trophy"; trophy: Trophy }
   | { kind: "award"; award: Award }
   | { kind: "callup" }
-  | { kind: "milestone"; ovr: number }
-  | { kind: "record"; label: string };
+  | { kind: "milestone"; ovr: number };
 
 interface MomentOverlayProps {
   moment: CareerMoment;
@@ -117,15 +116,6 @@ export function MomentOverlay({ moment, onContinue }: MomentOverlayProps) {
         <Star size={32} aria-hidden="true" />
       </span>
     );
-  } else if (moment.kind === "record") {
-    eyebrow = "Record personale";
-    title = moment.label;
-    detail = "Hai superato il tuo migliore risultato.";
-    visual = (
-      <span className="flex h-16 w-16 items-center justify-center rounded-full bg-(--color-accent)/20 text-(--color-accent)">
-        <TrophyIcon size={32} aria-hidden="true" />
-      </span>
-    );
   } else {
     eyebrow = "Nazionale";
     title = "Convocato in nazionale!";
@@ -181,7 +171,6 @@ export function buildCareerMoments(input: {
   newAward: Award | null;
   nationalCallup: boolean;
   newMilestones?: number[];
-  brokenRecords?: string[];
 }): CareerMoment[] {
   const moments: CareerMoment[] = [];
   for (const trophy of input.newTrophies) {
@@ -195,10 +184,6 @@ export function buildCareerMoments(input: {
   }
   for (const ovr of input.newMilestones ?? []) {
     moments.push({ kind: "milestone", ovr });
-  }
-  const firstRecord = input.brokenRecords?.[0];
-  if (firstRecord) {
-    moments.push({ kind: "record", label: firstRecord });
   }
   return moments;
 }

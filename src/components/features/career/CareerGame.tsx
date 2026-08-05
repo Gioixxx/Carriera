@@ -196,6 +196,16 @@ function OutcomeBanner({
           </p>
         ) : null}
 
+        {outcome.brokenRecords.length > 0 ? (
+          <ul className="flex flex-col gap-0.5">
+            {outcome.brokenRecords.map((label) => (
+              <li key={label} className="text-xs text-(--color-ovr-gold)">
+                Record: {label}
+              </li>
+            ))}
+          </ul>
+        ) : null}
+
         {outcome.nationalCallup ? (
           <p className="text-sm font-medium text-(--color-accent)">Convocato in nazionale!</p>
         ) : null}
@@ -341,7 +351,6 @@ export function CareerGame() {
       newAward: outcome.newAward,
       nationalCallup: outcome.nationalCallup,
       newMilestones: outcome.newMilestones,
-      brokenRecords: outcome.brokenRecords,
     });
     setMoments(nextMoments);
     setMomentIndex(0);

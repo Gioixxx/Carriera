@@ -132,24 +132,39 @@ export function PlayerCard({ player, compact = false, flashRecords }: PlayerCard
 
       <div
         key={recordsFlashKey || "records"}
-        className={cn(
-          "grid grid-cols-3 gap-2 text-center",
-          compact && "hidden sm:grid",
-          recordsFlashKey && "animate-count-flash rounded-lg",
-        )}
+        className={cn("grid grid-cols-3 gap-2 text-center", compact && "hidden sm:grid")}
       >
         <div className="rounded-lg bg-(--color-surface) py-2">
-          <p className="font-display text-lg text-(--color-text)">{player.records.bestSeasonGoals}</p>
+          <p
+            className={cn(
+              "font-display text-lg",
+              recordsFlashKey.includes("gol") ? "text-(--color-ovr-gold)" : "text-(--color-text)",
+            )}
+          >
+            {player.records.bestSeasonGoals}
+          </p>
           <p className="text-[10px] tracking-wide text-(--color-text-muted) uppercase">Best gol</p>
         </div>
         <div className="rounded-lg bg-(--color-surface) py-2">
-          <p className="font-display text-lg text-(--color-text)">
+          <p
+            className={cn(
+              "font-display text-lg",
+              recordsFlashKey.includes("assist") ? "text-(--color-ovr-gold)" : "text-(--color-text)",
+            )}
+          >
             {player.records.bestSeasonAssists}
           </p>
           <p className="text-[10px] tracking-wide text-(--color-text-muted) uppercase">Best ast</p>
         </div>
         <div className="rounded-lg bg-(--color-surface) py-2">
-          <p className="font-display text-lg text-(--color-text)">{player.records.bestSeasonApps}</p>
+          <p
+            className={cn(
+              "font-display text-lg",
+              recordsFlashKey.includes("presenze") ? "text-(--color-ovr-gold)" : "text-(--color-text)",
+            )}
+          >
+            {player.records.bestSeasonApps}
+          </p>
           <p className="text-[10px] tracking-wide text-(--color-text-muted) uppercase">Best pr</p>
         </div>
       </div>
