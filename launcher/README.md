@@ -5,6 +5,13 @@ repo/installare Node. È un piccolo host WinForms + WebView2 che serve l'export 
 gioco su `http://127.0.0.1:<porta libera>/` (via `HttpListener` su file incorporati
 nell'assembly) e lo mostra in una finestra nativa, senza chrome del browser.
 
+## Download
+
+Modo più semplice: [GitHub Release](https://github.com/Gioixxx/Carriera/releases/latest) —
+scarica `Carriera.exe` dagli asset e avvialo (repo privata: serve accesso al repo per vedere
+la pagina della release). In alternativa `dist/Carriera.exe` è anche committato direttamente
+nel repo, per chi preferisce/deve prenderlo da lì.
+
 ## Come funziona
 
 - `EmbeddedStaticServer.cs` — legge l'export statico (`npm run build`, `output: "export"` in
