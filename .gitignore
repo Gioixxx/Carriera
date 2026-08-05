@@ -40,6 +40,15 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 
+# launcher desktop (.NET) — vedi launcher/README.md e scripts/build-launcher.ps1
+# solo dist/Carriera.exe va committato, non gli artefatti intermedi
+/launcher/CarrieraLauncher/wwwroot/
+/launcher/CarrieraLauncher/bin/
+/launcher/CarrieraLauncher/obj/
+/launcher/CarrieraLauncher/publish/
+# profilo/cache WebView2 se mai creato accanto all'exe (non dovrebbe più succedere, vedi MainForm.cs)
+/dist/*.WebView2/
+
 # claude-libs / progetto
 ralph/run-state.json
 .claude/memory-sync.log

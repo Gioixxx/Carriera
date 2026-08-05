@@ -43,6 +43,13 @@ Registro scelte tecniche con motivazioni.
 - **Perché:** un campo da calcio che diventa color oro in dark mode (bug riscontrato e corretto durante lo sviluppo) rompe la metafora visiva — un campo è sempre verde indipendentemente dal tema.
 - **Impatto:** `constants/design-tokens.ts`, `app/globals.css`, `JerseyCard.tsx`, `PositionPicker.tsx`.
 
+### Launcher desktop: export statico Next.js + host .NET/WebView2, non Electron/Tauri
+- **Data:** 2026-08-05
+- **Decisione:** per l'eseguibile `.exe` richiesto dall'utente (vedi [[backlog]]), `next.config.ts` ora usa `output: "export"` (il gioco è interamente client-side, nessuna API route) e un piccolo progetto .NET WinForms (`launcher/CarrieraLauncher/`) incorpora l'export statico come embedded resource, lo serve su `127.0.0.1` via `HttpListener` e lo mostra in una finestra `WebView2` nativa. Pubblicato come singolo file self-contained per `win-x64` (~50 MB) e committato in `dist/Carriera.exe`.
+- **Perché:** Windows 11 (target primario dell'utente) include già il runtime WebView2 di serie, quindi non serve imbarcare un intero Chromium come farebbe Electron (~150-250 MB) — il costo residuo è solo il runtime .NET self-contained. `.NET SDK` era già installato sulla macchina, mentre Tauri avrebbe richiesto l'installazione di Rust+toolchain MSVC assente. La build è riproducibile con uno script (`scripts/build-launcher.ps1`), non un artefatto costruito a mano.
+- **Alternative:** Electron (scartato: troppo pesante da committare in git permanentemente); Tauri (scartato: nessun toolchain Rust disponibile su questa macchina); Node.js Single Executable Application (scartato: il solo `node.exe` da imbarcare è grande quanto/superiore al runtime .NET, nessun vantaggio di dimensione).
+- **Impatto:** `next.config.ts`, `launcher/CarrieraLauncher/**`, `scripts/build-launcher.ps1`, `dist/Carriera.exe` (unico artefatto binario committato — `wwwroot`/`bin`/`obj`/`publish` sono gitignored, rigenerati ad ogni build). Nota tecnica: WebView2 salva profilo/cache in `%LOCALAPPDATA%\Carriera\WebView2` (esplicitamente configurato in `MainForm.cs`) e non accanto all'exe, per non sporcare la cartella del repo.
+
 ### Piano di implementazione vive fuori dal repo
 - **Data:** 2026-08-04
 - **Decisione:** il piano dettagliato (meccaniche osservate, modello dati, fasi) è in `C:\Users\Gioix\.claude\plans\piped-bouncing-cocke.md`, non in un file dentro il repo del progetto.

@@ -12,6 +12,9 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    // Launcher desktop (.NET) e artefatti impacchettati — non è codice JS/TS del progetto.
+    "launcher/**",
+    "dist/**",
   ]),
 ]);
 

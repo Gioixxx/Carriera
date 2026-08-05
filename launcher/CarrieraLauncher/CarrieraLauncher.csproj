@@ -1,0 +1,26 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net10.0-windows</TargetFramework>
+    <UseWindowsForms>true</UseWindowsForms>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <AssemblyName>Carriera</AssemblyName>
+    <RootNamespace>CarrieraLauncher</RootNamespace>
+    <InvariantGlobalization>true</InvariantGlobalization>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Web.WebView2" Version="1.0.3405.78" />
+  </ItemGroup>
+
+  <!-- L'export statico del gioco (npm run build) viene copiato qui da scripts/build-launcher.ps1
+       prima della publish; il nome logico preserva i separatori "/" per il lookup a runtime. -->
+  <ItemGroup>
+    <EmbeddedResource Include="wwwroot/**/*" Exclude="wwwroot/.gitkeep">
+      <LogicalName>wwwroot/%(RecursiveDir)%(Filename)%(Extension)</LogicalName>
+    </EmbeddedResource>
+  </ItemGroup>
+
+</Project>
