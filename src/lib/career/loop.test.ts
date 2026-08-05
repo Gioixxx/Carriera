@@ -45,6 +45,13 @@ describe("availableCategories", () => {
       expect.arrayContaining(["transfer", "loan", "lifestyle", "position-change", "club-crisis", "end-of-cycle"]),
     );
   });
+
+  it("dovrebbe includere sponsor solo sopra la soglia di popolarità", () => {
+    const belowThreshold = { ...playerAt(), popularity: 10 };
+    const aboveThreshold = { ...playerAt(), popularity: 40 };
+    expect(availableCategories(belowThreshold, INITIAL_LOOP_CONTEXT)).not.toContain("sponsor");
+    expect(availableCategories(aboveThreshold, INITIAL_LOOP_CONTEXT)).toContain("sponsor");
+  });
 });
 
 describe("shouldTriggerContinentalFinal", () => {
@@ -158,7 +165,14 @@ describe("resolveCycle", () => {
     const option = {
       id: "left",
       label: "Sinistra",
-      outcomes: [{ weight: 100, effect: {}, resultText: `Gol! Vinci la finale di ${JUVENTUS.competitions.continental}.` }],
+      outcomes: [
+        {
+          weight: 100,
+          effect: {},
+          resultText: `Gol! Vinci la finale di ${JUVENTUS.competitions.continental}.`,
+          continentalWin: true,
+        },
+      ],
     };
     const result = resolveCycle(player, INITIAL_LOOP_CONTEXT, "continental-final", option, "normal", () => 0);
 
@@ -175,6 +189,81 @@ describe("resolveCycle", () => {
     const result = resolveCycle(player, INITIAL_LOOP_CONTEXT, "continental-final", option, "normal", () => 0);
 
     expect(result.newTrophies.some((t) => t.competition === JUVENTUS.competitions.continental)).toBe(false);
+  });
+});
+
+describe("resolveCycle — gestione infortuni", () => {
+  const lifestyleOption = {
+    id: "x",
+    label: "Opzione",
+    outcomes: [{ weight: 100, effect: {}, resultText: "Nessun cambiamento." }],
+  };
+
+  it("dovrebbe poter infortunare il giocatore in un ciclo (rng minimo -> chance sempre superata)", () => {
+    const player = playerAt();
+    const result = resolveCycle(player, INITIAL_LOOP_CONTEXT, "lifestyle", lifestyleOption, "normal", () => 0);
+
+    expect(result.newInjury).not.toBeNull();
+    expect(result.player.injury).toEqual(result.newInjury);
+    expect(result.injuryHealed).toBe(false);
+  });
+
+  it("dovrebbe far guarire un infortunio già attivo invece di infortunare di nuovo", () => {
+    const player = {
+      ...playerAt(),
+      injury: { label: "Distorsione alla caviglia", turnsRemaining: 1, ovrPenalty: 4 },
+    };
+    const result = resolveCycle(player, INITIAL_LOOP_CONTEXT, "lifestyle", lifestyleOption, "normal", () => 0);
+
+    expect(result.injuryHealed).toBe(true);
+    expect(result.player.injury).toBeNull();
+    expect(result.newInjury).toBeNull();
+  });
+
+  it("dovrebbe far avanzare un infortunio con più cicli residui senza guarirlo subito", () => {
+    const player = {
+      ...playerAt(),
+      injury: { label: "Distorsione alla caviglia", turnsRemaining: 2, ovrPenalty: 4 },
+    };
+    const result = resolveCycle(player, INITIAL_LOOP_CONTEXT, "lifestyle", lifestyleOption, "normal", () => 0);
+
+    expect(result.injuryHealed).toBe(false);
+    expect(result.player.injury).toEqual({
+      label: "Distorsione alla caviglia",
+      turnsRemaining: 1,
+      ovrPenalty: 4,
+    });
+  });
+});
+
+describe("resolveCycle — stipendio e popolarità", () => {
+  const lifestyleOption = {
+    id: "x",
+    label: "Opzione",
+    outcomes: [{ weight: 100, effect: {}, resultText: "Nessun cambiamento." }],
+  };
+
+  it("dovrebbe accumulare lo stipendio nei risparmi dopo un ciclo", () => {
+    const player = { ...playerAt(), wallet: { salaryEurPerCycle: 10_000, savingsEur: 0 } };
+    // rng alto per evitare che l'infortunio azzeri il confronto (non influisce sui risparmi comunque)
+    const result = resolveCycle(player, INITIAL_LOOP_CONTEXT, "lifestyle", lifestyleOption, "normal", () => 0.99);
+
+    expect(result.player.wallet.savingsEur).toBeGreaterThan(0);
+  });
+
+  it("la popolarità dovrebbe crescere sensibilmente in un ciclo con un trofeo vinto", () => {
+    const highOvrPlayer = { ...playerAt(), ovr: 95 };
+    const result = resolveCycle(
+      highOvrPlayer,
+      INITIAL_LOOP_CONTEXT,
+      "lifestyle",
+      lifestyleOption,
+      "normal",
+      () => 0,
+    );
+
+    expect(result.newTrophies.length).toBeGreaterThan(0);
+    expect(result.player.popularity).toBeGreaterThan(highOvrPlayer.popularity);
   });
 });
 

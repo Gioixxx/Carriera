@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { Award as AwardIcon, Trophy as TrophyIcon } from "lucide-react";
+import { Award as AwardIcon, HeartCrack, Trophy as TrophyIcon } from "lucide-react";
 import type { Player } from "@/types/career";
 import { countries } from "@/data/countries";
 import { useCountUp } from "@/hooks/useMotion";
@@ -9,6 +9,7 @@ import { cn } from "@/lib/utils";
 import { ClubCrest } from "./ClubCrest";
 import { JerseyBadge } from "./JerseyBadge";
 import { OvrBadge } from "./OvrBadge";
+import { PopularityMeter } from "./PopularityMeter";
 
 interface PlayerCardProps {
   player: Player;
@@ -71,6 +72,15 @@ export function PlayerCard({ player, compact = false }: PlayerCardProps) {
           <span className="rounded bg-(--color-surface) px-1.5 py-0.5 text-[10px] font-semibold tracking-wide text-(--color-text-muted) uppercase">
             {player.position}
           </span>
+          {player.injury ? (
+            <span
+              className="ml-1.5 inline-flex items-center gap-1 rounded bg-(--color-error)/15 px-1.5 py-0.5 text-[10px] font-semibold tracking-wide text-(--color-error) uppercase"
+              title={`${player.injury.label} — fuori per ${player.injury.turnsRemaining} ${player.injury.turnsRemaining === 1 ? "ciclo" : "cicli"}`}
+            >
+              <HeartCrack size={10} aria-hidden="true" />
+              Infortunato
+            </span>
+          ) : null}
           <p
             className={cn(
               "font-display truncate leading-tight text-(--color-text)",
@@ -89,14 +99,21 @@ export function PlayerCard({ player, compact = false }: PlayerCardProps) {
         <OvrBadge ovr={displayOvr} />
       </div>
 
-      {!compact ? (
-        <div className="flex items-center justify-between rounded-lg bg-(--color-surface) px-3 py-2 text-sm">
+      <div className="flex flex-col gap-1.5 rounded-lg bg-(--color-surface) px-3 py-2 text-sm">
+        <div className="flex items-center justify-between">
           <span className="text-(--color-text-muted)">Valore</span>
           <span className="font-semibold text-(--color-text)">
             {VALUE_FORMATTER.format(player.marketValueEur)}
           </span>
         </div>
-      ) : null}
+        <div className="flex items-center justify-between">
+          <span className="text-(--color-text-muted)">Patrimonio</span>
+          <span className="font-semibold text-(--color-text)">
+            {VALUE_FORMATTER.format(player.wallet.savingsEur)}
+          </span>
+        </div>
+        <PopularityMeter value={player.popularity} />
+      </div>
 
       <div className={cn("grid grid-cols-3 gap-2 text-center", compact && "hidden sm:grid")}>
         <div className="rounded-lg bg-(--color-surface) py-2">

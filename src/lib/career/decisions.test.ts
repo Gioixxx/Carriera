@@ -12,9 +12,11 @@ import {
   generateLoanOffer,
   generateLoanReturn,
   generateReturnHome,
+  generateSponsorDeal,
   generateTaxTrouble,
   generateTransferWindow,
   isReturnHomeEligible,
+  isSponsorEligible,
   isTaxTroubleEligible,
   LIFESTYLE_DECISIONS,
   nationalCallupChance,
@@ -56,6 +58,22 @@ describe("LIFESTYLE_DECISIONS", () => {
     for (const decision of LIFESTYLE_DECISIONS) {
       expect(decision.options.length).toBeGreaterThanOrEqual(2);
     }
+  });
+
+  it("gli outcome negativi di 'Doppie sedute' e 'Ritiro speciale' dovrebbero infortunare il giocatore", () => {
+    const doubleSessions = LIFESTYLE_DECISIONS.find((d) => d.id === "double-sessions")!;
+    const injuryOutcome = doubleSessions.options[0].outcomes.find((o) => o.effect.injury);
+    expect(injuryOutcome?.effect.injury).toMatchObject({
+      turnsRemaining: expect.any(Number),
+      ovrPenalty: expect.any(Number),
+    });
+
+    const extraCamp = LIFESTYLE_DECISIONS.find((d) => d.id === "extra-camp")!;
+    const campInjuryOutcome = extraCamp.options[0].outcomes.find((o) => o.effect.injury);
+    expect(campInjuryOutcome?.effect.injury).toMatchObject({
+      turnsRemaining: expect.any(Number),
+      ovrPenalty: expect.any(Number),
+    });
   });
 });
 
@@ -242,6 +260,45 @@ describe("generateContinentalFinalDecision", () => {
     const player = playerAt();
     const decision = generateContinentalFinalDecision(player, "Copa Libertadores");
     expect(decision.description).toContain("Copa Libertadores");
+  });
+
+  it("solo l'outcome vincente dovrebbe avere continentalWin: true", () => {
+    const player = playerAt();
+    const decision = generateContinentalFinalDecision(player, "Champions League");
+    for (const option of decision.options) {
+      const [winOutcome, loseOutcome] = option.outcomes;
+      expect(winOutcome.continentalWin).toBe(true);
+      expect(loseOutcome.continentalWin).toBeUndefined();
+    }
+  });
+});
+
+describe("isSponsorEligible", () => {
+  it("dovrebbe essere falso sotto la soglia di popolarità", () => {
+    expect(isSponsorEligible({ popularity: 10 })).toBe(false);
+  });
+
+  it("dovrebbe essere vero alla soglia di popolarità o sopra", () => {
+    expect(isSponsorEligible({ popularity: 25 })).toBe(true);
+    expect(isSponsorEligible({ popularity: 80 })).toBe(true);
+  });
+});
+
+describe("generateSponsorDeal", () => {
+  it("ogni opzione dovrebbe avere outcome i cui pesi sommano a 100", () => {
+    const player = { ...playerAt(), popularity: 40 };
+    const decision = generateSponsorDeal(player, FIXED_RNG);
+    for (const option of decision.options) {
+      const totalWeight = option.outcomes.reduce((sum, o) => sum + o.weight, 0);
+      expect(totalWeight).toBe(100);
+    }
+  });
+
+  it("dovrebbe avere categoria sponsor e opzioni accetta/rifiuta", () => {
+    const player = { ...playerAt(), popularity: 40 };
+    const decision = generateSponsorDeal(player, FIXED_RNG);
+    expect(decision.category).toBe("sponsor");
+    expect(decision.options.map((o) => o.id)).toEqual(["accept", "decline"]);
   });
 });
 

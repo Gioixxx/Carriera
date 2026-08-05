@@ -8,6 +8,14 @@ import { AwardBadge } from "./AwardBadge";
 import { ClubCrest } from "./ClubCrest";
 import { CompetitionBadge } from "./CompetitionBadge";
 import { OvrBadge } from "./OvrBadge";
+import { PopularityMeter } from "./PopularityMeter";
+
+const SAVINGS_FORMATTER = new Intl.NumberFormat("it-IT", {
+  style: "currency",
+  currency: "EUR",
+  notation: "compact",
+  maximumFractionDigits: 1,
+});
 
 interface CareerSummaryProps {
   player: Player;
@@ -81,6 +89,19 @@ export function CareerSummary({ player, onRestart }: CareerSummaryProps) {
           Gioca ancora
         </Button>
       </Card>
+
+      <div className="flex shrink-0 flex-wrap items-center gap-3 text-xs text-(--color-text-muted)">
+        <span>
+          Patrimonio finale{" "}
+          <span className="font-semibold text-(--color-text)">
+            {SAVINGS_FORMATTER.format(player.wallet.savingsEur)}
+          </span>
+        </span>
+        <span className="flex min-w-40 items-center gap-2">
+          Popolarità finale
+          <PopularityMeter value={player.popularity} className="min-w-24 flex-1" />
+        </span>
+      </div>
 
       {hasHighlights ? (
         <div className="flex shrink-0 flex-wrap items-center gap-2">

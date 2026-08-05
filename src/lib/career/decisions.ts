@@ -4,6 +4,7 @@ import type {
   DecisionCategory,
   DecisionOption,
   DecisionOutcome,
+  Injury,
   Player,
 } from "@/types/career";
 import { clubs, clubsByCountry } from "@/data/clubs";
@@ -42,6 +43,11 @@ function pickClubs(pool: Club[], count: number, rng: Rng): Club[] {
 
 function outcome(weight: number, resultText: string, ovrDelta = 0): DecisionOutcome {
   return { weight, effect: ovrDelta ? { ovrDelta } : {}, resultText };
+}
+
+/** Outcome che infortuna il giocatore invece di applicare solo un malus OVR testuale. */
+function injuryOutcome(weight: number, resultText: string, injury: Injury): DecisionOutcome {
+  return { weight, effect: { injury }, resultText };
 }
 
 function signOption(id: string, label: string, club: Club, resultText: string): DecisionOption {
@@ -126,7 +132,11 @@ export const LIFESTYLE_DECISIONS: Decision[] = [
         label: "Allenati duramente",
         outcomes: [
           outcome(65, "Diventi titolare per il prossimo ciclo.", 2),
-          outcome(35, "Un infortunio ti tiene lontano dai campi.", -4),
+          injuryOutcome(35, "Un infortunio ti tiene lontano dai campi.", {
+            label: "Distorsione alla caviglia",
+            turnsRemaining: 2,
+            ovrPenalty: 4,
+          }),
         ],
       },
       {
@@ -147,7 +157,11 @@ export const LIFESTYLE_DECISIONS: Decision[] = [
         label: "Partecipa",
         outcomes: [
           outcome(65, "Il ritiro speciale ti dà una marcia in più.", 4),
-          outcome(35, "Lo sforzo extra si fa sentire.", -3),
+          injuryOutcome(35, "Lo sforzo extra si fa sentire.", {
+            label: "Affaticamento fisico",
+            turnsRemaining: 2,
+            ovrPenalty: 3,
+          }),
         ],
       },
       {
@@ -456,7 +470,7 @@ export function generateContinentalFinalDecision(
 ): Decision {
   const scoreChance = Math.round(penaltyScoreChance(player.ovr) * 100);
   const outcomes = (): DecisionOutcome[] => [
-    outcome(scoreChance, `Gol! Vinci la finale di ${competition}.`),
+    { ...outcome(scoreChance, `Gol! Vinci la finale di ${competition}.`), continentalWin: true },
     outcome(100 - scoreChance, `Il portiere para il rigore. Perdi la finale di ${competition}.`, -1),
   ];
   return {
@@ -467,6 +481,83 @@ export function generateContinentalFinalDecision(
     options: [
       { id: "left", label: "Sinistra", outcomes: outcomes() },
       { id: "right", label: "Destra", outcomes: outcomes() },
+    ],
+  };
+}
+
+// ---------- Sponsor/endorsement ----------
+
+const SPONSOR_ELIGIBILITY_POPULARITY = 25;
+
+export function isSponsorEligible(player: Pick<Player, "popularity">): boolean {
+  return player.popularity >= SPONSOR_ELIGIBILITY_POPULARITY;
+}
+
+function economicOutcome(
+  weight: number,
+  resultText: string,
+  effect: { savingsDelta?: number; popularityDelta?: number },
+): DecisionOutcome {
+  return { weight, effect, resultText };
+}
+
+interface SponsorDealTemplate {
+  id: string;
+  title: string;
+  description: string;
+  savingsGain: number;
+}
+
+const SPONSOR_DEAL_TEMPLATES: SponsorDealTemplate[] = [
+  {
+    id: "sportswear-brand",
+    title: "Contratto con un brand sportivo",
+    description: "Un marchio di scarpe sportive ti propone un contratto da testimonial.",
+    savingsGain: 150_000,
+  },
+  {
+    id: "energy-drink",
+    title: "Testimonial di una bibita energetica",
+    description: "Un'azienda di bevande energetiche vuole il tuo volto in campagna pubblicitaria.",
+    savingsGain: 90_000,
+  },
+  {
+    id: "watch-brand",
+    title: "Ambasciatore di un marchio di orologi",
+    description: "Un marchio di orologi di lusso ti propone di diventarne ambasciatore.",
+    savingsGain: 220_000,
+  },
+];
+
+export function generateSponsorDeal(player: Player, rng: Rng = Math.random): Decision {
+  const template =
+    SPONSOR_DEAL_TEMPLATES[Math.floor(rng() * SPONSOR_DEAL_TEMPLATES.length)] ??
+    SPONSOR_DEAL_TEMPLATES[0];
+  return {
+    id: `sponsor-${template.id}-${player.age}`,
+    category: "sponsor",
+    title: template.title,
+    description: template.description,
+    options: [
+      {
+        id: "accept",
+        label: "Accetta",
+        outcomes: [
+          economicOutcome(70, "L'accordo va in porto: incassi e popolarità in crescita.", {
+            savingsDelta: template.savingsGain,
+            popularityDelta: 4,
+          }),
+          economicOutcome(30, "Un dettaglio del contratto genera polemiche.", {
+            savingsDelta: template.savingsGain,
+            popularityDelta: -3,
+          }),
+        ],
+      },
+      {
+        id: "decline",
+        label: "Rifiuta",
+        outcomes: [economicOutcome(100, "Rifiuti l'offerta, nulla cambia.", {})],
+      },
     ],
   };
 }
@@ -482,6 +573,7 @@ const BASE_CATEGORY_WEIGHTS: Partial<Record<DecisionCategory, number>> = {
   "end-of-cycle": 10,
   lifestyle: 20,
   narrative: 5,
+  sponsor: 10,
 };
 
 const DEFAULT_CATEGORY_WEIGHT = 5;

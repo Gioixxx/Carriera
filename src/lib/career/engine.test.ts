@@ -44,17 +44,27 @@ describe("createPlayer", () => {
     expect(player.trophies).toEqual([]);
     expect(player.awards).toEqual([]);
     expect(player.retired).toBe(false);
+    expect(player.injury).toBeNull();
+    expect(player.wallet).toEqual({ salaryEurPerCycle: 0, savingsEur: 0 });
+    expect(player.popularity).toBeGreaterThan(0);
   });
 });
 
 describe("signWithClub", () => {
-  it("dovrebbe assegnare il club al giocatore senza modificare altri campi", () => {
+  it("dovrebbe assegnare il club al giocatore senza modificare età/OVR", () => {
     const player = createPlayer(IDENTITY);
     const signed = signWithClub(player, TEST_CLUB);
 
     expect(signed.club).toEqual(TEST_CLUB);
     expect(signed.age).toBe(player.age);
     expect(signed.ovr).toBe(player.ovr);
+  });
+
+  it("dovrebbe ricalcolare lo stipendio in base a OVR e prestigio del club", () => {
+    const player = createPlayer(IDENTITY);
+    const signed = signWithClub(player, TEST_CLUB);
+
+    expect(signed.wallet.salaryEurPerCycle).toBeGreaterThan(0);
   });
 });
 
@@ -97,6 +107,40 @@ describe("applyDelta", () => {
     const crashed = applyDelta(player, { ovrDelta: -100 });
 
     expect(crashed.ovr).toBe(30);
+  });
+
+  it("dovrebbe applicare popularityDelta con clamp 0-100", () => {
+    const player = createPlayer(IDENTITY);
+    const boosted = applyDelta(player, { popularityDelta: 1000 });
+    const crashed = applyDelta(player, { popularityDelta: -1000 });
+
+    expect(boosted.popularity).toBe(100);
+    expect(crashed.popularity).toBe(0);
+  });
+
+  it("dovrebbe applicare savingsDelta ai risparmi del portafoglio", () => {
+    const player = createPlayer(IDENTITY);
+    const richer = applyDelta(player, { savingsDelta: 5000 });
+
+    expect(richer.wallet.savingsEur).toBe(5000);
+    expect(richer.wallet.salaryEurPerCycle).toBe(player.wallet.salaryEurPerCycle);
+  });
+
+  it("dovrebbe impostare o azzerare l'infortunio in base a delta.injury", () => {
+    const player = createPlayer(IDENTITY);
+    const injured = applyDelta(player, {
+      injury: { label: "Distorsione alla caviglia", turnsRemaining: 2, ovrPenalty: 4 },
+    });
+    const healed = applyDelta(injured, { injury: null });
+    const untouched = applyDelta(injured, {});
+
+    expect(injured.injury).toEqual({
+      label: "Distorsione alla caviglia",
+      turnsRemaining: 2,
+      ovrPenalty: 4,
+    });
+    expect(healed.injury).toBeNull();
+    expect(untouched.injury).toEqual(injured.injury);
   });
 });
 

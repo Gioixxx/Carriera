@@ -6,6 +6,7 @@ import type {
   Decision,
   DecisionCategory,
   GameSpeed,
+  Injury,
   Player,
   PlayerIdentity,
   Trophy,
@@ -19,7 +20,7 @@ import {
   resolveCycle,
   type LoopContext,
 } from "@/lib/career/loop";
-import { clearGame, loadGame, saveGame } from "@/lib/career/storage";
+import { appendToArchive, buildArchiveEntry, clearGame, loadGame, saveGame } from "@/lib/career/storage";
 
 export interface CycleOutcomeSummary {
   optionLabel: string;
@@ -30,6 +31,10 @@ export interface CycleOutcomeSummary {
   ovrBefore: number;
   ovrDelta: number;
   ageBefore: number;
+  newInjury: Injury | null;
+  injuryHealed: boolean;
+  savingsDelta: number;
+  popularityDelta: number;
 }
 
 interface CareerGameState {
@@ -111,8 +116,18 @@ export function useCareerGame(): UseCareerGame {
     });
   }, [state]);
 
+  // Archivia la carriera non appena si ritira, non al click di "Gioca ancora": un reload prima
+  // di quel click perderebbe lo stato di fine carriera (il mount effect ignora i save retired).
+  const archivedRef = useRef(false);
+  useEffect(() => {
+    if (!state?.retired || archivedRef.current) return;
+    archivedRef.current = true;
+    appendToArchive(buildArchiveEntry(state.player));
+  }, [state?.retired, state?.player]);
+
   const startCareer = useCallback((identity: PlayerIdentity, speed: GameSpeed) => {
     clearGame();
+    archivedRef.current = false;
     setState(buildInitialState(identity, speed));
   }, []);
 
@@ -141,6 +156,10 @@ export function useCareerGame(): UseCareerGame {
         ovrBefore: prev.player.ovr,
         ovrDelta: result.player.ovr - prev.player.ovr,
         ageBefore: prev.player.age,
+        newInjury: result.newInjury,
+        injuryHealed: result.injuryHealed,
+        savingsDelta: result.player.wallet.savingsEur - prev.player.wallet.savingsEur,
+        popularityDelta: result.player.popularity - prev.player.popularity,
       };
 
       if (result.retired) {
@@ -178,6 +197,7 @@ export function useCareerGame(): UseCareerGame {
 
   const restart = useCallback(() => {
     clearGame();
+    archivedRef.current = false;
     setState(null);
   }, []);
 

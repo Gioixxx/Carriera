@@ -10,6 +10,7 @@ import type {
 } from "@/types/career";
 import { clamp, projectOvr, projectStats, type Rng } from "./progression";
 import { computeMarketValue } from "./market";
+import { resignSalary } from "./wallet";
 
 export const STARTING_AGE = 16;
 export const STARTING_OVR = 50;
@@ -22,6 +23,9 @@ export const SEASONS_PER_CYCLE: Record<GameSpeed, number> = {
   normal: 2,
   express: 3,
 };
+
+/** Popolarità iniziale di un giovane sconosciuto al debutto. */
+export const STARTING_POPULARITY = 15;
 
 export function createPlayer(identity: PlayerIdentity): Player {
   return {
@@ -36,12 +40,15 @@ export function createPlayer(identity: PlayerIdentity): Player {
     trophies: [],
     awards: [],
     retired: false,
+    injury: null,
+    wallet: { salaryEurPerCycle: 0, savingsEur: 0 },
+    popularity: STARTING_POPULARITY,
   };
 }
 
-/** Firma per un nuovo club (academy offer, transfer window, prestito). */
+/** Firma per un nuovo club (academy offer, transfer window, prestito): aggiorna anche lo stipendio. */
 export function signWithClub(player: Player, club: Club): Player {
-  return { ...player, club };
+  return { ...player, club, wallet: resignSalary(player.wallet, player.ovr, club.prestige) };
 }
 
 function sumStats(a: StatLine, b: StatLine): StatLine {
@@ -100,13 +107,21 @@ export function advanceSeasons(
   };
 }
 
-/** Applica l'effetto di un outcome di decisione (es. +3 OVR, -2 OVR) al giocatore. */
+/** Applica l'effetto di un outcome di decisione (es. +3 OVR, -2 OVR, infortunio, popolarità). */
 export function applyDelta(player: Player, delta: PlayerDelta): Player {
   const nextOvr = clamp(player.ovr + (delta.ovrDelta ?? 0), 30, 99);
+  const nextPopularity = clamp(player.popularity + (delta.popularityDelta ?? 0), 0, 100);
+  const nextInjury = delta.injury !== undefined ? delta.injury : player.injury;
   return {
     ...player,
     ovr: nextOvr,
     marketValueEur: computeMarketValue(nextOvr, player.age),
+    popularity: nextPopularity,
+    injury: nextInjury,
+    wallet:
+      delta.savingsDelta !== undefined
+        ? { ...player.wallet, savingsEur: player.wallet.savingsEur + delta.savingsDelta }
+        : player.wallet,
   };
 }
 

@@ -2,7 +2,7 @@ import { beforeEach, describe, expect, it } from "vitest";
 import type { Player, PlayerIdentity } from "@/types/career";
 import { createPlayer } from "./engine";
 import { INITIAL_LOOP_CONTEXT } from "./loop";
-import { clearGame, loadGame, saveGame } from "./storage";
+import { appendToArchive, buildArchiveEntry, clearGame, loadArchive, loadGame, saveGame } from "./storage";
 
 const IDENTITY: PlayerIdentity = {
   lastName: "Rossi",
@@ -47,6 +47,29 @@ describe("saveGame / loadGame", () => {
     window.localStorage.setItem("carriera:save", "{non valido");
     expect(loadGame()).toBeNull();
   });
+
+  it("dovrebbe migrare un save v1 privo di injury/wallet/popularity aggiungendo i default", () => {
+    const legacyPlayer = samplePlayer() as unknown as Record<string, unknown>;
+    delete legacyPlayer.injury;
+    delete legacyPlayer.wallet;
+    delete legacyPlayer.popularity;
+    window.localStorage.setItem(
+      "carriera:save",
+      JSON.stringify({
+        version: 1,
+        player: legacyPlayer,
+        speed: "normal",
+        context: INITIAL_LOOP_CONTEXT,
+        recentCategories: [],
+      }),
+    );
+
+    const loaded = loadGame();
+    expect(loaded?.version).toBe(2);
+    expect(loaded?.player.injury).toBeNull();
+    expect(loaded?.player.wallet).toEqual({ salaryEurPerCycle: 0, savingsEur: 0 });
+    expect(loaded?.player.popularity).toBe(15);
+  });
 });
 
 describe("clearGame", () => {
@@ -54,5 +77,37 @@ describe("clearGame", () => {
     saveGame({ player: samplePlayer(), speed: "express", context: INITIAL_LOOP_CONTEXT, recentCategories: [] });
     clearGame();
     expect(loadGame()).toBeNull();
+  });
+});
+
+describe("loadArchive / appendToArchive", () => {
+  it("dovrebbe restituire un array vuoto se non c'è nessun archivio", () => {
+    expect(loadArchive()).toEqual([]);
+  });
+
+  it("dovrebbe accodare più carriere mantenendo le più recenti in testa", () => {
+    const first = buildArchiveEntry(samplePlayer());
+    const second = buildArchiveEntry({ ...samplePlayer(), lastName: "Bianchi" });
+
+    appendToArchive(first);
+    appendToArchive(second);
+
+    const archive = loadArchive();
+    expect(archive).toHaveLength(2);
+    expect(archive[0].lastName).toBe("Bianchi");
+    expect(archive[1].lastName).toBe("Rossi");
+  });
+
+  it("buildArchiveEntry dovrebbe estrarre i campi di riepilogo dal giocatore", () => {
+    const player = samplePlayer();
+    const entry = buildArchiveEntry(player);
+
+    expect(entry.lastName).toBe(player.lastName);
+    expect(entry.position).toBe(player.position);
+    expect(entry.peakOvr).toBe(player.ovr);
+    expect(entry.trophyCount).toBe(0);
+    expect(entry.awardCount).toBe(0);
+    expect(entry.finalSavingsEur).toBe(player.wallet.savingsEur);
+    expect(entry.finalPopularity).toBe(player.popularity);
   });
 });

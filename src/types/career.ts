@@ -78,6 +78,19 @@ export interface NationalTeamStats extends StatLine {
   called: boolean;
 }
 
+/** Infortunio attivo: tiene fuori il giocatore per N cicli con un malus OVR temporaneo. */
+export interface Injury {
+  label: string;
+  turnsRemaining: number;
+  ovrPenalty: number;
+}
+
+/** Portafoglio del giocatore: stipendio corrente e risparmi accumulati. */
+export interface Wallet {
+  salaryEurPerCycle: number;
+  savingsEur: number;
+}
+
 export interface Player extends PlayerIdentity {
   age: number;
   ovr: number;
@@ -89,11 +102,19 @@ export interface Player extends PlayerIdentity {
   trophies: Trophy[];
   awards: Award[];
   retired: boolean;
+  injury: Injury | null;
+  wallet: Wallet;
+  /** Reputazione/popolarità continua, 0-100. */
+  popularity: number;
 }
 
 /** Effetto applicabile al giocatore da un outcome di decisione. */
 export interface PlayerDelta {
   ovrDelta?: number;
+  popularityDelta?: number;
+  savingsDelta?: number;
+  /** undefined = nessuna modifica, null = guarigione esplicita, oggetto = nuovo infortunio. */
+  injury?: Injury | null;
 }
 
 export type DecisionCategory =
@@ -106,13 +127,16 @@ export type DecisionCategory =
   | "lifestyle"
   | "callup"
   | "continental-final"
-  | "narrative";
+  | "narrative"
+  | "sponsor";
 
 export interface DecisionOutcome {
   /** Peso relativo tra gli outcome della stessa opzione — i pesi di un'opzione sommano a 100. */
   weight: number;
   effect: PlayerDelta;
   resultText: string;
+  /** true solo sull'outcome che rappresenta la vittoria di una finale continentale. */
+  continentalWin?: boolean;
 }
 
 export interface DecisionOption {
@@ -132,4 +156,22 @@ export interface Decision {
   title: string;
   description: string;
   options: DecisionOption[];
+}
+
+/** Riepilogo leggero di una carriera conclusa, per l'archivio multi-carriera. */
+export interface ArchivedCareer {
+  id: string;
+  lastName: string;
+  nationality: string;
+  position: Position;
+  peakOvr: number;
+  trophyCount: number;
+  awardCount: number;
+  retiredAge: number;
+  retiredAtIso: string;
+  careerApps: number;
+  careerGoals: number;
+  careerAssists: number;
+  finalSavingsEur: number;
+  finalPopularity: number;
 }

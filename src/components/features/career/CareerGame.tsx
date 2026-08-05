@@ -2,15 +2,17 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { TrendingDown, TrendingUp } from "lucide-react";
-import type { GameSpeed, PlayerIdentity } from "@/types/career";
+import type { ArchivedCareer, GameSpeed, PlayerIdentity } from "@/types/career";
 import { useCareerGame, type CycleOutcomeSummary } from "@/hooks/useCareerGame";
 import { usePrefersReducedMotion } from "@/hooks/useMotion";
 import { AWARD_LABELS } from "@/lib/career/award-labels";
+import { loadArchive } from "@/lib/career/storage";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
 import { cn } from "@/lib/utils";
 import { AwardBadge } from "./AwardBadge";
+import { CareerArchive } from "./CareerArchive";
 import { CareerSummary } from "./CareerSummary";
 import { CareerTable } from "./CareerTable";
 import { CareerTimeline } from "./CareerTimeline";
@@ -24,12 +26,19 @@ import { PlayerCard } from "./PlayerCard";
 import { SpeedSelect } from "./SpeedSelect";
 import { ClubCrest } from "./ClubCrest";
 
-type Step = "speed" | "identity";
+type Step = "speed" | "identity" | "archive";
 type ResolvePhase = "season" | "moments" | "outcome" | null;
 
 const DECISION_EXIT_MS = 320;
 const SEASON_BEAT_MS = 1200;
 const OUTCOME_CONTINUE_MS = 1000;
+
+const SAVINGS_FORMATTER = new Intl.NumberFormat("it-IT", {
+  style: "currency",
+  currency: "EUR",
+  notation: "compact",
+  maximumFractionDigits: 1,
+});
 
 function SeasonBeat({
   playerAge,
@@ -172,6 +181,43 @@ function OutcomeBanner({
             {AWARD_LABELS[outcome.newAward.type]}
           </p>
         ) : null}
+
+        {outcome.newInjury ? (
+          <p className="flex items-center gap-2 text-sm font-medium text-(--color-error)">
+            Infortunio: {outcome.newInjury.label} — fuori per {outcome.newInjury.turnsRemaining}{" "}
+            {outcome.newInjury.turnsRemaining === 1 ? "ciclo" : "cicli"}
+          </p>
+        ) : null}
+
+        {outcome.injuryHealed ? (
+          <p className="text-sm font-medium text-(--color-success)">
+            Torni disponibile dopo l&apos;infortunio.
+          </p>
+        ) : null}
+
+        {outcome.savingsDelta !== 0 ? (
+          <p
+            className={cn(
+              "text-sm font-medium",
+              outcome.savingsDelta > 0 ? "text-(--color-success)" : "text-(--color-error)",
+            )}
+          >
+            Patrimonio {outcome.savingsDelta > 0 ? "+" : ""}
+            {SAVINGS_FORMATTER.format(outcome.savingsDelta)}
+          </p>
+        ) : null}
+
+        {outcome.popularityDelta !== 0 ? (
+          <p
+            className={cn(
+              "text-sm font-medium",
+              outcome.popularityDelta > 0 ? "text-(--color-success)" : "text-(--color-error)",
+            )}
+          >
+            Popolarità {outcome.popularityDelta > 0 ? "+" : ""}
+            {outcome.popularityDelta}
+          </p>
+        ) : null}
       </div>
 
       <Button
@@ -210,8 +256,16 @@ function SetupStepDots({ current }: { current: Step }) {
 export function CareerGame() {
   const [step, setStep] = useState<Step>("speed");
   const [speed, setSpeed] = useState<GameSpeed | null>(null);
+  const [archiveEntries, setArchiveEntries] = useState<ArchivedCareer[]>([]);
   const { state, startCareer, chooseOption, restart, isResuming } = useCareerGame();
   const prefersReducedMotion = usePrefersReducedMotion();
+
+  // Letto in un effect (non lazy initializer) per lo stesso motivo di useCareerGame: window non
+  // esiste in SSR, evita un hydration mismatch tra il render server e il primo render client.
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- vedi commento sopra l'effect
+    setArchiveEntries(loadArchive());
+  }, []);
 
   const [resolvePhase, setResolvePhase] = useState<ResolvePhase>(null);
   const [moments, setMoments] = useState<CareerMoment[]>([]);
@@ -285,7 +339,17 @@ export function CareerGame() {
     setMomentIndex(0);
     setDecisionExiting(false);
     seenOutcome.current = null;
+    setArchiveEntries(loadArchive());
   }, [restart]);
+
+  const handleShowArchive = useCallback(() => {
+    setArchiveEntries(loadArchive());
+    setStep("archive");
+  }, []);
+
+  const handleBackFromArchive = useCallback(() => {
+    setStep("speed");
+  }, []);
 
   const handleChoose = useCallback(
     (optionId: string) => {
@@ -333,6 +397,7 @@ export function CareerGame() {
 
   const isSetup = !showPlaying;
   const isIdentity = isSetup && step === "identity";
+  const isArchive = isSetup && step === "archive";
   const outcomeKey = state?.lastOutcome
     ? `${state.player.age}-${state.lastOutcome.optionLabel}-${state.lastOutcome.outcomeText}`
     : "none";
@@ -373,19 +438,23 @@ export function CareerGame() {
               Carriera
             </p>
             <h1 className="font-display text-2xl text-(--color-text) sm:text-3xl">
-              {isIdentity ? "Crea la tua identità" : "Costruisci la tua carriera da calciatore"}
+              {isIdentity
+                ? "Crea la tua identità"
+                : isArchive
+                  ? "Le mie carriere"
+                  : "Costruisci la tua carriera da calciatore"}
             </h1>
-            {!isIdentity ? (
-              <p className="mt-0.5 text-sm text-(--color-text-muted)">
-                Scegli chi sei, affronta le decisioni che contano, scrivi la tua leggenda.
-              </p>
-            ) : (
+            {isIdentity ? (
               <p className="mt-0.5 font-display text-xs tracking-[0.3em] text-(--color-accent)">
                 Passo 2 di 2
               </p>
-            )}
+            ) : !isArchive ? (
+              <p className="mt-0.5 text-sm text-(--color-text-muted)">
+                Scegli chi sei, affronta le decisioni che contano, scrivi la tua leggenda.
+              </p>
+            ) : null}
           </div>
-          <SetupStepDots current={step} />
+          {!isArchive ? <SetupStepDots current={step} /> : null}
         </header>
       )}
 
@@ -394,8 +463,13 @@ export function CareerGame() {
       ) : (
         <>
           {!showPlaying && step === "speed" ? (
-            <Card key="step-speed" className="animate-step-in p-5 sm:p-7">
+            <Card key="step-speed" className="animate-step-in flex flex-col gap-4 p-5 sm:p-7">
               <SpeedSelect onSelect={handleSpeedSelected} />
+              {archiveEntries.length > 0 ? (
+                <Button variant="ghost" onClick={handleShowArchive} className="self-center text-xs">
+                  Le mie carriere
+                </Button>
+              ) : null}
             </Card>
           ) : null}
 
@@ -405,6 +479,12 @@ export function CareerGame() {
               className="animate-step-in flex min-h-0 flex-1 flex-col overflow-y-auto p-3 sm:p-5 lg:overflow-hidden"
             >
               <IdentityForm onSubmit={handleIdentitySubmitted} />
+            </Card>
+          ) : null}
+
+          {!showPlaying && step === "archive" ? (
+            <Card key="step-archive" className="animate-step-in p-5 sm:p-7">
+              <CareerArchive entries={archiveEntries} onBack={handleBackFromArchive} />
             </Card>
           ) : null}
 

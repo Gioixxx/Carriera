@@ -5,6 +5,7 @@ import type {
   DecisionCategory,
   DecisionOption,
   GameSpeed,
+  Injury,
   Player,
   Trophy,
 } from "@/types/career";
@@ -17,7 +18,10 @@ import {
   signWithClub,
   SEASONS_PER_CYCLE,
 } from "./engine";
-import { projectNationalStats, type Rng } from "./progression";
+import { rollInjury, tickInjury } from "./injuries";
+import { clamp, projectNationalStats, type Rng } from "./progression";
+import { computeMarketValue } from "./market";
+import { accrueSalary, applyPopularityDelta, popularityDeltaForCycle } from "./wallet";
 import {
   generateClubCrisis,
   generateCompetitionForSpot,
@@ -27,9 +31,11 @@ import {
   generateLoanOffer,
   generateLoanReturn,
   generateReturnHome,
+  generateSponsorDeal,
   generateTaxTrouble,
   generateTransferWindow,
   isReturnHomeEligible,
+  isSponsorEligible,
   isTaxTroubleEligible,
   LIFESTYLE_DECISIONS,
   pickDecisionCategory,
@@ -65,6 +71,9 @@ export function availableCategories(player: Player, context: LoopContext): Decis
   ];
   if (isTaxTroubleEligible(player) || isReturnHomeEligible(player)) {
     categories.push("narrative");
+  }
+  if (isSponsorEligible(player)) {
+    categories.push("sponsor");
   }
   return categories;
 }
@@ -150,6 +159,8 @@ export function pickNextDecision(
       return { decision: pickStaticDecision(category, rng), category };
     case "narrative":
       return { decision: pickNarrativeDecision(player, rng), category };
+    case "sponsor":
+      return { decision: generateSponsorDeal(player, rng), category };
     default:
       throw new Error(`Categoria di decisione non gestita nel loop: ${category}`);
   }
@@ -186,11 +197,49 @@ export interface CycleResult {
   newTrophies: Trophy[];
   newAward: Award | null;
   nationalCallup: boolean;
+  newInjury: Injury | null;
+  injuryHealed: boolean;
 }
 
-/** Determina se l'outcome scelto rappresenta una vittoria nella finale di coppa continentale. */
-function isContinentalFinalWin(outcomeText: string): boolean {
-  return outcomeText.startsWith("Gol!");
+/** Fa avanzare l'infortunio del giocatore di un ciclo, o ne estrae uno nuovo, aggiustando l'OVR. */
+function processInjuries(
+  player: Player,
+  seasons: number,
+  rng: Rng,
+): { player: Player; newInjury: Injury | null; injuryHealed: boolean } {
+  if (player.injury) {
+    const ticked = tickInjury(player.injury);
+    if (ticked === null) {
+      const restoredOvr = clamp(player.ovr + player.injury.ovrPenalty, 30, 99);
+      return {
+        player: {
+          ...player,
+          injury: null,
+          ovr: restoredOvr,
+          marketValueEur: computeMarketValue(restoredOvr, player.age),
+        },
+        newInjury: null,
+        injuryHealed: true,
+      };
+    }
+    return { player: { ...player, injury: ticked }, newInjury: null, injuryHealed: false };
+  }
+
+  const rolled = rollInjury(player.age, player.position, seasons, rng);
+  if (!rolled) {
+    return { player, newInjury: null, injuryHealed: false };
+  }
+  const penalizedOvr = clamp(player.ovr - rolled.ovrPenalty, 30, 99);
+  return {
+    player: {
+      ...player,
+      injury: rolled,
+      ovr: penalizedOvr,
+      marketValueEur: computeMarketValue(penalizedOvr, player.age),
+    },
+    newInjury: rolled,
+    injuryHealed: false,
+  };
 }
 
 /** Applica l'esito di un'opzione scelta dal giocatore: delta, cambio club/ritiro, avanzamento stagioni, trofei/award/nazionale. */
@@ -216,6 +265,8 @@ export function resolveCycle(
       newTrophies: [],
       newAward: null,
       nationalCallup: false,
+      newInjury: null,
+      injuryHealed: false,
     };
   }
 
@@ -228,12 +279,16 @@ export function resolveCycle(
   const seasons = SEASONS_PER_CYCLE[speed];
   nextPlayer = advanceSeasons(nextPlayer, seasons, rng, stintType);
 
+  const injuryResult = processInjuries(nextPlayer, seasons, rng);
+  nextPlayer = injuryResult.player;
+  nextPlayer = { ...nextPlayer, wallet: accrueSalary(nextPlayer.wallet, seasons) };
+
   const newTrophies: Trophy[] = nextPlayer.club
     ? rollClubTrophies(nextPlayer.club, nextPlayer.ovr, nextPlayer.age, rng)
     : [];
 
   if (category === "continental-final" && nextPlayer.club?.competitions.continental) {
-    if (isContinentalFinalWin(outcome.resultText)) {
+    if (outcome.continentalWin === true) {
       newTrophies.push({
         competition: nextPlayer.club.competitions.continental,
         club: nextPlayer.club,
@@ -273,6 +328,16 @@ export function resolveCycle(
     nextPlayer = { ...nextPlayer, awards: [...nextPlayer.awards, newAward] };
   }
 
+  const popularityDelta = popularityDeltaForCycle({
+    goals: lastStint?.stats.goals ?? 0,
+    trophiesWon: newTrophies.length,
+    awardsWon: newAward ? 1 : 0,
+  });
+  nextPlayer = {
+    ...nextPlayer,
+    popularity: applyPopularityDelta(nextPlayer.popularity, popularityDelta),
+  };
+
   if (checkRetirement(nextPlayer, rng)) {
     nextPlayer = retire(nextPlayer);
   }
@@ -286,6 +351,8 @@ export function resolveCycle(
     newTrophies,
     newAward,
     nationalCallup,
+    newInjury: injuryResult.newInjury,
+    injuryHealed: injuryResult.injuryHealed,
   };
 }
 
