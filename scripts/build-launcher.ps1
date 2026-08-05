@@ -29,6 +29,10 @@ Write-Host "==> Copio out/ in launcher/CarrieraLauncher/wwwroot/" -ForegroundCol
 if (Test-Path $wwwroot) { Remove-Item $wwwroot -Recurse -Force }
 Copy-Item (Join-Path $repoRoot "out") $wwwroot -Recurse
 
+$packageJson = Get-Content (Join-Path $repoRoot "package.json") -Raw | ConvertFrom-Json
+$version = $packageJson.version
+Write-Host "==> Versione da package.json: $version" -ForegroundColor Cyan
+
 Write-Host "==> dotnet publish (self-contained, single-file, win-x64)" -ForegroundColor Cyan
 if (Test-Path $publishDir) { Remove-Item $publishDir -Recurse -Force }
 dotnet publish $launcherProject `
@@ -38,6 +42,7 @@ dotnet publish $launcherProject `
     -p:PublishSingleFile=true `
     -p:IncludeNativeLibrariesForSelfExtract=true `
     -p:EnableCompressionInSingleFile=true `
+    -p:Version=$version `
     -o $publishDir
 if ($LASTEXITCODE -ne 0) { throw "dotnet publish fallito (exit $LASTEXITCODE)" }
 

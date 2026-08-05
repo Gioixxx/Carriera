@@ -48,6 +48,33 @@ internal sealed class MainForm : Form
                 MessageBoxButtons.OK,
                 MessageBoxIcon.Error);
             Close();
+            return;
+        }
+
+        _ = CheckForUpdatesAsync();
+    }
+
+    private async Task CheckForUpdatesAsync()
+    {
+        try
+        {
+            var update = await UpdateChecker.CheckAsync();
+            if (update is null) return;
+
+            var result = MessageBox.Show(
+                $"È disponibile una nuova versione di Carriera ({update.Version}). Aggiornare ora?",
+                "Aggiornamento disponibile",
+                MessageBoxButtons.YesNo,
+                MessageBoxIcon.Information);
+
+            if (result == DialogResult.Yes)
+            {
+                await UpdateInstaller.DownloadAndApplyAsync(update);
+            }
+        }
+        catch
+        {
+            // Best-effort: un aggiornamento fallito non deve mai impedire di giocare.
         }
     }
 }

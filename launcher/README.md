@@ -28,11 +28,26 @@ powershell -File scripts/build-launcher.ps1
 
 Lo script: builda l'export statico (`npm run build`), lo copia in
 `launcher/CarrieraLauncher/wwwroot/` (rigenerato ad ogni run, non versionato), pubblica il
-progetto .NET come singolo file self-contained per `win-x64`, copia il risultato in
+progetto .NET come singolo file self-contained per `win-x64` con l'`AssemblyVersion` presa da
+`package.json.version` (nessun numero di versione duplicato nel `.csproj`), copia il risultato in
 `dist/Carriera.exe` (non versionato — vedi `.gitignore` — va allegato a mano a una GitHub
 Release dopo la build).
 
 Richiede: Node/npm (già usati dal resto del progetto) e .NET SDK 10+ (`dotnet --version`).
+
+## Aggiornamento automatico
+
+All'avvio, il launcher controlla in background `api.github.com/repos/Gioixxx/Carriera/releases/latest`
+e confronta il tag (`vX.Y.Z`) con la propria `AssemblyVersion`. Se trova una versione più recente
+con un asset `Carriera.exe` allegato, chiede conferma e — su "Sì" — la scarica, sostituisce
+l'eseguibile in uso e si riavvia da solo (`UpdateChecker.cs`/`UpdateInstaller.cs`). Qualsiasi
+errore (nessuna connessione, rate limit, ecc.) viene ignorato in silenzio: l'avvio del gioco non
+dipende mai dall'esito del controllo.
+
+Per questo, chi taglia una nuova release deve **far combaciare il tag git con
+`package.json.version`**: bump della versione in `package.json` → rebuild (`build-launcher.ps1`,
+che stampa la versione usata) → `git tag vX.Y.Z` → `gh release create` con `dist/Carriera.exe`
+allegato.
 
 ## Note
 
