@@ -63,6 +63,12 @@ describe("clubs", () => {
     }
   });
 
+  it("ogni club dovrebbe avere un crestUrl valido (hotlink https a thesportsdb.com)", () => {
+    for (const c of clubs) {
+      expect(c.crestUrl).toMatch(/^https:\/\/(r2|www)\.thesportsdb\.com\//);
+    }
+  });
+
   it("getClub dovrebbe restituire il club corretto per id", () => {
     expect(getClub("juventus")?.name).toBe("Juventus");
     expect(getClub("id-inesistente")).toBeUndefined();

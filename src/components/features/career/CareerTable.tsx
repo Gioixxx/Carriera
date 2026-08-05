@@ -1,5 +1,6 @@
 import { Trophy } from "lucide-react";
 import type { Player } from "@/types/career";
+import { ClubCrest } from "./ClubCrest";
 import { OvrBadge } from "./OvrBadge";
 
 interface CareerTableProps {
@@ -37,6 +38,12 @@ export function CareerTable({ player, pendingLabel }: CareerTableProps) {
               >
                 <td className="px-3 py-2 text-(--color-text-muted)">{stint.ageFrom}</td>
                 <td className="px-3 py-2">
+                  <ClubCrest
+                    crestUrl={stint.club.crestUrl}
+                    clubName={stint.club.name}
+                    size={16}
+                    className="mr-1.5 inline-block align-text-bottom"
+                  />
                   <span className="font-medium text-(--color-text)">{stint.club.name}</span>
                   {stint.type === "loan" ? (
                     <span className="ml-1.5 text-xs text-(--color-text-muted)">(prestito)</span>

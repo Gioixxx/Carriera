@@ -18,19 +18,20 @@ Funzionalità e idee a lungo termine. Prioritizzato pre-sprint → confluisce in
 
 ---
 
-### Valutare integrazione stemmi club via hotlink
+### Nomi reali confederazione-specifici per i trofei di nazionale (Copa América, Asian Cup, ecc.)
 - **Priorità:** Bassa
-- **Tipo:** Feature
-- **Area:** UI (`components/features/career/`), dati (`data/clubs.ts`)
-- **Descrizione:** un agente di ricerca ha raccolto URL hotlink a stemmi ufficiali per tutti gli 84 club e le competizioni del progetto, salvati in `.claude/research/team-crests.md` (fonte: TheSportsDB, nessuna immagine scaricata). Non ancora deciso se/come integrarli nella UI — il progetto resta per ora "solo testuale" com'era stato deciso a inizio progetto.
-- **Criteri accettazione:** decisione esplicita presa con l'utente su se procedere; se sì, integrazione via `<img>` hotlink (mai download/salvataggio locale del file immagine, per il rischio copyright sui marchi registrati).
-- **Nota importante:** i termini d'uso di TheSportsDB (citati in `team-crests.md`) vietano la pubblicazione su app store senza abbonamento a pagamento — non è chiaro se questo vincolo si applichi a un'app solo web; da rivalutare se in futuro cambia la piattaforma di distribuzione.
-- **Stima:** Piccola (l'integrazione tecnica è semplice, il grosso è già stato fatto dalla ricerca)
+- **Tipo:** Miglioramento
+- **Area:** dominio (`lib/career/trophies.ts`, `rollNationalTrophy`), dati (`data/countries.ts`)
+- **Descrizione:** `rollNationalTrophy` oggi sceglie 50/50 tra solo `"Mondiale"`/`"Europei"`, indipendentemente dalla nazionalità del giocatore. Una sessione di ricerca sul gioco originale (Esplorazione aggiuntiva 3, poi confermata in Esplorazione 4) ha osservato/confermato che l'originale usa nomi reali specifici per confederazione (es. "Asian Cup" per nazionalità asiatiche) — l'Esplorazione 4 ha anche corretto un'assunzione precedente: l'originale usa sempre nomi di trofeo reali (World Cup, Copa América, Champions League, Europa League, Copa Libertadores, Copa Argentina, ecc.), mai un placeholder generico "Eurocup". La ricerca immagini 2026-08-05 ha già trovato badge TheSportsDB per 6 tornei di confederazione (`.claude/research/team-crests.md` sezione 5), pronti da usare quando si implementa la logica.
+- **Criteri accettazione:** `rollNationalTrophy` sceglie il torneo in base alla confederazione derivata dalla nazionalità del giocatore (richiede aggiungere confederazione a `countries.ts`), badge corrispondente mostrato via `CompetitionBadge`/`COMPETITION_BADGES` (da estendere con le 6 voci già ricercate).
+- **Perché rimandato:** tocca la logica di dominio (non solo la UI), decisione a parte rispetto all'integrazione immagini già fatta (che copre solo "Mondiale"/"Europei", le uniche stringhe che il dominio produce oggi).
+- **Stima:** Media
 
 ## Priorità
 - **Alta:** —
 - **Media:** —
-- **Bassa:** integrazione stemmi club via hotlink
+- **Bassa:** nomi reali confederazione-specifici per i trofei di nazionale (vedi sopra)
 
 ## Archiviato
 - **Packaging come eseguibile .exe** — implementato 2026-08-05: launcher .NET/WebView2 (`launcher/CarrieraLauncher/`), committato come `dist/Carriera.exe`. Vedi [[decisions]] per la scelta tecnica e `launcher/README.md` per come rigenerarlo.
+- **Integrazione stemmi club/competizioni e immagini premi via hotlink** — implementato 2026-08-05: `crestUrl` su ogni `Club` (84/84, TheSportsDB), `COMPETITION_BADGES` per campionati/coppe/coppe continentali/Mondiale/Europei, icona generica (Twemoji) per i 3 `AwardType` individuali — vedi [[decisions]] per il ragionamento sulla distinzione trademark club-vs-award.

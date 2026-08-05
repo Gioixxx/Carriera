@@ -3,6 +3,7 @@
 import { Star } from "lucide-react";
 import type { Decision } from "@/types/career";
 import { cn } from "@/lib/utils";
+import { ClubCrest } from "./ClubCrest";
 
 interface OfferPanelProps {
   decision: Decision;
@@ -49,7 +50,12 @@ export function OfferPanel({ decision, onChoose }: OfferPanelProps) {
               "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-(--color-accent)",
             )}
           >
-            <span className="text-sm font-semibold text-(--color-text)">{option.label}</span>
+            <span className="flex items-center gap-1.5 text-sm font-semibold text-(--color-text)">
+              {option.club ? (
+                <ClubCrest crestUrl={option.club.crestUrl} clubName={option.club.name} size={16} />
+              ) : null}
+              {option.label}
+            </span>
             {option.club ? (
               <>
                 <span className="text-xs text-(--color-text-muted)">

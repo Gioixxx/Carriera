@@ -39,6 +39,8 @@ export interface Club {
   /** 0-3 stelle, come nell'originale — influenza probabilità di trofei e soglie di offerta. */
   prestige: 0 | 1 | 2 | 3;
   competitions: ClubCompetitions;
+  /** Hotlink allo stemma ufficiale (TheSportsDB) — mai scaricato/salvato nel repo. */
+  crestUrl: string;
 }
 
 export interface StatLine {

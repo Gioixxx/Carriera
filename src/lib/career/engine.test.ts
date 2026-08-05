@@ -28,6 +28,7 @@ const TEST_CLUB: Club = {
   tier: 1,
   prestige: 2,
   competitions: { league: "Serie A", cup: "Coppa Italia" },
+  crestUrl: "https://r2.thesportsdb.com/images/media/team/badge/test.png",
 };
 
 const NO_NOISE_RNG: Rng = () => 0.5;

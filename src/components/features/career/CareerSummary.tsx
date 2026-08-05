@@ -1,8 +1,11 @@
-import { Award as AwardIcon, Trophy as TrophyIcon } from "lucide-react";
+import { Trophy as TrophyIcon } from "lucide-react";
 import type { AwardType, Player } from "@/types/career";
 import { peakOvr, summarizeClubHistory } from "@/lib/career/summary";
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
+import { AwardBadge } from "./AwardBadge";
+import { ClubCrest } from "./ClubCrest";
+import { CompetitionBadge } from "./CompetitionBadge";
 import { OvrBadge } from "./OvrBadge";
 
 interface CareerSummaryProps {
@@ -92,12 +95,15 @@ export function CareerSummary({ player, onRestart }: CareerSummaryProps) {
                     className="border-b border-(--color-border) last:border-0 odd:bg-(--color-surface-raised)/40"
                   >
                     <td className="px-3 py-2 font-medium text-(--color-text)">
-                      {c.club.name}
-                      {c.stintCount > 1 ? (
-                        <span className="ml-1.5 text-xs text-(--color-text-muted)">
-                          ({c.stintCount} cicli)
-                        </span>
-                      ) : null}
+                      <span className="flex items-center gap-2">
+                        <ClubCrest crestUrl={c.club.crestUrl} clubName={c.club.name} size={18} />
+                        {c.club.name}
+                        {c.stintCount > 1 ? (
+                          <span className="text-xs text-(--color-text-muted)">
+                            ({c.stintCount} cicli)
+                          </span>
+                        ) : null}
+                      </span>
                     </td>
                     <td className="px-3 py-2 text-(--color-text-muted)">
                       {c.ageFrom}–{c.ageTo}
@@ -149,7 +155,7 @@ export function CareerSummary({ player, onRestart }: CareerSummaryProps) {
           <ul className="flex flex-col gap-2 text-sm">
             {trophies.map((t, i) => (
               <li key={`trophy-${i}`} className="flex items-center gap-2">
-                <TrophyIcon size={14} aria-hidden="true" className="shrink-0 text-(--color-ovr-gold)" />
+                <CompetitionBadge competition={t.competition} size={18} />
                 <span className="text-(--color-text)">
                   {t.competition}
                   <span className="text-(--color-text-muted)">
@@ -161,7 +167,7 @@ export function CareerSummary({ player, onRestart }: CareerSummaryProps) {
             ))}
             {awards.map((a, i) => (
               <li key={`award-${i}`} className="flex items-center gap-2">
-                <AwardIcon size={14} aria-hidden="true" className="shrink-0 text-(--color-ovr-gold)" />
+                <AwardBadge size={18} />
                 <span className="text-(--color-text)">
                   {AWARD_LABELS[a.type]}
                   <span className="text-(--color-text-muted)">

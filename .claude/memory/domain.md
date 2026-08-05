@@ -9,7 +9,7 @@ Termini, entità, regole di business del progetto. Decisioni correlate in [[deci
 
 ## Entità principali
 - **Player** (`types/career.ts`): identità (cognome, numero, piede, nazionalità, ruolo), età, OVR, valore di mercato, statistiche di carriera cumulative, club corrente, `clubHistory`, statistiche nazionale, trofei, awards, flag ritirato.
-- **Club** (`data/clubs.ts`): id, nome, paese, tier (livello di lega), prestige (0-3 stelle), competizioni associate (campionato/coppa nazionale/coppa continentale se tier 1).
+- **Club** (`data/clubs.ts`): id, nome, paese, tier (livello di lega), prestige (0-3 stelle), competizioni associate (campionato/coppa nazionale/coppa continentale se tier 1), `crestUrl` (hotlink stemma TheSportsDB, mai scaricato — vedi [[decisions]]).
 - **ClubStint**: una riga di `clubHistory` — un club per un intervallo di età, con statistiche del periodo. **Una riga per ciclo**, non accorpata per club (replica il comportamento osservato nell'originale: restare 3 cicli nello stesso club produce 3 righe distinte).
 - **Decision / DecisionOption / DecisionOutcome**: un bivio con opzioni; ogni opzione ha uno o più outcome pesati (i pesi di un'opzione sommano a 100). Un solo outcome = esito deterministico.
 - **Trophy / Award**: trofei di club/nazionale (nome reale competizione) vs premi individuali (Pallone d'Oro, capocannoniere, ecc.).
@@ -32,5 +32,5 @@ Termini, entità, regole di business del progetto. Decisioni correlate in [[deci
 
 ## Flussi principali
 - **Creazione personaggio:** selezione ritmo (Intense/Normal/Express) → form identità (cognome, numero, piede, nazionalità, ruolo) → `createPlayer` → offerta settore giovanile.
-- **Loop di gioco (fase 6, non ancora costruito):** ad ogni ciclo, `pickDecisionCategory` sceglie il tipo di evento, un generatore produce la `Decision`, l'utente sceglie un'opzione, `resolveOutcome` estrae l'esito, `advanceSeasons` + `applyDelta` aggiornano il giocatore.
-- **Fine carriera (fase 7, non ancora costruito):** `checkRetirement` o scelta esplicita → `retire` → `CareerSummary` con breakdown per club/nazionale/trofei/awards.
+- **Loop di gioco:** ad ogni ciclo, `pickDecisionCategory` sceglie il tipo di evento, un generatore produce la `Decision`, l'utente sceglie un'opzione, `resolveOutcome` estrae l'esito, `advanceSeasons` + `applyDelta` aggiornano il giocatore.
+- **Fine carriera:** `checkRetirement` o scelta esplicita → `retire` → `CareerSummary` con breakdown per club/nazionale/trofei/awards.

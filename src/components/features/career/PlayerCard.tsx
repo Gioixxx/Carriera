@@ -1,6 +1,7 @@
 import { Award as AwardIcon, Trophy as TrophyIcon } from "lucide-react";
 import type { Player } from "@/types/career";
 import { countries } from "@/data/countries";
+import { ClubCrest } from "./ClubCrest";
 import { JerseyBadge } from "./JerseyBadge";
 import { OvrBadge } from "./OvrBadge";
 
@@ -31,7 +32,10 @@ export function PlayerCard({ player }: PlayerCardProps) {
           <p className="font-display truncate text-2xl leading-tight text-(--color-text)">
             {player.lastName.toUpperCase()}
           </p>
-          <p className="truncate text-xs text-(--color-text-muted)">
+          <p className="flex items-center gap-1.5 truncate text-xs text-(--color-text-muted)">
+            {player.club ? (
+              <ClubCrest crestUrl={player.club.crestUrl} clubName={player.club.name} size={14} />
+            ) : null}
             {player.club ? player.club.name : "Svincolato"} · {player.age} anni
           </p>
         </div>

@@ -251,3 +251,123 @@ Serie C risolto con 3 badge di girone invece di un badge unico (vedi sezione 4).
   serviti da `www.thesportsdb.com/images/...` invece del CDN `r2.thesportsdb.com/images/...`
   (es. Chelsea, Aston Villa). Entrambi risultano host ufficiali del sito, quindi utilizzabili in
   hotlink; se si vuole uniformità si può normalizzare via redirect o accettare l'host così com'è.
+
+## 5. Badge tornei nazionali
+
+> Stesso metodo delle sezioni precedenti: `lookupleague.php?id=<id>` su TheSportsDB con la chiave
+> pubblica `123`, verificato per ogni id (nessuno scraping HTML). Gli id sono stati localizzati
+> partendo da un mirror JSON di terze parti dei nomi lega di TheSportsDB
+> ([TralahM/thesportsdb leagues.json](https://raw.githubusercontent.com/TralahM/thesportsdb/master/leagues.json),
+> dump della stessa API pubblica) e dalle pagine pubbliche `thesportsdb.com/league/<id>-<slug>` per
+> i due tornei non presenti in quel mirror (AFC Asian Cup, CONCACAF Gold Cup), poi **ogni id è
+> stato confermato individualmente** con una chiamata diretta a `lookupleague.php?id=<id>` per
+> leggere `strLeague`/`strBadge` dal payload ufficiale prima di riportarlo qui.
+
+Contesto dal dominio: `Trophy.competition` (vinto con la nazionale) oggi in `trophies.ts` genera
+solo `"Mondiale"` o `"Europei"` (50/50, funzione `rollNationalTrophy`). Una sessione di ricerca
+precedente sul gioco originale ha osservato anche `"Asian Cup"` come competizione possibile — la
+tabella sotto copre le confederazioni corrispondenti alle 41 nazionalità in `src/data/countries.ts`
+(UEFA per la maggioranza europea, CONMEBOL per BR/AR/UY/CO/CL/PY/PE/EC, CONCACAF per MX/US/CA,
+CAF per MA/SN/NG/GH/EG/CI, AFC per JP/KR/AU/SA/QA).
+
+| Torneo | Confederazione | TSDB strLeague | TSDB idLeague | URL badge |
+|---|---|---|---|---|
+| FIFA World Cup (Mondiale) | FIFA (tutte) | FIFA World Cup | 4429 | https://r2.thesportsdb.com/images/media/league/badge/e7er5g1696521789.png |
+| UEFA European Championship (Europei) | UEFA | European Championships | 4502 | https://r2.thesportsdb.com/images/media/league/badge/bivzlu1635869135.png |
+| Copa América | CONMEBOL | Copa America | 4499 | https://r2.thesportsdb.com/images/media/league/badge/n78hen1718080720.png |
+| AFC Asian Cup | AFC | AFC Asian Cup | 4866 | https://r2.thesportsdb.com/images/media/league/badge/0a86rp1710997941.png |
+| Africa Cup of Nations (AFCON) | CAF | African Cup of Nations | 4496 | https://r2.thesportsdb.com/images/media/league/badge/rhu61x1738628727.png |
+| CONCACAF Gold Cup | CONCACAF | CONCACAF Gold Cup | 4873 | https://r2.thesportsdb.com/images/media/league/badge/pfx34h1621878481.png |
+
+**Copertura: 6/6 tornei richiesti trovati e verificati.** Stesso host CDN (`r2.thesportsdb.com`)
+delle competizioni di club già raccolte in sezione 3, stessi termini d'uso della sezione 1
+(uso hobbistico/sviluppo in hotlink coperto; badge "as is" senza modifiche; non pubblicabile su
+app store senza abbonamento a pagamento).
+
+**Nota su come mappare in codice**: oggi `rollNationalTrophy` restituisce solo la stringa
+`"Mondiale"` o `"Europei"` senza informazione sulla confederazione del giocatore — per collegare
+un badge specifico servirebbe o (a) derivare la confederazione dalla nazionalità del giocatore al
+momento del render (mapping `country.code` → confederazione, non ancora presente in
+`countries.ts`), oppure (b) estendere `rollNationalTrophy` a scegliere tra il torneo "proprio"
+della confederazione del giocatore invece del 50/50 fisso Mondiale/Europei attuale — quest'ultimo
+tocca la logica di dominio in `trophies.ts`, non solo la UI, quindi è una decisione da prendere a
+parte (vedi [[backlog]]) e non è nello scope di questa sola ricerca.
+
+## 6. Immagini premi individuali
+
+Contesto dal dominio: `AwardType` in `src/types/career.ts` è `"player-of-the-season" |
+"ballon-dor" | "top-scorer"`, generato da `rollAward` in `trophies.ts` con soglie di probabilità
+deliberatamente più generose dell'originale (OVR ≥ 85 per qualunque award, ≥ 90 con 30% di chance
+per `"ballon-dor"`). Il nostro `"ballon-dor"` è quindi un premio con **meccaniche nostre**, non il
+vero Pallone d'Oro con licenza — il che rende il rischio di un'immagine del trofeo reale (di
+proprietà France Football/L'Équipe) più delicato del caso degli stemmi club (dati sportivi
+fattuali, coperti dai termini TheSportsDB per hobby project). Valutate due strade, con URL
+verificati individualmente aprendo la pagina file su Wikimedia Commons (non solo dai risultati di
+ricerca).
+
+### Strada 1 — foto/immagini reali su Wikimedia Commons
+
+| File | Cosa raffigura | Licenza (dalla pagina file) | URL diretto (upload.wikimedia.org) |
+|---|---|---|---|
+| Ballon d'Or.png | Icona stilizzata di una palla dorata (rappresentazione del trofeo, non foto) | **CC0 1.0** (pubblico dominio, dedica esplicita dell'autore) | https://upload.wikimedia.org/wikipedia/commons/3/3d/Ballon_d%27Or.png |
+| Balón de oro.png | Icona/replica stilizzata del Pallone d'Oro, alta risoluzione (2529×2990) | **Pubblico dominio** — pagina file: *"this image of simple geometry is ineligible for copyright... consists entirely of information that is common property and contains no original authorship"* | https://upload.wikimedia.org/wikipedia/commons/0/0b/Bal%C3%B3n_de_oro.png |
+| Icone ballon d'or.svg | Icona stilizzata SVG 512×512 del trofeo Ballon d'Or | CC BY-SA 4.0 | https://upload.wikimedia.org/wikipedia/commons/8/8d/Icone_ballon_d%27or.svg |
+| Cristiano Ronaldo's 2008 Ballon d'Or trophy, Real Madrid Museum...jpg | **Foto reale** del trofeo fisico (edizione 2008) esposto al museo del Real Madrid | CC BY-SA 4.0 (autore: Ank Kumar / Ank gsx) | https://upload.wikimedia.org/wikipedia/commons/c/cc/Cristiano_Ronaldo%27s_2008_Ballon_d%27Or_trophy%2C_Real_Madrid_Museum%2C_Santiago_Bernab%C3%A9u%2C_Madrid%2C_Spain_%28Ank_Kumar%2C_Infosys_Limited%29_02.jpg |
+| PremierLeagueGoldenBoot.png | Illustrazione del trofeo "Golden Boot" della Premier League (capocannoniere) — utile per `top-scorer` | CC BY-SA 4.0 (self-published, autore dichiara di essere titolare del copyright) | https://upload.wikimedia.org/wikipedia/commons/0/07/PremierLeagueGoldenBoot.png |
+
+Verificate e **scartate** perché non pertinenti nonostante comparissero nei risultati di ricerca:
+`File:Golden Booty (6857094337).jpg` (foto di un concerto della band Die Antwoord — coincidenza di
+nome, nessun rapporto con il calcio) e `File:Golden Boot, Maidstone.jpg` (statua/oggetto locale a
+Maidstone, UK, senza conferma che sia collegato a un premio calcistico — pagina file non ne chiarisce
+il soggetto).
+
+**Pro strada 1**: immagini "vere", più riconoscibili/evocative per l'utente; le licenze trovate per
+le icone stilizzate (`Ballon d'Or.png` CC0, `Balón de oro.png` PD) sono le più sicure possibili sul
+piano del copyright della *fotografia/illustrazione in sé*.
+**Contro strada 1**: anche con foto/icona a licenza CC0/CC-BY-SA libera sul piano del copyright
+dell'immagine, **la forma del trofeo Ballon d'Or e il nome "Ballon d'Or" restano potenzialmente
+protetti da marchio/design registrato di France Football/L'Équipe** — la licenza Commons copre chi
+ha scattato la foto o disegnato l'icona, non concede automaticamente il diritto di usare il design
+del trofeo per rappresentare un premio proprio con meccaniche diverse dall'originale (il nostro
+"ballon-dor" in-game). Nessuna delle pagine file controllate riporta un disclaimer di trademark
+esplicito (a differenza dei loghi club su TheSportsDB, che dichiarano esplicitamente "as is, non
+modificabili" proprio perché trademark) — il rischio quindi non è documentato/mitigato dalla fonte
+stessa, va valutato dall'utente.
+
+### Strada 2 — icone stilizzate generiche via CDN open-source
+
+| Set icone | Licenza | Emoji/icona | URL CDN verificato |
+|---|---|---|---|
+| Twemoji (fork attivo [jdecked/twemoji](https://github.com/jdecked/twemoji) — il repo originale `twitter/twemoji` risulta abbandonato dopo l'acquisizione X Corp, il fork continua manutenzione/nuove emoji con la stessa licenza) | **CC BY 4.0** (grafica), attribuzione a Twemoji richiesta | 🏆 Trophy (U+1F3C6) | https://cdn.jsdelivr.net/gh/jdecked/twemoji@latest/assets/svg/1f3c6.svg |
+| OpenMoji ([openmoji.org](https://openmoji.org)) | **CC BY-SA 4.0** — *"you are free to: Share... for any purpose, even commercially"*, richiede attribuzione + ShareAlike sulle modifiche | 🏆 Trophy (emoji-1F3C6) | https://openmoji.org/data/color/svg/1F3C6.svg |
+
+Entrambi gli URL sono stati verificati fetchando il contenuto SVG grezzo e confermando che
+raffigurano davvero una coppa/trofeo dorato stilizzato (non un'altra emoji). Nota tecnica: il
+pattern jsDelivr `cdn.jsdelivr.net/gh/hfg-gmuend/openmoji/color/svg/<CODE>.svg` citato in alcune
+fonti secondarie per OpenMoji **non ha funzionato in verifica** (403 con `@latest` sull'alias
+`gh`); l'hosting diretto `openmoji.org/data/color/svg/<CODE>.svg` invece sì — usare quello se si
+sceglie OpenMoji.
+
+**Pro strada 2**: rischio zero di trademark — sono icone emoji generiche di "trofeo", non la
+rappresentazione di un premio reale specifico con proprietario riconoscibile; licenze open
+esplicitamente pensate per embed/hotlink; nessuna ambiguità sul design coperto da marchio.
+**Contro strada 2**: meno "riconoscibile"/evocativo di una foto vera del trofeo — un'emoji trofeo
+generica comunica "premio" ma non specificamente "Ballon d'Or".
+
+### Raccomandazione
+
+- **`ballon-dor`** (il caso delicato): **strada 2** (icona trofeo generica stilizzata, es. Twemoji
+  o OpenMoji 🏆). Coerente con la logica già adottata nel progetto per gli stemmi club (dati
+  fattuali/hotlink sì, ma "as is" e senza reinterpretazioni) — qui però il premio in-game *non è*
+  il vero Pallone d'Oro (meccaniche proprie, soglie diverse), quindi rappresentarlo con
+  un'immagine che imita il trofeo reale rischierebbe di implicare un'associazione con
+  France Football/L'Équipe che non esiste. Un'icona generica evita il problema alla radice senza
+  perdere leggibilità (il nome "Pallone d'Oro" nel testo italiano della UI comunica comunque il
+  riferimento culturale, l'icona serve solo da rinforzo visivo).
+- **`player-of-the-season`** e **`top-scorer`**: **strada 2 è adeguata**, sono concetti generici
+  (non un singolo trofeo reale con un unico proprietario) — nessuna icona reale specifica è
+  necessaria. Per `top-scorer` è stata comunque trovata un'alternativa di strada 1 pertinente
+  (`PremierLeagueGoldenBoot.png`, CC BY-SA 4.0) nel caso si preferisca in futuro un'immagine più
+  "reale" — ma anche qui vale la stessa cautela sul trademark Premier League (nome/design
+  associato a una competizione specifica con licenza propria), quindi la raccomandazione resta
+  un'icona generica (es. 🥇/🏆 stilizzata) anche per questi due award.

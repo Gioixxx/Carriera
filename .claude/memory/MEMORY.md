@@ -28,6 +28,8 @@ loop di gioco, fine carriera (CareerSummary), polish (dark mode toggle, empty st
 - @adr.md — [[adr]] — ADR formali
 
 ## Segnalibri critici
+- **Repo pubblica dal 2026-08-05** (era privata) — da qui in poi ogni nuovo asset/scelta (immagini, exe in `dist/`, licenze) va valutato assumendo visibilità pubblica, non più "solo io la vedo".
 - Il piano di implementazione dettagliato vive FUORI dal repo, in `C:\Users\Gioix\.claude\plans\piped-bouncing-cocke.md` — leggerlo prima di riprendere lo sviluppo, contiene le meccaniche osservate su 10+ carriere giocate sul sito originale.
 - Nell'originale gli award individuali (Pallone d'Oro) e le probabilità di nazionale/coppa continentale sono praticamente irraggiungibili anche in carriere-record — il clone li implementa con soglie deliberatamente più generose (vedi [[decisions]]).
-- Stemmi dei club: solo hotlink a URL esterni (mai download di loghi), vedi ricerca in `.claude/research/team-crests.md` (se già completata).
+- Stemmi club/competizioni: hotlink TheSportsDB (mai download), integrati nella UI (`Club.crestUrl`, `COMPETITION_BADGES`) — vedi [[decisions]]. Premi individuali (Pallone d'Oro ecc.): icona generica Twemoji, deliberatamente NON una foto del trofeo reale (rischio trademark diverso dagli stemmi club, vedi [[decisions]]).
+- Eseguibile Windows: `dist/Carriera.exe`, distribuito anche via GitHub Release — vedi [[decisions]] per la scelta tecnica (.NET/WebView2) e `launcher/README.md`.
