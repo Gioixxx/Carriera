@@ -63,6 +63,14 @@ describe("clubs", () => {
     }
   });
 
+  it("i club UEFA di tier 1 giocano Champions League se prestige >= 2, Europa League altrimenti", () => {
+    for (const c of clubs) {
+      const league = leagues.find((l) => l.country === c.country && l.tier === c.tier);
+      if (c.tier !== 1 || league?.confederation !== "UEFA") continue;
+      expect(c.competitions.continental).toBe(c.prestige >= 2 ? "Champions League" : "Europa League");
+    }
+  });
+
   it("ogni club dovrebbe avere un crestUrl valido (hotlink https a thesportsdb.com)", () => {
     for (const c of clubs) {
       expect(c.crestUrl).toMatch(/^https:\/\/(r2|www)\.thesportsdb\.com\//);

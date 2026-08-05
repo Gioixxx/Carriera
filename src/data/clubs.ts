@@ -18,6 +18,21 @@ export const CONTINENTAL_CUP: Record<Confederation, string> = {
   CONMEBOL: "Copa Libertadores",
 };
 
+const UEFA_EUROPA_LEAGUE = "Europa League";
+/** Prestige minimo per la Champions League — sotto questa soglia i club UEFA giocano l'Europa League. */
+const UEFA_CHAMPIONS_LEAGUE_PRESTIGE_THRESHOLD = 2;
+
+/** Coppa continentale per un club di tier 1: UEFA distingue Champions/Europa League in base al prestige. */
+function continentalCompetition(league: League, prestige: Club["prestige"]): string | undefined {
+  if (league.tier !== 1) return undefined;
+  if (league.confederation === "UEFA") {
+    return prestige >= UEFA_CHAMPIONS_LEAGUE_PRESTIGE_THRESHOLD
+      ? CONTINENTAL_CUP.UEFA
+      : UEFA_EUROPA_LEAGUE;
+  }
+  return CONTINENTAL_CUP[league.confederation];
+}
+
 export const leagues: League[] = [
   { id: "ita-serie-a", name: "Serie A", country: "Italy", tier: 1, confederation: "UEFA", cup: "Coppa Italia" },
   { id: "ita-serie-b", name: "Serie B", country: "Italy", tier: 2, confederation: "UEFA", cup: "Coppa Italia" },
@@ -28,6 +43,11 @@ export const leagues: League[] = [
   { id: "esp-laliga2", name: "LaLiga 2", country: "Spain", tier: 2, confederation: "UEFA", cup: "Copa del Rey" },
   { id: "bra-serie-a", name: "Brasileirão Série A", country: "Brazil", tier: 1, confederation: "CONMEBOL", cup: "Copa do Brasil" },
   { id: "bra-serie-b", name: "Brasileirão Série B", country: "Brazil", tier: 2, confederation: "CONMEBOL", cup: "Copa do Brasil" },
+  { id: "por-primeira-liga", name: "Primeira Liga", country: "Portugal", tier: 1, confederation: "UEFA", cup: "Taça de Portugal" },
+  { id: "fra-ligue-1", name: "Ligue 1", country: "France", tier: 1, confederation: "UEFA", cup: "Coupe de France" },
+  { id: "ger-bundesliga", name: "Bundesliga", country: "Germany", tier: 1, confederation: "UEFA", cup: "DFB-Pokal" },
+  { id: "ned-eredivisie", name: "Eredivisie", country: "Netherlands", tier: 1, confederation: "UEFA", cup: "KNVB Beker" },
+  { id: "arg-liga-profesional", name: "Liga Profesional", country: "Argentina", tier: 1, confederation: "CONMEBOL", cup: "Copa Argentina" },
 ];
 
 const leagueById = new Map(leagues.map((league) => [league.id, league]));
@@ -52,7 +72,7 @@ function club(
     competitions: {
       league: league.name,
       cup: league.cup,
-      continental: league.tier === 1 ? CONTINENTAL_CUP[league.confederation] : undefined,
+      continental: continentalCompetition(league, prestige),
     },
     crestUrl,
   };
@@ -162,6 +182,56 @@ export const clubs: Club[] = [
   club("nautico", "Náutico", "bra-serie-b", 0, "https://r2.thesportsdb.com/images/media/team/badge/wywuwv1464886832.png"),
   club("crb", "CRB", "bra-serie-b", 0, "https://r2.thesportsdb.com/images/media/team/badge/vpypuq1472069179.png"),
   club("avai", "Avaí", "bra-serie-b", 0, "https://r2.thesportsdb.com/images/media/team/badge/bblkat1766506007.png"),
+
+  // --- Portogallo — Primeira Liga ---
+  club("benfica", "Benfica", "por-primeira-liga", 3, "https://r2.thesportsdb.com/images/media/team/badge/hj4kyc1781152436.png"),
+  club("porto", "FC Porto", "por-primeira-liga", 3, "https://r2.thesportsdb.com/images/media/team/badge/xu47rb1628855600.png"),
+  club("sporting-cp", "Sporting CP", "por-primeira-liga", 2, "https://www.thesportsdb.com/images/media/team/badge/5hiuk71783137875.png"),
+  club("braga", "Sporting Braga", "por-primeira-liga", 2, "https://www.thesportsdb.com/images/media/team/badge/skbiwo1785775946.png"),
+  club("vitoria-guimaraes", "Vitória de Guimarães", "por-primeira-liga", 1, "https://r2.thesportsdb.com/images/media/team/badge/af52z61628855707.png"),
+  club("boavista", "Boavista", "por-primeira-liga", 1, "https://r2.thesportsdb.com/images/media/team/badge/usi98v1628853974.png"),
+  club("famalicao", "Famalicão", "por-primeira-liga", 0, "https://r2.thesportsdb.com/images/media/team/badge/a3f4er1563653256.png"),
+  club("rio-ave", "Rio Ave", "por-primeira-liga", 0, "https://r2.thesportsdb.com/images/media/team/badge/ngbklq1628851239.png"),
+
+  // --- Francia — Ligue 1 ---
+  club("psg", "Paris Saint-Germain", "fra-ligue-1", 3, "https://r2.thesportsdb.com/images/media/team/badge/rwqrrq1473504808.png"),
+  club("marseille", "Marseille", "fra-ligue-1", 3, "https://r2.thesportsdb.com/images/media/team/badge/c6bazh1779212287.png"),
+  club("monaco", "Monaco", "fra-ligue-1", 2, "https://r2.thesportsdb.com/images/media/team/badge/exjf5l1678808044.png"),
+  club("lyon", "Lyon", "fra-ligue-1", 2, "https://r2.thesportsdb.com/images/media/team/badge/blk9771656932845.png"),
+  club("lille", "Lille", "fra-ligue-1", 1, "https://r2.thesportsdb.com/images/media/team/badge/2giize1534005340.png"),
+  club("nice", "Nice", "fra-ligue-1", 1, "https://r2.thesportsdb.com/images/media/team/badge/msy7ly1621593859.png"),
+  club("rennes", "Rennes", "fra-ligue-1", 0, "https://r2.thesportsdb.com/images/media/team/badge/ypturx1473504818.png"),
+  club("lens", "Lens", "fra-ligue-1", 0, "https://r2.thesportsdb.com/images/media/team/badge/3pxoum1598797195.png"),
+
+  // --- Germania — Bundesliga ---
+  club("bayern-munich", "Bayern Munich", "ger-bundesliga", 3, "https://r2.thesportsdb.com/images/media/team/badge/01ogkh1716960412.png"),
+  club("borussia-dortmund", "Borussia Dortmund", "ger-bundesliga", 3, "https://r2.thesportsdb.com/images/media/team/badge/tqo8ge1716960353.png"),
+  club("rb-leipzig", "RB Leipzig", "ger-bundesliga", 2, "https://r2.thesportsdb.com/images/media/team/badge/zjgapo1594244951.png"),
+  club("bayer-leverkusen", "Bayer Leverkusen", "ger-bundesliga", 2, "https://r2.thesportsdb.com/images/media/team/badge/3x9k851726760113.png"),
+  club("eintracht-frankfurt", "Eintracht Frankfurt", "ger-bundesliga", 1, "https://r2.thesportsdb.com/images/media/team/badge/rurwpy1473453269.png"),
+  club("vfb-stuttgart", "VfB Stuttgart", "ger-bundesliga", 1, "https://r2.thesportsdb.com/images/media/team/badge/yppyux1473454085.png"),
+  club("borussia-monchengladbach", "Borussia Mönchengladbach", "ger-bundesliga", 0, "https://r2.thesportsdb.com/images/media/team/badge/sysurw1473453380.png"),
+  club("werder-bremen", "Werder Bremen", "ger-bundesliga", 0, "https://r2.thesportsdb.com/images/media/team/badge/tkvqan1716960454.png"),
+
+  // --- Paesi Bassi — Eredivisie ---
+  club("ajax", "Ajax", "ned-eredivisie", 3, "https://r2.thesportsdb.com/images/media/team/badge/zg9tii1755495289.png"),
+  club("psv", "PSV Eindhoven", "ned-eredivisie", 3, "https://r2.thesportsdb.com/images/media/team/badge/xfsz6i1721297428.png"),
+  club("feyenoord", "Feyenoord", "ned-eredivisie", 2, "https://r2.thesportsdb.com/images/media/team/badge/uturtx1473534803.png"),
+  club("az-alkmaar", "AZ Alkmaar", "ned-eredivisie", 2, "https://r2.thesportsdb.com/images/media/team/badge/wtqwvv1473534757.png"),
+  club("fc-utrecht", "FC Utrecht", "ned-eredivisie", 1, "https://r2.thesportsdb.com/images/media/team/badge/yuhha71625167104.png"),
+  club("fc-twente", "FC Twente", "ned-eredivisie", 1, "https://r2.thesportsdb.com/images/media/team/badge/rsrxrt1473534783.png"),
+  club("vitesse", "Vitesse", "ned-eredivisie", 0, "https://r2.thesportsdb.com/images/media/team/badge/wrptxp1473534864.png"),
+  club("willem-ii", "Willem II", "ned-eredivisie", 0, "https://r2.thesportsdb.com/images/media/team/badge/ushlnc1666107465.png"),
+
+  // --- Argentina — Liga Profesional ---
+  club("boca-juniors", "Boca Juniors", "arg-liga-profesional", 3, "https://r2.thesportsdb.com/images/media/team/badge/bm7krb1775741582.png"),
+  club("river-plate", "River Plate", "arg-liga-profesional", 3, "https://r2.thesportsdb.com/images/media/team/badge/03dmi31645539717.png"),
+  club("racing-club", "Racing Club", "arg-liga-profesional", 2, "https://r2.thesportsdb.com/images/media/team/badge/vi4mu41695734959.png"),
+  club("independiente", "Independiente", "arg-liga-profesional", 2, "https://r2.thesportsdb.com/images/media/team/badge/eki4nd1580842605.png"),
+  club("san-lorenzo", "San Lorenzo", "arg-liga-profesional", 1, "https://r2.thesportsdb.com/images/media/team/badge/jih7hv1582229717.png"),
+  club("estudiantes", "Estudiantes de La Plata", "arg-liga-profesional", 1, "https://r2.thesportsdb.com/images/media/team/badge/pf08dq1760634366.png"),
+  club("velez-sarsfield", "Vélez Sarsfield", "arg-liga-profesional", 0, "https://r2.thesportsdb.com/images/media/team/badge/jo98m71517769587.png"),
+  club("newells-old-boys", "Newell's Old Boys", "arg-liga-profesional", 0, "https://r2.thesportsdb.com/images/media/team/badge/23aftf1580842633.png"),
 ];
 
 export function getLeague(id: string): League | undefined {

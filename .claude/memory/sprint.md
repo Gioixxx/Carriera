@@ -3,6 +3,11 @@ type: sprint
 tags: [memory, sprint]
 updated: [2026-08-05]
 ---
+> Aggiornato da /sprint — sessione 2026-08-05 (post-build iniziale): 4 nuove feature di gameplay
+> (infortuni, economia/popolarità/sponsor, hardening trofeo continentale, archivio carriere) +
+> branding del launcher desktop (icona/sfondo/finestra massimizzata) + prima release versionata
+> pubblicata su GitHub (v0.2.0). Dettaglio nelle ultime voci di "Ricerca completata (agenti
+> background)" più sotto.
 
 # Sprint Corrente
 Stato lavoro in corso. Aggiornato con /sprint. Backlog in [[backlog]], debito in [[tech-debt]].
@@ -36,6 +41,55 @@ Stato lavoro in corso. Aggiornato con /sprint. Backlog in [[backlog]], debito in
 - [x] **Momenti di carriera celebrativi + timeline + animazioni** (2026-08-05, 3 commit: ba0083c, 41b9a01, c882a44 — non registrati in memoria al momento del commit, recuperati in questa sessione): `MomentOverlay.tsx` (overlay modale con focus trap + confetti CSS per trofeo/premio/convocazione nazionale, coda di `buildCareerMoments` gestita da `CareerGame.tsx`), `CareerTimeline.tsx` (barra di progresso 16→40 anni con marker trofei/premi), `hooks/useMotion.ts` (`usePrefersReducedMotion` + `useCountUp`, usato per animare le statistiche in `PlayerCard`), `SetupStepDots` per la navigazione nella creazione personaggio, `lib/career/award-labels.ts` (label italiane `AwardType` estratte per riuso). Vedi [[decisions]] per il ragionamento su overlay modale vs toast e sul rispetto di `prefers-reduced-motion`. Non ancora verificato end-to-end nel browser in questa sessione di recupero — solo letto il codice per documentarlo.
 
 - [x] **Auto-updater del launcher desktop** (2026-08-05, commit 0d56d8a): `UpdateChecker.cs`/`UpdateInstaller.cs` (nuovi) confrontano l'`AssemblyVersion` corrente con l'ultima release GitHub all'avvio (`MainForm.OnLoad`, fire-and-forget) e, su conferma dell'utente, scaricano+applicano l'update via script `.bat` self-replace (necessario perché l'exe è self-contained single-file, non può sovrascrivere se stesso in esecuzione). `scripts/build-launcher.ps1` ora stampa l'`AssemblyVersion` da `package.json.version` invece di duplicarla nel `.csproj`. Vedi [[decisions]] per il design completo. Verificato: `dotnet build` pulito (solo warning preesistente WebView2/WindowsBase), build completo via `build-launcher.ps1` con `dist/Carriera.exe` FileVersion=0.1.0.0 confermato, avvio dell'exe senza crash (5s). **Non verificato visivamente**: il dialog "aggiornamento disponibile" e il flusso download→self-replace→relaunch (richiede abbassare temporaneamente `package.json.version` per forzare il percorso positivo, vedi step 4 del piano — non ancora eseguito).
+
+- [x] **4 nuove feature di gameplay** (2026-08-05, commit 4ddb366, piano approvato in
+  `C:\Users\Gioix\.claude\plans\dobbiamo-trovare-delle-idee-cryptic-blossom.md`): **infortuni
+  persistenti** (`lib/career/injuries.ts`, stato su `Player.injury`, badge in `PlayerCard`, righe
+  dedicate nell'`OutcomeBanner`, outcome lifestyle "Doppie sedute"/"Ritiro speciale" ora
+  infortunano davvero invece di essere solo testo); **asse economico-reputazionale**
+  (`lib/career/wallet.ts`: stipendio/patrimonio/popolarità, nuova categoria di decisioni
+  "sponsor", `PopularityMeter.tsx`, patrimonio/popolarità visibili su `PlayerCard`/
+  `CareerSummary`); **hardening trofeo continentale** (`DecisionOutcome.continentalWin`
+  esplicito al posto del match sulla stringa "Gol!" in `resultText` — la feature esisteva già,
+  solo il rilevamento era fragile); **archivio multi-carriera** (`CareerArchive.tsx`, nuova
+  schermata "Le mie carriere", chiave localStorage separata `carriera:archive` con cap FIFO 100
+  voci, archiviazione al ritiro). Migrazione storage `STORAGE_VERSION` 1→2 che arricchisce i
+  save v1 esistenti con i default dei nuovi campi invece di scartarli. 167 test (era 129),
+  lint/typecheck/build puliti, verificato end-to-end nel browser (migrazione save v1, infortuni,
+  stipendio/patrimonio/popolarità, trofeo continentale, archivio).
+
+- [x] **Icona custom + sfondo di caricamento per il launcher** (2026-08-05, commit 52e70ac, su
+  richiesta esplicita dell'utente con immagini fornite in `img/icona.png`/`img/sfondo.png`, poi
+  rimossa dopo la copia — vedi sotto): `assets/app.ico` (multi-risoluzione, generato dall'icona
+  fornita) impostato come `ApplicationIcon` nel `.csproj`; `MainForm.cs` lo estrae a runtime
+  dall'exe (`Icon.ExtractAssociatedIcon`) per l'icona della finestra. `assets/sfondo.png`
+  (embedded resource) mostrato a tutto schermo dietro al `WebView2` finché la pagina non ha
+  finito di caricare.
+
+- [x] **Finestra massimizzata all'avvio + durata minima sfondo caricamento** (2026-08-05, commit
+  a60e456, su richiesta esplicita): `WindowState = Maximized` invece della dimensione fissa
+  1280×860; sfondo di caricamento mostrato per almeno 1,5s prima di lasciare spazio al
+  `WebView2` (il caricamento da server locale è troppo rapido perché si veda altrimenti). Rimossa
+  la cartella `img/` con gli originali (duplicati in `launcher/CarrieraLauncher/assets/`).
+
+- [x] **Prima release versionata pubblicata: v0.2.0** (2026-08-05, commit b308736 + tag v0.2.0,
+  su richiesta esplicita dell'utente): bump `package.json`/`package-lock.json` 0.1.0→0.2.0
+  (il vecchio tag `v0.1.0` puntava a un commit ormai superato — bump necessario perché
+  l'auto-updater del launcher confronta le versioni), `dist/Carriera.exe` rigenerato
+  (FileVersion 0.2.0.0 verificato) e allegato alla [release GitHub
+  v0.2.0](https://github.com/Gioixxx/Carriera/releases/tag/v0.2.0) con note di rilascio.
+
+- [x] **2 fix di tech-debt da confronto originale-vs-clone** (2026-08-05, non ancora committati a
+  inizio di questa voce): **Champions vs Europa League** (`continentalCompetition` in
+  `data/clubs.ts`, soglia `prestige >= 2`, badge Europa League nuovo) e **copertura club estesa a
+  5 nuovi paesi** (Portogallo/Francia/Germania/Paesi Bassi/Argentina, 40 club reali, 84→124
+  totali, crest TheSportsDB verificati uno per uno) — vedi [[decisions]] per il ragionamento
+  completo, [[tech-debt]] per gli item ora archiviati. 170 test (era 168), `tsc`/eslint puliti sui
+  file toccati. Non verificato manualmente nel browser il caso raro (finale continentale, 15% di
+  probabilità); verificato invece via test dedicati (mappatura prestige→trofeo,
+  `generateAcademyOffer`/`isReturnHomeEligible` per un giocatore portoghese). Restano in
+  tech-debt.md 4 item dei 6 trovati dal confronto: eventi narrativi mancanti, percentuali su
+  `DecisionPanel`, evento cambio-nazionalità, anti-ripetizione lifestyle.
 
 ## Ricerca completata (agenti background, 2026-08-05)
 - **Esplorazione aggiuntiva 4** sul sito originale (scritta in `piped-bouncing-cocke.md`, fuori dal repo): catene di prestito ancora mai osservate (0/47 cicli aggiuntivi, conclusione: probabilmente non serve modellarle); esito di "Look for a way out" chiarito (trasferimento immediato deterministico, stesso pattern di un'offerta normale accettata); **correzione importante**: l'originale usa sempre nomi di trofeo reali (World Cup, Copa América, Champions League, Europa League, Copa Libertadores, Copa Argentina) mai un placeholder generico "Eurocup" come assunto prima — rilevante per [[backlog]] (nomi confederazione-specifici per trofei nazionale); awards individuali confermati vuoti in 14/14 carriere cumulative anche nel caso più estremo osservato finora (OVR 90, Mondiale + 3x Copa América, 9 trofei di club)

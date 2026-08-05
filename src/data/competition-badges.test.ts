@@ -5,7 +5,7 @@ import { COMPETITION_BADGES, getCompetitionBadge } from "./competition-badges";
 describe("COMPETITION_BADGES", () => {
   it("ogni URL è un hotlink https a thesportsdb.com", () => {
     for (const url of Object.values(COMPETITION_BADGES)) {
-      expect(url).toMatch(/^https:\/\/(r2\.)?thesportsdb\.com\//);
+      expect(url).toMatch(/^https:\/\/(r2\.|www\.)?thesportsdb\.com\//);
     }
   });
 

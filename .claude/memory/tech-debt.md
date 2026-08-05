@@ -64,24 +64,6 @@ Registro debito tecnico con priorità. Aggiornato da /session-end. Origine spess
 - **Impatto:** rischio medio — è UI nuova e non banale (focus trap, coda di overlay multipli, animazioni condizionate), un bug qui sarebbe visibile all'utente ad ogni trofeo/premio vinto.
 - **Risoluzione suggerita:** prima della prossima release, giocare una carriera fino a ottenere almeno un trofeo, un premio e una convocazione in nazionale nella stessa sessione per vedere la coda di overlay in sequenza; testare anche con `prefers-reduced-motion: reduce` attivo nel sistema.
 
-### Champions League ed Europa League non distinte (un solo trofeo continentale UEFA)
-- **Priorità:** Alta
-- **Area:** `data/clubs.ts` (`CONTINENTAL_CUP`), `lib/career/trophies.ts` (`rollClubTrophies`)
-- **Data:** 2026-08-05
-- **Descrizione:** un agente ha giocato una carriera fresca sul sito originale e una equivalente sul clone (confrontate anche col codice sorgente): `CONTINENTAL_CUP` mappa **un solo** trofeo per confederazione (UEFA → sempre "Champions League" fisso, CONMEBOL → sempre "Copa Libertadores" fisso). L'originale tratta Champions League ed Europa League come due trofei europei distinti e non intercambiabili (confermato più volte anche nella ricerca precedente, Esplorazione 4, e nell'evento "Club priority" che a volte fa scegliere quale delle due inseguire).
-- **Perché rimandato:** non emerso come gap fino a questo confronto diretto — la scelta di un trofeo continentale fisso per confederazione era stata presa senza verificare che l'originale ne distinguesse due per l'Europa.
-- **Impatto:** un club di prestigio medio-alto in UEFA nel clone può vincere solo "Champions League", mai "Europa League" — meno fedele e meno varietà nei trofei di fine carriera.
-- **Risoluzione suggerita:** introdurre un secondo tier di coppa continentale UEFA (Champions vs Europa League, probabilmente legato al prestigio del club) in `CONTINENTAL_CUP`/`rollClubTrophies`; basso costo, la logica di roll pesato esiste già. Badge TheSportsDB da verificare/aggiungere in `data/competition-badges.ts`.
-
-### Copertura club/campionati limitata a 4 paesi nonostante 41 nazionalità in `countries.ts`
-- **Priorità:** Media
-- **Area:** `data/clubs.ts`, `data/countries.ts`, `lib/career/decisions.ts` (`generateAcademyOffer`, `clubsByCountry`)
-- **Data:** 2026-08-05
-- **Descrizione:** confermato giocando una carriera con un giocatore portoghese sul clone: ha ricevuto offerte da club italiani/spagnoli (Novara, Frosinone, Real Oviedo) perché `clubs.ts` copre solo Italia (Serie A/B/C), Inghilterra (Premier/Championship), Spagna (La Liga/LaLiga2) e Brasile (Série A/B) — 2 confederazioni. `countries.ts` ha invece 41 nazionalità, quasi tutte senza club corrispondenti. **La logica di filtro per nazionalità è già corretta** (`generateAcademyOffer` prova prima `clubsByCountry(identity.nationality)`, ripiega sul pool globale solo se <3 club) — è un gap di dati, non di logica.
-- **Perché rimandato:** le 84 squadre attuali coprivano il minimo per far girare il loop di gioco end-to-end; estendere il dataset non era mai stato prioritario finché non si è osservato l'effetto pratico (offerte cross-country immotivate per nazionalità comuni).
-- **Impatto:** qualunque giocatore con nazionalità fuori dai 4 paesi coperti riceve offerte "casuali" per nazionalità invece che dal proprio paese — rompe l'immersione per le nazionalità più probabili da scegliere (europee/sudamericane popolari).
-- **Risoluzione suggerita:** estendere `clubs.ts` per le nazionalità più comuni già in `countries.ts`, in ordine di priorità: Portogallo, Francia, Germania, Paesi Bassi, Argentina (tutte osservate ripetutamente sia nell'originale che già presenti come nazionalità selezionabili nel clone).
-
 ### Eventi narrativi osservati nell'originale ma assenti in `decisions.ts`
 - **Priorità:** Media
 - **Area:** `lib/career/decisions.ts` (pool lifestyle/club-crisis)
@@ -119,9 +101,10 @@ Registro debito tecnico con priorità. Aggiornato da /session-end. Origine spess
 - **Risoluzione suggerita:** in una sessione futura, loggare la sequenza di categorie/generatori scelti su più carriere simulate (RNG reale) e verificare se esiste già una finestra anti-ripetizione in `pickClubCrisisDecision`; se assente, valutare di aggiungerne una semplice (es. non ripetere lo stesso generatore per N cicli).
 
 ## Priorità
-- **Alta:** Champions League/Europa League non distinte (vedi sopra)
-- **Media:** statistiche portiere; probabilità trofei/award/nazionale non validate con playtest; momenti celebrativi/timeline non verificati end-to-end; copertura club/campionati limitata a 4 paesi; eventi narrativi mancanti rispetto all'originale (vedi sopra)
+- **Alta:** —
+- **Media:** statistiche portiere; probabilità trofei/award/nazionale non validate con playtest; momenti celebrativi/timeline non verificati end-to-end; eventi narrativi mancanti rispetto all'originale (vedi sopra)
 - **Bassa:** soglia di ritiro automatico; generatori club-crisis con probabilità uniforme; percentuali outcome non visibili in `DecisionPanel`; evento cambio-nazionalità mai implementato; possibile assenza di finestra anti-ripetizione eventi lifestyle (vedi sopra)
 
 ## Archiviato
-- [item risolti]
+- **Champions League ed Europa League non distinte** — risolto 2026-08-05: i club UEFA di tier 1 assegnano "Champions League" se prestige ≥2, "Europa League" altrimenti (`continentalCompetition` in `data/clubs.ts`), badge Europa League aggiunto in `data/competition-badges.ts`. Test dedicato in `clubs.test.ts`.
+- **Copertura club/campionati limitata a 4 paesi** — risolto 2026-08-05: estesi `data/clubs.ts`/`leagues` con Portogallo (Primeira Liga), Francia (Ligue 1), Germania (Bundesliga), Paesi Bassi (Eredivisie), Argentina (Liga Profesional) — 40 nuovi club reali con crest TheSportsDB verificati, 84→124 totali. Badge campionato/coppa nazionale aggiunti in `competition-badges.ts`. Verificato con test dedicato che `generateAcademyOffer`/`isReturnHomeEligible` funzionino per un giocatore portoghese (prima ripiegavano su club italiani/spagnoli per mancanza di dati).

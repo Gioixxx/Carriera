@@ -19,9 +19,20 @@ export const COMPETITION_BADGES: Record<string, string> = {
   "Brasileirão Série B": "https://r2.thesportsdb.com/images/media/league/badge/iiz0gf1778446845.png",
   "Copa do Brasil": "https://r2.thesportsdb.com/images/media/league/badge/h38dax1582151151.png",
   "Champions League": "https://r2.thesportsdb.com/images/media/league/badge/facv1u1742998896.png",
+  "Europa League": "https://r2.thesportsdb.com/images/media/league/badge/mlsr7d1718774547.png",
   "Copa Libertadores": "https://r2.thesportsdb.com/images/media/league/badge/9shr931685425181.png",
   Mondiale: "https://r2.thesportsdb.com/images/media/league/badge/e7er5g1696521789.png",
   Europei: "https://r2.thesportsdb.com/images/media/league/badge/bivzlu1635869135.png",
+  "Primeira Liga": "https://www.thesportsdb.com/images/media/league/badge/3tgdke1782689102.png",
+  "Taça de Portugal": "https://r2.thesportsdb.com/images/media/league/badge/hyy7lq1593011553.png",
+  "Ligue 1": "https://r2.thesportsdb.com/images/media/league/badge/9f7z9d1742983155.png",
+  "Coupe de France": "https://r2.thesportsdb.com/images/media/league/badge/l6fitb1546469041.png",
+  Bundesliga: "https://r2.thesportsdb.com/images/media/league/badge/teqh1b1679952008.png",
+  "DFB-Pokal": "https://r2.thesportsdb.com/images/media/league/badge/tlczpm1780941454.png",
+  Eredivisie: "https://r2.thesportsdb.com/images/media/league/badge/5cdsu21725984946.png",
+  "KNVB Beker": "https://r2.thesportsdb.com/images/media/league/badge/to8dpt1757803973.png",
+  "Liga Profesional": "https://r2.thesportsdb.com/images/media/league/badge/rk9xhx1768238251.png",
+  "Copa Argentina": "https://r2.thesportsdb.com/images/media/league/badge/welbig1655924428.png",
 };
 
 export function getCompetitionBadge(competition: string): string | undefined {

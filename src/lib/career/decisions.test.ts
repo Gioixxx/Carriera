@@ -91,6 +91,11 @@ describe("generateAcademyOffer", () => {
     const decision = generateAcademyOffer({ nationality: "Italy" }, FIXED_RNG);
     expect(decision.options.every((o) => o.club!.country === "Italy")).toBe(true);
   });
+
+  it("dovrebbe proporre club portoghesi a un giocatore portoghese (copertura club estesa)", () => {
+    const decision = generateAcademyOffer({ nationality: "Portugal" }, FIXED_RNG);
+    expect(decision.options.every((o) => o.club!.country === "Portugal")).toBe(true);
+  });
 });
 
 describe("generateTransferWindow", () => {
@@ -199,6 +204,14 @@ describe("eventi condizionati dal contesto", () => {
       nationality: "Brazil",
     };
     expect(isReturnHomeEligible(brazilianAbroad)).toBe(true);
+  });
+
+  it("isReturnHomeEligible dovrebbe essere vero per un portoghese all'estero (copertura club estesa)", () => {
+    const portugueseAbroad: Player = {
+      ...playerAt(getClub("juventus")!),
+      nationality: "Portugal",
+    };
+    expect(isReturnHomeEligible(portugueseAbroad)).toBe(true);
   });
 
   it("generateReturnHome dovrebbe proporre un club del paese di nazionalità", () => {
