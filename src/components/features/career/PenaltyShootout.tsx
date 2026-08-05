@@ -55,6 +55,9 @@ export function PenaltyShootout({ decision, onChoose }: PenaltyShootoutProps) {
           </button>
         ))}
       </div>
+      {decision.options[0]?.hint ? (
+        <p className="text-xs text-(--color-text-muted)">{decision.options[0].hint}</p>
+      ) : null}
     </div>
   );
 }

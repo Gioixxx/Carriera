@@ -1,6 +1,7 @@
 import { Flag, Trophy as TrophyIcon } from "lucide-react";
-import type { Player } from "@/types/career";
+import type { ArchivedCareer, Player } from "@/types/career";
 import { AWARD_LABELS } from "@/lib/career/award-labels";
+import { hallOfFameWinsFor, pickBestCareerTitle } from "@/lib/career/satisfaction";
 import { peakOvr, summarizeClubHistory } from "@/lib/career/summary";
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
@@ -17,9 +18,20 @@ const SAVINGS_FORMATTER = new Intl.NumberFormat("it-IT", {
   maximumFractionDigits: 1,
 });
 
+const HOF_WIN_LABELS: Record<
+  "highestOvr" | "mostTrophies" | "richest" | "mostPopular",
+  string
+> = {
+  highestOvr: "OVR record",
+  mostTrophies: "Più trofei",
+  richest: "Più ricco",
+  mostPopular: "Più popolare",
+};
+
 interface CareerSummaryProps {
   player: Player;
   onRestart: () => void;
+  archive?: ArchivedCareer[];
 }
 
 function EmptyShowcase({ children }: { children: string }) {
@@ -31,10 +43,12 @@ function EmptyShowcase({ children }: { children: string }) {
   );
 }
 
-export function CareerSummary({ player, onRestart }: CareerSummaryProps) {
+export function CareerSummary({ player, onRestart, archive = [] }: CareerSummaryProps) {
   const clubs = summarizeClubHistory(player.clubHistory);
   const trophies = [...player.trophies].sort((a, b) => a.age - b.age);
   const awards = [...player.awards].sort((a, b) => a.age - b.age);
+  const bestTitle = pickBestCareerTitle(player.seasonTitles);
+  const recentTitles = [...player.seasonTitles].slice(-4).reverse();
 
   const highlightTrophies = [...trophies].slice(-3).reverse();
   const highlightAwards = [...awards].slice(-2).reverse();
@@ -42,6 +56,25 @@ export function CareerSummary({ player, onRestart }: CareerSummaryProps) {
     highlightTrophies.length > 0 ||
     highlightAwards.length > 0 ||
     player.nationalTeam.called;
+
+  const provisionalEntry: ArchivedCareer = {
+    id: "__current__",
+    lastName: player.lastName,
+    nationality: player.nationality,
+    position: player.position,
+    peakOvr: peakOvr(player),
+    trophyCount: player.trophies.length,
+    awardCount: player.awards.length,
+    retiredAge: player.age,
+    retiredAtIso: new Date().toISOString(),
+    careerApps: player.career.apps,
+    careerGoals: player.career.goals,
+    careerAssists: player.career.assists,
+    finalSavingsEur: player.wallet.savingsEur,
+    finalPopularity: player.popularity,
+    careerTitle: bestTitle,
+  };
+  const hofWins = hallOfFameWinsFor(provisionalEntry, archive);
 
   return (
     <div className="animate-step-in flex min-h-0 min-w-0 flex-1 flex-col gap-3 overflow-y-auto lg:overflow-hidden">
@@ -56,7 +89,7 @@ export function CareerSummary({ player, onRestart }: CareerSummaryProps) {
           </h2>
           <p className="text-xs text-(--color-text-muted) sm:text-sm">
             Ritirato a {player.age} anni · {player.clubHistory.length}{" "}
-            {player.clubHistory.length === 1 ? "ciclo" : "cicli"}
+            {player.clubHistory.length === 1 ? "ciclo" : "cicli"} · {bestTitle}
           </p>
         </div>
 
@@ -102,6 +135,39 @@ export function CareerSummary({ player, onRestart }: CareerSummaryProps) {
           <PopularityMeter value={player.popularity} className="min-w-24 flex-1" />
         </span>
       </div>
+
+      {hofWins.length > 0 ? (
+        <div className="flex shrink-0 flex-wrap items-center gap-2">
+          <span className="font-display text-[10px] tracking-[0.2em] text-(--color-accent) uppercase">
+            Hall of Fame
+          </span>
+          {hofWins.map((win) => (
+            <span
+              key={win}
+              className="rounded-full border border-(--color-accent)/40 bg-(--color-accent)/10 px-2.5 py-1 text-xs text-(--color-accent)"
+            >
+              {HOF_WIN_LABELS[win]}
+            </span>
+          ))}
+        </div>
+      ) : null}
+
+      {recentTitles.length > 0 ? (
+        <div className="flex shrink-0 flex-wrap items-center gap-2">
+          <span className="font-display text-[10px] tracking-[0.2em] text-(--color-ovr-gold) uppercase">
+            Titoli di stagione
+          </span>
+          {recentTitles.map((t, i) => (
+            <span
+              key={`${t.id}-${t.age}-${i}`}
+              className="rounded-full border border-(--color-ovr-gold)/35 bg-(--color-ovr-gold)/10 px-2.5 py-1 text-xs text-(--color-text)"
+            >
+              {t.label}
+              <span className="text-(--color-text-muted)"> · {t.age}</span>
+            </span>
+          ))}
+        </div>
+      ) : null}
 
       {hasHighlights ? (
         <div className="flex shrink-0 flex-wrap items-center gap-2">

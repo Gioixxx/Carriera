@@ -1,6 +1,7 @@
 import { Trophy as TrophyIcon } from "lucide-react";
 import type { ArchivedCareer } from "@/types/career";
 import { countries } from "@/data/countries";
+import { computeHallOfFame } from "@/lib/career/satisfaction";
 import { Button } from "@/components/ui/Button";
 import { CountryFlag } from "./CountryFlag";
 import { OvrBadge } from "./OvrBadge";
@@ -18,12 +19,40 @@ const SAVINGS_FORMATTER = new Intl.NumberFormat("it-IT", {
 });
 
 export function CareerArchive({ entries, onBack }: CareerArchiveProps) {
+  const hof = computeHallOfFame(entries);
+
   return (
     <div className="flex min-w-0 flex-col items-center gap-5 text-center">
       <div>
         <p className="font-display text-xs tracking-[0.3em] text-(--color-accent)">Archivio</p>
         <h2 className="font-display text-2xl text-(--color-text)">Le mie carriere</h2>
       </div>
+
+      {entries.length > 0 ? (
+        <div className="w-full min-w-0 rounded-xl border border-(--color-accent)/30 bg-(--color-surface) p-4 text-left">
+          <p className="font-display mb-3 text-[10px] tracking-[0.25em] text-(--color-accent) uppercase">
+            Hall of Fame
+          </p>
+          <ul className="grid gap-2 sm:grid-cols-2">
+            <HofRow label="OVR più alto" entry={hof.highestOvr} detail={hof.highestOvr ? `OVR ${hof.highestOvr.peakOvr}` : null} />
+            <HofRow
+              label="Più trofei"
+              entry={hof.mostTrophies}
+              detail={hof.mostTrophies ? `${hof.mostTrophies.trophyCount} trofei` : null}
+            />
+            <HofRow
+              label="Più ricco"
+              entry={hof.richest}
+              detail={hof.richest ? SAVINGS_FORMATTER.format(hof.richest.finalSavingsEur) : null}
+            />
+            <HofRow
+              label="Più popolare"
+              entry={hof.mostPopular}
+              detail={hof.mostPopular ? `Pop ${hof.mostPopular.finalPopularity}` : null}
+            />
+          </ul>
+        </div>
+      ) : null}
 
       {entries.length === 0 ? (
         <div className="flex flex-col items-center gap-1.5 rounded-lg border border-dashed border-(--color-border) px-6 py-8 text-center">
@@ -35,6 +64,11 @@ export function CareerArchive({ entries, onBack }: CareerArchiveProps) {
           <ul className="divide-y divide-(--color-border)">
             {entries.map((entry) => {
               const country = countries.find((c) => c.name === entry.nationality);
+              const isHof =
+                entry.id === hof.highestOvr?.id ||
+                entry.id === hof.mostTrophies?.id ||
+                entry.id === hof.richest?.id ||
+                entry.id === hof.mostPopular?.id;
               return (
                 <li
                   key={entry.id}
@@ -56,11 +90,17 @@ export function CareerArchive({ entries, onBack }: CareerArchiveProps) {
                       {entry.position}
                     </span>
                     <OvrBadge ovr={entry.peakOvr} size="sm" />
+                    {isHof ? (
+                      <span className="shrink-0 rounded bg-(--color-accent)/15 px-1.5 py-0.5 text-[10px] font-semibold tracking-wide text-(--color-accent) uppercase">
+                        HoF
+                      </span>
+                    ) : null}
                   </div>
                   <p className="pl-6 text-xs text-(--color-text-muted) sm:pl-0">
+                    {entry.careerTitle ? `${entry.careerTitle} · ` : ""}
                     Ritirato a {entry.retiredAge} anni · {entry.trophyCount}{" "}
                     {entry.trophyCount === 1 ? "trofeo" : "trofei"} · {entry.awardCount}{" "}
-                    {entry.awardCount === 1 ? "premio" : "premi"} ·{" "}
+                    {entry.awardCount === 1 ? "premio" : "premi"} · Pop {entry.finalPopularity} ·{" "}
                     {SAVINGS_FORMATTER.format(entry.finalSavingsEur)}
                   </p>
                 </li>
@@ -74,5 +114,31 @@ export function CareerArchive({ entries, onBack }: CareerArchiveProps) {
         Torna
       </Button>
     </div>
+  );
+}
+
+function HofRow({
+  label,
+  entry,
+  detail,
+}: {
+  label: string;
+  entry: ArchivedCareer | null;
+  detail: string | null;
+}) {
+  return (
+    <li className="rounded-lg bg-(--color-surface-raised)/60 px-3 py-2">
+      <p className="text-[10px] font-semibold tracking-wide text-(--color-text-muted) uppercase">
+        {label}
+      </p>
+      {entry ? (
+        <p className="text-sm text-(--color-text)">
+          <span className="font-semibold">{entry.lastName.toUpperCase()}</span>
+          {detail ? <span className="text-(--color-text-muted)"> · {detail}</span> : null}
+        </p>
+      ) : (
+        <p className="text-sm text-(--color-text-muted)">—</p>
+      )}
+    </li>
   );
 }

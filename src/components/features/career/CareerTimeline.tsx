@@ -1,4 +1,4 @@
-import { Award as AwardIcon, Trophy } from "lucide-react";
+import { Award as AwardIcon, Star, Trophy } from "lucide-react";
 import type { Player } from "@/types/career";
 import { STARTING_AGE } from "@/lib/career/engine";
 
@@ -17,7 +17,7 @@ function ageToPercent(age: number): number {
 export function CareerTimeline({ player }: CareerTimelineProps) {
   const progress = ageToPercent(player.age);
 
-  const markers: { age: number; title: string; kind: "trophy" | "award" }[] = [];
+  const markers: { age: number; title: string; kind: "trophy" | "award" | "milestone" }[] = [];
   for (const trophy of player.trophies) {
     markers.push({
       age: trophy.age,
@@ -30,6 +30,13 @@ export function CareerTimeline({ player }: CareerTimelineProps) {
       age: award.age,
       title: `Premio · ${award.age} anni`,
       kind: "award",
+    });
+  }
+  for (const milestone of player.milestonesReached) {
+    markers.push({
+      age: milestone.age,
+      title: `OVR ${milestone.ovr} · ${milestone.age} anni`,
+      kind: "milestone",
     });
   }
 
@@ -53,8 +60,10 @@ export function CareerTimeline({ player }: CareerTimelineProps) {
           >
             {m.kind === "trophy" ? (
               <Trophy size={14} aria-hidden="true" />
-            ) : (
+            ) : m.kind === "award" ? (
               <AwardIcon size={14} aria-hidden="true" />
+            ) : (
+              <Star size={14} aria-hidden="true" />
             )}
           </span>
         ))}

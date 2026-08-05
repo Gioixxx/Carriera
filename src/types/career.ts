@@ -91,6 +91,53 @@ export interface Wallet {
   savingsEur: number;
 }
 
+/** Soglia OVR già celebrata, con età al momento del traguardo (per la timeline). */
+export interface OvrMilestone {
+  ovr: number;
+  age: number;
+}
+
+/** Record personali aggiornati ciclo per ciclo. */
+export interface PersonalRecords {
+  bestSeasonGoals: number;
+  bestSeasonAssists: number;
+  bestSeasonApps: number;
+  peakMarketValueEur: number;
+  firstCallupAge: number | null;
+}
+
+export type SeasonTitleId =
+  | "champion"
+  | "ballondorSeason"
+  | "nationalHero"
+  | "revelation"
+  | "comeback"
+  | "workhorse"
+  | "toughYear"
+  | "steady";
+
+export interface SeasonTitleEntry {
+  age: number;
+  id: SeasonTitleId;
+  label: string;
+}
+
+export type CycleObjectiveKind =
+  | "goals"
+  | "apps"
+  | "trophy"
+  | "no-injury"
+  | "callup"
+  | "ovr-gain";
+
+/** Obiettivo del ciclo corrente, mostrato sul cartellino e valutato a fine ciclo. */
+export interface CycleObjective {
+  id: string;
+  label: string;
+  kind: CycleObjectiveKind;
+  target: number;
+}
+
 export interface Player extends PlayerIdentity {
   age: number;
   ovr: number;
@@ -106,6 +153,11 @@ export interface Player extends PlayerIdentity {
   wallet: Wallet;
   /** Reputazione/popolarità continua, 0-100. */
   popularity: number;
+  milestonesReached: OvrMilestone[];
+  records: PersonalRecords;
+  /** Ultimi titoli di stagione (cap applicato nel dominio). */
+  seasonTitles: SeasonTitleEntry[];
+  currentObjective: CycleObjective | null;
 }
 
 /** Effetto applicabile al giocatore da un outcome di decisione. */
@@ -142,6 +194,8 @@ export interface DecisionOutcome {
 export interface DecisionOption {
   id: string;
   label: string;
+  /** Hint soft sul trade-off (solo UI, senza pesi numerici). */
+  hint?: string;
   /** Se presente, selezionare questa opzione firma il giocatore per questo club (anche "resta"). */
   club?: Club;
   /** Se true, selezionare questa opzione termina la carriera (es. "Retire" in end-of-cycle). */
@@ -174,4 +228,6 @@ export interface ArchivedCareer {
   careerAssists: number;
   finalSavingsEur: number;
   finalPopularity: number;
+  /** Miglior titolo di stagione della carriera, o fallback narrativo. */
+  careerTitle: string;
 }

@@ -1,9 +1,10 @@
 import type { ArchivedCareer, DecisionCategory, GameSpeed, Player } from "@/types/career";
 import type { LoopContext } from "./loop";
+import { emptyPersonalRecords, pickBestCareerTitle } from "./satisfaction";
 import { peakOvr } from "./summary";
 
 const STORAGE_KEY = "carriera:save";
-const STORAGE_VERSION = 2;
+const STORAGE_VERSION = 3;
 
 export interface SavedGame {
   version: number;
@@ -15,11 +16,22 @@ export interface SavedGame {
 
 /** Arricchisce un save v1 (privo di injury/wallet/popularity) con i default, invece di scartarlo. */
 function migratePlayerV1(raw: Player): Player {
-  return {
+  return migratePlayerV2({
     ...raw,
     injury: raw.injury ?? null,
     wallet: raw.wallet ?? { salaryEurPerCycle: 0, savingsEur: 0 },
     popularity: raw.popularity ?? 15,
+  });
+}
+
+/** Arricchisce un save v2 (privo dei campi soddisfazione) con i default. */
+function migratePlayerV2(raw: Player): Player {
+  return {
+    ...raw,
+    milestonesReached: raw.milestonesReached ?? [],
+    records: raw.records ?? emptyPersonalRecords(raw.marketValueEur ?? 0),
+    seasonTitles: raw.seasonTitles ?? [],
+    currentObjective: raw.currentObjective ?? null,
   };
 }
 
@@ -39,6 +51,9 @@ export function loadGame(): SavedGame | null {
     if (parsed.version === 1) {
       return { ...parsed, version: STORAGE_VERSION, player: migratePlayerV1(parsed.player) };
     }
+    if (parsed.version === 2) {
+      return { ...parsed, version: STORAGE_VERSION, player: migratePlayerV2(parsed.player) };
+    }
     if (parsed.version !== STORAGE_VERSION) return null;
     return parsed;
   } catch {
@@ -52,12 +67,19 @@ export function clearGame(): void {
 }
 
 const ARCHIVE_KEY = "carriera:archive";
-const ARCHIVE_VERSION = 1;
+const ARCHIVE_VERSION = 2;
 const ARCHIVE_MAX_ENTRIES = 100;
 
 interface ArchivePayload {
   version: number;
   entries: ArchivedCareer[];
+}
+
+function migrateArchiveEntryV1(entry: ArchivedCareer): ArchivedCareer {
+  return {
+    ...entry,
+    careerTitle: entry.careerTitle ?? "",
+  };
 }
 
 export function buildArchiveEntry(player: Player): ArchivedCareer {
@@ -76,6 +98,7 @@ export function buildArchiveEntry(player: Player): ArchivedCareer {
     careerAssists: player.career.assists,
     finalSavingsEur: player.wallet.savingsEur,
     finalPopularity: player.popularity,
+    careerTitle: pickBestCareerTitle(player.seasonTitles),
   };
 }
 
@@ -86,6 +109,9 @@ export function loadArchive(): ArchivedCareer[] {
 
   try {
     const parsed = JSON.parse(raw) as ArchivePayload;
+    if (parsed.version === 1) {
+      return parsed.entries.map(migrateArchiveEntryV1);
+    }
     if (parsed.version !== ARCHIVE_VERSION) return [];
     return parsed.entries;
   } catch {

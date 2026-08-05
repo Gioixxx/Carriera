@@ -7,6 +7,7 @@ import type {
   GameSpeed,
   Injury,
   Player,
+  SeasonTitleEntry,
   Trophy,
 } from "@/types/career";
 import {
@@ -21,6 +22,17 @@ import {
 import { rollInjury, tickInjury } from "./injuries";
 import { clamp, projectNationalStats, type Rng } from "./progression";
 import { computeMarketValue } from "./market";
+import {
+  brokenRecordLabels,
+  buildHighlightReel,
+  detectOvrMilestones,
+  evaluateObjective,
+  evaluateSeasonTitle,
+  pushSeasonTitle,
+  rollCycleObjective,
+  updatePersonalRecords,
+  type CycleSatisfactionContext,
+} from "./satisfaction";
 import { accrueSalary, applyPopularityDelta, popularityDeltaForCycle } from "./wallet";
 import {
   generateClubCrisis,
@@ -199,6 +211,24 @@ export interface CycleResult {
   nationalCallup: boolean;
   newInjury: Injury | null;
   injuryHealed: boolean;
+  newMilestones: number[];
+  seasonTitle: SeasonTitleEntry | null;
+  objectiveResult: { label: string; met: boolean } | null;
+  brokenRecords: string[];
+  highlights: string[];
+}
+
+function emptySatisfactionFields(): Pick<
+  CycleResult,
+  "newMilestones" | "seasonTitle" | "objectiveResult" | "brokenRecords" | "highlights"
+> {
+  return {
+    newMilestones: [],
+    seasonTitle: null,
+    objectiveResult: null,
+    brokenRecords: [],
+    highlights: [],
+  };
 }
 
 /** Fa avanzare l'infortunio del giocatore di un ciclo, o ne estrae uno nuovo, aggiustando l'OVR. */
@@ -251,6 +281,10 @@ export function resolveCycle(
   speed: GameSpeed,
   rng: Rng = Math.random,
 ): CycleResult {
+  const ovrBefore = player.ovr;
+  const wasAlreadyCalled = player.nationalTeam.called;
+  const pendingObjective = player.currentObjective;
+
   const outcome = resolveOutcome(option.outcomes, rng);
   let nextPlayer = applyDelta(player, outcome.effect);
 
@@ -267,6 +301,7 @@ export function resolveCycle(
       nationalCallup: false,
       newInjury: null,
       injuryHealed: false,
+      ...emptySatisfactionFields(),
     };
   }
 
@@ -298,6 +333,7 @@ export function resolveCycle(
   }
 
   let nationalCallup = false;
+  let nationalGoalsThisCycle = 0;
   if (rollNationalCallup(nextPlayer, rng)) {
     nextPlayer = { ...nextPlayer, nationalTeam: { ...nextPlayer.nationalTeam, called: true } };
     nationalCallup = true;
@@ -305,6 +341,7 @@ export function resolveCycle(
 
   if (nextPlayer.nationalTeam.called) {
     const natStats = projectNationalStats(nextPlayer.ovr, nextPlayer.position, seasons, rng);
+    nationalGoalsThisCycle = natStats.goals;
     nextPlayer = {
       ...nextPlayer,
       nationalTeam: {
@@ -338,8 +375,77 @@ export function resolveCycle(
     popularity: applyPopularityDelta(nextPlayer.popularity, popularityDelta),
   };
 
+  const satCtx: CycleSatisfactionContext = {
+    age: nextPlayer.age,
+    ovrBefore,
+    ovrAfter: nextPlayer.ovr,
+    goals: lastStint?.stats.goals ?? 0,
+    assists: lastStint?.stats.assists ?? 0,
+    apps: lastStint?.stats.apps ?? 0,
+    trophies: newTrophies,
+    award: newAward,
+    newInjury: injuryResult.newInjury,
+    injuryHealed: injuryResult.injuryHealed,
+    nationalCallup,
+    nationalGoals: nationalGoalsThisCycle,
+    marketValueEur: nextPlayer.marketValueEur,
+    wasAlreadyCalled,
+  };
+
+  const newMilestoneEntries = detectOvrMilestones(
+    ovrBefore,
+    nextPlayer.ovr,
+    nextPlayer.milestonesReached,
+    nextPlayer.age,
+  );
+  if (newMilestoneEntries.length > 0) {
+    nextPlayer = {
+      ...nextPlayer,
+      milestonesReached: [...nextPlayer.milestonesReached, ...newMilestoneEntries],
+    };
+  }
+
+  let objectiveResult: { label: string; met: boolean } | null = null;
+  if (pendingObjective) {
+    const evaluated = evaluateObjective(pendingObjective, satCtx);
+    objectiveResult = { label: pendingObjective.label, met: evaluated.met };
+    if (evaluated.met) {
+      nextPlayer = applyDelta(nextPlayer, evaluated.reward);
+    }
+  }
+
+  const seasonTitle = evaluateSeasonTitle({
+    age: nextPlayer.age,
+    goals: satCtx.goals,
+    assists: satCtx.assists,
+    apps: satCtx.apps,
+    trophies: newTrophies,
+    award: newAward,
+    newInjury: injuryResult.newInjury,
+    injuryHealed: injuryResult.injuryHealed,
+    ovrDelta: nextPlayer.ovr - ovrBefore,
+    nationalCallup,
+    nationalGoals: nationalGoalsThisCycle,
+  });
+  nextPlayer = {
+    ...nextPlayer,
+    seasonTitles: pushSeasonTitle(nextPlayer.seasonTitles, seasonTitle),
+  };
+
+  const recordsUpdate = updatePersonalRecords(nextPlayer.records, satCtx);
+  nextPlayer = { ...nextPlayer, records: recordsUpdate.records };
+  const brokenRecords = brokenRecordLabels(recordsUpdate.broken);
+
+  const highlights = buildHighlightReel(satCtx, rng);
+
   if (checkRetirement(nextPlayer, rng)) {
     nextPlayer = retire(nextPlayer);
+  }
+
+  if (!nextPlayer.retired) {
+    nextPlayer = { ...nextPlayer, currentObjective: rollCycleObjective(nextPlayer, rng) };
+  } else {
+    nextPlayer = { ...nextPlayer, currentObjective: null };
   }
 
   return {
@@ -353,6 +459,11 @@ export function resolveCycle(
     nationalCallup,
     newInjury: injuryResult.newInjury,
     injuryHealed: injuryResult.injuryHealed,
+    newMilestones: newMilestoneEntries.map((m) => m.ovr),
+    seasonTitle,
+    objectiveResult,
+    brokenRecords,
+    highlights,
   };
 }
 

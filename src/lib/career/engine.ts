@@ -43,6 +43,16 @@ export function createPlayer(identity: PlayerIdentity): Player {
     injury: null,
     wallet: { salaryEurPerCycle: 0, savingsEur: 0 },
     popularity: STARTING_POPULARITY,
+    milestonesReached: [],
+    records: {
+      bestSeasonGoals: 0,
+      bestSeasonAssists: 0,
+      bestSeasonApps: 0,
+      peakMarketValueEur: computeMarketValue(STARTING_OVR, STARTING_AGE),
+      firstCallupAge: null,
+    },
+    seasonTitles: [],
+    currentObjective: null,
   };
 }
 

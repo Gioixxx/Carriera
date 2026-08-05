@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { Award as AwardIcon, HeartCrack, Trophy as TrophyIcon } from "lucide-react";
+import { Award as AwardIcon, HeartCrack, Target, Trophy as TrophyIcon } from "lucide-react";
 import type { Player } from "@/types/career";
 import { countries } from "@/data/countries";
 import { useCountUp } from "@/hooks/useMotion";
@@ -15,6 +15,8 @@ interface PlayerCardProps {
   player: Player;
   /** Compact layout for mobile playing shell */
   compact?: boolean;
+  /** Label dei record appena battuti (flash UI). */
+  flashRecords?: string[];
 }
 
 const VALUE_FORMATTER = new Intl.NumberFormat("it-IT", {
@@ -24,7 +26,7 @@ const VALUE_FORMATTER = new Intl.NumberFormat("it-IT", {
   maximumFractionDigits: 1,
 });
 
-export function PlayerCard({ player, compact = false }: PlayerCardProps) {
+export function PlayerCard({ player, compact = false, flashRecords }: PlayerCardProps) {
   const country = countries.find((c) => c.name === player.nationality);
   const trophyCount = player.trophies.length;
   const awardCount = player.awards.length;
@@ -37,6 +39,7 @@ export function PlayerCard({ player, compact = false }: PlayerCardProps) {
   const prevCounts = useRef({ trophies: trophyCount, awards: awardCount });
   const [flashTrophies, setFlashTrophies] = useState(false);
   const [flashAwards, setFlashAwards] = useState(false);
+  const recordsFlashKey = flashRecords?.join("|") ?? "";
 
   useEffect(() => {
     const prev = prevCounts.current;
@@ -99,6 +102,18 @@ export function PlayerCard({ player, compact = false }: PlayerCardProps) {
         <OvrBadge ovr={displayOvr} />
       </div>
 
+      {player.currentObjective ? (
+        <div className="flex items-start gap-2 rounded-lg border border-(--color-accent)/25 bg-(--color-surface) px-3 py-2">
+          <Target size={14} className="mt-0.5 shrink-0 text-(--color-accent)" aria-hidden="true" />
+          <div className="min-w-0">
+            <p className="text-[10px] font-semibold tracking-wide text-(--color-accent) uppercase">
+              Obiettivo
+            </p>
+            <p className="truncate text-xs text-(--color-text)">{player.currentObjective.label}</p>
+          </div>
+        </div>
+      ) : null}
+
       <div className="flex flex-col gap-1.5 rounded-lg bg-(--color-surface) px-3 py-2 text-sm">
         <div className="flex items-center justify-between">
           <span className="text-(--color-text-muted)">Valore</span>
@@ -113,6 +128,30 @@ export function PlayerCard({ player, compact = false }: PlayerCardProps) {
           </span>
         </div>
         <PopularityMeter value={player.popularity} />
+      </div>
+
+      <div
+        key={recordsFlashKey || "records"}
+        className={cn(
+          "grid grid-cols-3 gap-2 text-center",
+          compact && "hidden sm:grid",
+          recordsFlashKey && "animate-count-flash rounded-lg",
+        )}
+      >
+        <div className="rounded-lg bg-(--color-surface) py-2">
+          <p className="font-display text-lg text-(--color-text)">{player.records.bestSeasonGoals}</p>
+          <p className="text-[10px] tracking-wide text-(--color-text-muted) uppercase">Best gol</p>
+        </div>
+        <div className="rounded-lg bg-(--color-surface) py-2">
+          <p className="font-display text-lg text-(--color-text)">
+            {player.records.bestSeasonAssists}
+          </p>
+          <p className="text-[10px] tracking-wide text-(--color-text-muted) uppercase">Best ast</p>
+        </div>
+        <div className="rounded-lg bg-(--color-surface) py-2">
+          <p className="font-display text-lg text-(--color-text)">{player.records.bestSeasonApps}</p>
+          <p className="text-[10px] tracking-wide text-(--color-text-muted) uppercase">Best pr</p>
+        </div>
       </div>
 
       <div className={cn("grid grid-cols-3 gap-2 text-center", compact && "hidden sm:grid")}>

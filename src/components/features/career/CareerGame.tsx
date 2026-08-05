@@ -45,11 +45,13 @@ function SeasonBeat({
   ageBefore,
   clubName,
   crestUrl,
+  seasonTitle,
 }: {
   playerAge: number;
   ageBefore: number;
   clubName: string | null;
   crestUrl?: string;
+  seasonTitle?: string | null;
 }) {
   return (
     <Card className="animate-step-in flex flex-col items-center gap-3 border-(--color-accent)/30 p-6 text-center sm:p-8">
@@ -68,7 +70,11 @@ function SeasonBeat({
         {playerAge}
         <span className="ml-2 text-lg tracking-wide text-(--color-text-muted)">anni</span>
       </p>
-      <p className="animate-pulse text-sm text-(--color-text-muted)">Stagione in corso…</p>
+      {seasonTitle ? (
+        <p className="font-display text-sm tracking-wide text-(--color-ovr-gold)">{seasonTitle}</p>
+      ) : (
+        <p className="animate-pulse text-sm text-(--color-text-muted)">Stagione in corso…</p>
+      )}
     </Card>
   );
 }
@@ -112,7 +118,13 @@ function OutcomeBanner({
   return (
     <Card className="animate-step-in flex flex-col gap-3 border-(--color-accent)/40 p-4 sm:p-5">
       <div>
-        <p className="font-display text-xs tracking-[0.3em] text-(--color-accent)">Esito</p>
+        {outcome.seasonTitle ? (
+          <p className="font-display text-xs tracking-[0.3em] text-(--color-ovr-gold)">
+            {outcome.seasonTitle.label}
+          </p>
+        ) : (
+          <p className="font-display text-xs tracking-[0.3em] text-(--color-accent)">Esito</p>
+        )}
         <p
           className={cn(
             "font-semibold text-(--color-text) transition-opacity duration-300",
@@ -130,6 +142,21 @@ function OutcomeBanner({
           {outcome.outcomeText}
         </p>
       </div>
+
+      {outcome.highlights.length > 0 ? (
+        <ul
+          className={cn(
+            "flex flex-col gap-1 border-l-2 border-(--color-accent)/40 pl-3 transition-opacity duration-300",
+            stage >= 1 ? "opacity-100" : "opacity-0",
+          )}
+        >
+          {outcome.highlights.map((line) => (
+            <li key={line} className="text-sm text-(--color-text)">
+              {line}
+            </li>
+          ))}
+        </ul>
+      ) : null}
 
       <div
         className={cn(
@@ -156,6 +183,18 @@ function OutcomeBanner({
         ) : (
           <p className="text-sm text-(--color-text-muted)">OVR invariato ({outcome.ovrBefore})</p>
         )}
+
+        {outcome.objectiveResult ? (
+          <p
+            className={cn(
+              "text-sm font-medium",
+              outcome.objectiveResult.met ? "text-(--color-success)" : "text-(--color-text-muted)",
+            )}
+          >
+            Obiettivo {outcome.objectiveResult.met ? "raggiunto" : "mancato"}:{" "}
+            {outcome.objectiveResult.label}
+          </p>
+        ) : null}
 
         {outcome.nationalCallup ? (
           <p className="text-sm font-medium text-(--color-accent)">Convocato in nazionale!</p>
@@ -297,7 +336,13 @@ export function CareerGame() {
       return;
     }
 
-    const nextMoments = buildCareerMoments(outcome);
+    const nextMoments = buildCareerMoments({
+      newTrophies: outcome.newTrophies,
+      newAward: outcome.newAward,
+      nationalCallup: outcome.nationalCallup,
+      newMilestones: outcome.newMilestones,
+      brokenRecords: outcome.brokenRecords,
+    });
     setMoments(nextMoments);
     setMomentIndex(0);
     setResolvePhase("season");
@@ -494,7 +539,11 @@ export function CareerGame() {
 
               <div className="grid min-h-0 min-w-0 flex-1 gap-3 lg:grid-cols-[18rem_1fr] lg:items-stretch xl:grid-cols-[20rem_1fr]">
                 <div className="min-w-0 shrink-0 lg:max-h-full lg:overflow-y-auto">
-                  <PlayerCard player={state.player} compact />
+                  <PlayerCard
+                    player={state.player}
+                    compact
+                    flashRecords={state.lastOutcome?.brokenRecords}
+                  />
                 </div>
 
                 <div className="flex min-h-0 min-w-0 flex-col gap-3">
@@ -506,6 +555,7 @@ export function CareerGame() {
                         ageBefore={state.lastOutcome.ageBefore}
                         clubName={state.player.club?.name ?? null}
                         crestUrl={state.player.club?.crestUrl}
+                        seasonTitle={state.lastOutcome.seasonTitle?.label}
                       />
                     ) : null}
 
@@ -567,6 +617,7 @@ export function CareerGame() {
               key={`summary-${state.player.lastName}-${state.player.age}`}
               player={state.player}
               onRestart={handleRestart}
+              archive={loadArchive()}
             />
           ) : null}
         </>

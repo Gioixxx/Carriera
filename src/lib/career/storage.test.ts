@@ -53,6 +53,10 @@ describe("saveGame / loadGame", () => {
     delete legacyPlayer.injury;
     delete legacyPlayer.wallet;
     delete legacyPlayer.popularity;
+    delete legacyPlayer.milestonesReached;
+    delete legacyPlayer.records;
+    delete legacyPlayer.seasonTitles;
+    delete legacyPlayer.currentObjective;
     window.localStorage.setItem(
       "carriera:save",
       JSON.stringify({
@@ -65,10 +69,38 @@ describe("saveGame / loadGame", () => {
     );
 
     const loaded = loadGame();
-    expect(loaded?.version).toBe(2);
+    expect(loaded?.version).toBe(3);
     expect(loaded?.player.injury).toBeNull();
     expect(loaded?.player.wallet).toEqual({ salaryEurPerCycle: 0, savingsEur: 0 });
     expect(loaded?.player.popularity).toBe(15);
+    expect(loaded?.player.milestonesReached).toEqual([]);
+    expect(loaded?.player.seasonTitles).toEqual([]);
+    expect(loaded?.player.currentObjective).toBeNull();
+    expect(loaded?.player.records.bestSeasonGoals).toBe(0);
+  });
+
+  it("dovrebbe migrare un save v2 privo dei campi soddisfazione aggiungendo i default", () => {
+    const legacyPlayer = samplePlayer() as unknown as Record<string, unknown>;
+    delete legacyPlayer.milestonesReached;
+    delete legacyPlayer.records;
+    delete legacyPlayer.seasonTitles;
+    delete legacyPlayer.currentObjective;
+    window.localStorage.setItem(
+      "carriera:save",
+      JSON.stringify({
+        version: 2,
+        player: legacyPlayer,
+        speed: "normal",
+        context: INITIAL_LOOP_CONTEXT,
+        recentCategories: [],
+      }),
+    );
+
+    const loaded = loadGame();
+    expect(loaded?.version).toBe(3);
+    expect(loaded?.player.milestonesReached).toEqual([]);
+    expect(loaded?.player.currentObjective).toBeNull();
+    expect(loaded?.player.records.peakMarketValueEur).toBe(samplePlayer().marketValueEur);
   });
 });
 
@@ -109,5 +141,6 @@ describe("loadArchive / appendToArchive", () => {
     expect(entry.awardCount).toBe(0);
     expect(entry.finalSavingsEur).toBe(player.wallet.savingsEur);
     expect(entry.finalPopularity).toBe(player.popularity);
+    expect(entry.careerTitle).toBe("Carriera solida");
   });
 });

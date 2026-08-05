@@ -19,6 +19,7 @@ function sampleEntry(overrides: Partial<ArchivedCareer> = {}): ArchivedCareer {
     careerAssists: 50,
     finalSavingsEur: 5_000_000,
     finalPopularity: 70,
+    careerTitle: "Campione",
     ...overrides,
   };
 }
@@ -31,9 +32,11 @@ describe("CareerArchive", () => {
 
   it("dovrebbe elencare le carriere archiviate con i dati principali", () => {
     render(<CareerArchive entries={[sampleEntry()]} onBack={vi.fn()} />);
-    expect(screen.getByText("ROSSI")).toBeInTheDocument();
+    expect(screen.getAllByText("ROSSI").length).toBeGreaterThan(0);
     expect(screen.getByText(/ritirato a 38 anni/i)).toBeInTheDocument();
-    expect(screen.getByText(/3 trofei/i)).toBeInTheDocument();
+    expect(screen.getAllByText(/3 trofei/i).length).toBeGreaterThan(0);
+    expect(screen.getByText(/hall of fame/i)).toBeInTheDocument();
+    expect(screen.getByText(/campione/i)).toBeInTheDocument();
   });
 
   it("dovrebbe chiamare onBack quando si clicca 'Torna'", () => {

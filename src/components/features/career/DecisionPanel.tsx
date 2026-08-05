@@ -31,6 +31,9 @@ export function DecisionPanel({ decision, onChoose }: DecisionPanelProps) {
             )}
           >
             <span className="text-sm font-semibold text-(--color-text)">{option.label}</span>
+            {option.hint ? (
+              <span className="text-xs text-(--color-text-muted)">{option.hint}</span>
+            ) : null}
           </button>
         ))}
       </div>

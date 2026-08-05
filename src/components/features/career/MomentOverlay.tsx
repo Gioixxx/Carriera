@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useId, useMemo, useRef, type ReactNode } from "react";
-import { Flag } from "lucide-react";
+import { Flag, Star, Trophy as TrophyIcon } from "lucide-react";
 import type { Award, Trophy } from "@/types/career";
 import { AWARD_LABELS } from "@/lib/career/award-labels";
 import { usePrefersReducedMotion } from "@/hooks/useMotion";
@@ -12,7 +12,9 @@ import { CompetitionBadge } from "./CompetitionBadge";
 export type CareerMoment =
   | { kind: "trophy"; trophy: Trophy }
   | { kind: "award"; award: Award }
-  | { kind: "callup" };
+  | { kind: "callup" }
+  | { kind: "milestone"; ovr: number }
+  | { kind: "record"; label: string };
 
 interface MomentOverlayProps {
   moment: CareerMoment;
@@ -106,6 +108,24 @@ export function MomentOverlay({ moment, onContinue }: MomentOverlayProps) {
       ? `${moment.award.club.name} · ${moment.award.age} anni`
       : `${moment.award.age} anni`;
     visual = <AwardBadge size={64} />;
+  } else if (moment.kind === "milestone") {
+    eyebrow = "Traguardo";
+    title = `OVR ${moment.ovr}`;
+    detail = "Sei entrato in una nuova fascia di prestigio.";
+    visual = (
+      <span className="flex h-16 w-16 items-center justify-center rounded-full bg-(--color-ovr-gold)/20 text-(--color-ovr-gold)">
+        <Star size={32} aria-hidden="true" />
+      </span>
+    );
+  } else if (moment.kind === "record") {
+    eyebrow = "Record personale";
+    title = moment.label;
+    detail = "Hai superato il tuo migliore risultato.";
+    visual = (
+      <span className="flex h-16 w-16 items-center justify-center rounded-full bg-(--color-accent)/20 text-(--color-accent)">
+        <TrophyIcon size={32} aria-hidden="true" />
+      </span>
+    );
   } else {
     eyebrow = "Nazionale";
     title = "Convocato in nazionale!";
@@ -160,6 +180,8 @@ export function buildCareerMoments(input: {
   newTrophies: Trophy[];
   newAward: Award | null;
   nationalCallup: boolean;
+  newMilestones?: number[];
+  brokenRecords?: string[];
 }): CareerMoment[] {
   const moments: CareerMoment[] = [];
   for (const trophy of input.newTrophies) {
@@ -170,6 +192,13 @@ export function buildCareerMoments(input: {
   }
   if (input.nationalCallup) {
     moments.push({ kind: "callup" });
+  }
+  for (const ovr of input.newMilestones ?? []) {
+    moments.push({ kind: "milestone", ovr });
+  }
+  const firstRecord = input.brokenRecords?.[0];
+  if (firstRecord) {
+    moments.push({ kind: "record", label: firstRecord });
   }
   return moments;
 }

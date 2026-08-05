@@ -85,6 +85,9 @@ export function OfferPanel({ decision, onChoose }: OfferPanelProps) {
                 Termina la tua carriera da professionista.
               </span>
             ) : null}
+            {option.hint ? (
+              <span className="text-xs text-(--color-text-muted)">{option.hint}</span>
+            ) : null}
           </button>
         ))}
       </div>

@@ -9,6 +9,7 @@ import type {
   Injury,
   Player,
   PlayerIdentity,
+  SeasonTitleEntry,
   Trophy,
 } from "@/types/career";
 import { createPlayer } from "@/lib/career/engine";
@@ -35,6 +36,11 @@ export interface CycleOutcomeSummary {
   injuryHealed: boolean;
   savingsDelta: number;
   popularityDelta: number;
+  newMilestones: number[];
+  seasonTitle: SeasonTitleEntry | null;
+  objectiveResult: { label: string; met: boolean } | null;
+  brokenRecords: string[];
+  highlights: string[];
 }
 
 interface CareerGameState {
@@ -160,6 +166,11 @@ export function useCareerGame(): UseCareerGame {
         injuryHealed: result.injuryHealed,
         savingsDelta: result.player.wallet.savingsEur - prev.player.wallet.savingsEur,
         popularityDelta: result.player.popularity - prev.player.popularity,
+        newMilestones: result.newMilestones,
+        seasonTitle: result.seasonTitle,
+        objectiveResult: result.objectiveResult,
+        brokenRecords: result.brokenRecords,
+        highlights: result.highlights,
       };
 
       if (result.retired) {

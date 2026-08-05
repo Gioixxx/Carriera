@@ -54,6 +54,10 @@ function signOption(id: string, label: string, club: Club, resultText: string): 
   return { id, label, club, outcomes: [outcome(100, resultText)] };
 }
 
+function withHint(option: DecisionOption, hint: string): DecisionOption {
+  return { ...option, hint };
+}
+
 // ---------- Offerta iniziale (settore giovanile) ----------
 
 export function generateAcademyOffer(
@@ -88,6 +92,7 @@ export const LIFESTYLE_DECISIONS: Decision[] = [
       {
         id: "follow-plan",
         label: "Segui il piano",
+        hint: "Possibile crescita OVR · rischio di calo",
         outcomes: [
           outcome(60, "Il nuovo regime alimentare ti dà una marcia in più.", 3),
           outcome(40, "Il cambio di dieta ti destabilizza in campo.", -2),
@@ -96,6 +101,7 @@ export const LIFESTYLE_DECISIONS: Decision[] = [
       {
         id: "keep-diet",
         label: "Mantieni la tua dieta",
+        hint: "Nessun rischio",
         outcomes: [outcome(100, "Nessun cambiamento.")],
       },
     ],
@@ -109,6 +115,7 @@ export const LIFESTYLE_DECISIONS: Decision[] = [
       {
         id: "accept-tattoo",
         label: "Accetta",
+        hint: "Piccolo boost · rischio di stop",
         outcomes: [
           outcome(70, "Ti senti più sicuro di te in campo.", 1),
           outcome(30, "Il tatuaggio si infetta e ti costringe a fermarti.", -2),
@@ -117,6 +124,7 @@ export const LIFESTYLE_DECISIONS: Decision[] = [
       {
         id: "reject-tattoo",
         label: "Rifiuta",
+        hint: "Nessun rischio",
         outcomes: [outcome(100, "Nulla succede.")],
       },
     ],
@@ -130,6 +138,7 @@ export const LIFESTYLE_DECISIONS: Decision[] = [
       {
         id: "train-hard",
         label: "Allenati duramente",
+        hint: "Crescita OVR · rischio infortunio",
         outcomes: [
           outcome(65, "Diventi titolare per il prossimo ciclo.", 2),
           injuryOutcome(35, "Un infortunio ti tiene lontano dai campi.", {
@@ -142,6 +151,7 @@ export const LIFESTYLE_DECISIONS: Decision[] = [
       {
         id: "reduce-load",
         label: "Riduci il carico",
+        hint: "Calo OVR lieve · nessun rischio fisico",
         outcomes: [outcome(100, "Giochi con meno minutaggio.", -1)],
       },
     ],
@@ -155,6 +165,7 @@ export const LIFESTYLE_DECISIONS: Decision[] = [
       {
         id: "attend-camp",
         label: "Partecipa",
+        hint: "Forte crescita OVR · rischio infortunio",
         outcomes: [
           outcome(65, "Il ritiro speciale ti dà una marcia in più.", 4),
           injuryOutcome(35, "Lo sforzo extra si fa sentire.", {
@@ -167,6 +178,7 @@ export const LIFESTYLE_DECISIONS: Decision[] = [
       {
         id: "usual-preparation",
         label: "Preparazione abituale",
+        hint: "Nessun rischio",
         outcomes: [outcome(100, "Nessun cambiamento.")],
       },
     ],
@@ -180,6 +192,7 @@ export const LIFESTYLE_DECISIONS: Decision[] = [
       {
         id: "proceed",
         label: "Accetta",
+        hint: "Boost motivazionale · rischio scandalo",
         outcomes: [
           outcome(50, "L'euforia ti dà motivazione extra.", 2),
           outcome(50, "Vieni scoperto e lo scandalo ti pesa addosso.", -3),
@@ -188,6 +201,7 @@ export const LIFESTYLE_DECISIONS: Decision[] = [
       {
         id: "reject",
         label: "Rifiuta",
+        hint: "Nessun rischio",
         outcomes: [outcome(100, "Nulla succede.")],
       },
     ],
@@ -201,6 +215,7 @@ export const LIFESTYLE_DECISIONS: Decision[] = [
       {
         id: "accept-position",
         label: "Accetta",
+        hint: "Più minutaggio · adattamento costoso in OVR",
         outcomes: [
           outcome(
             100,
@@ -212,6 +227,7 @@ export const LIFESTYLE_DECISIONS: Decision[] = [
       {
         id: "reject-position",
         label: "Rifiuta",
+        hint: "Meno minutaggio · mantieni il ruolo",
         outcomes: [outcome(100, "Giochi con meno minutaggio.")],
       },
     ],
@@ -234,9 +250,15 @@ export function generateTransferWindow(player: Player, rng: Rng = Math.random): 
       "Sono arrivate offerte dopo l'ultimo ciclo. Puoi accettarne una o restare al tuo club.",
     options: [
       ...offers.map((c) =>
-        signOption(`sign-${c.id}`, `Firma per ${c.name}`, c, `Ti trasferisci al ${c.name}.`),
+        withHint(
+          signOption(`sign-${c.id}`, `Firma per ${c.name}`, c, `Ti trasferisci al ${c.name}.`),
+          "Nuovo ambiente · stipendio ricalcolato",
+        ),
       ),
-      signOption("stay", `Resta al ${currentClub.name}`, currentClub, `Resti al ${currentClub.name}.`),
+      withHint(
+        signOption("stay", `Resta al ${currentClub.name}`, currentClub, `Resti al ${currentClub.name}.`),
+        "Continuità",
+      ),
     ],
   };
 }
@@ -305,9 +327,13 @@ export function generateClubCrisis(player: Player, rng: Rng = Math.random): Deci
         id: "stay-and-fight",
         label: `Resta e lotta al ${player.club.name}`,
         club: player.club,
+        hint: "Lealtà · calo OVR",
         outcomes: [outcome(100, "Meno possibilità di vincere qualcosa quest'anno.", -2)],
       },
-      signOption("leave", `Vai al ${alternative.name}`, alternative, `Ti trasferisci al ${alternative.name}.`),
+      withHint(
+        signOption("leave", `Vai al ${alternative.name}`, alternative, `Ti trasferisci al ${alternative.name}.`),
+        "Cambio di ambiente",
+      ),
     ],
   };
 }
@@ -327,12 +353,16 @@ export function generateCompetitionForSpot(player: Player, rng: Rng = Math.rando
         id: "compete",
         label: "Fatti valere",
         club: player.club,
+        hint: "Possibile crescita · rischio panchina",
         outcomes: [
           outcome(50, "Ti guadagni il posto da titolare.", 1),
           outcome(50, "Finisci in panchina, giochi meno.", -2),
         ],
       },
-      signOption("leave", `Firma per ${alternative.name}`, alternative, `Lasci subito per il ${alternative.name}.`),
+      withHint(
+        signOption("leave", `Firma per ${alternative.name}`, alternative, `Lasci subito per il ${alternative.name}.`),
+        "Trasferimento immediato",
+      ),
     ],
   };
 }
@@ -479,8 +509,8 @@ export function generateContinentalFinalDecision(
     title: "Rigore decisivo",
     description: `Devi decidere la finale di ${competition}.`,
     options: [
-      { id: "left", label: "Sinistra", outcomes: outcomes() },
-      { id: "right", label: "Destra", outcomes: outcomes() },
+      { id: "left", label: "Sinistra", hint: "Vittoria continentale · rischio delusione", outcomes: outcomes() },
+      { id: "right", label: "Destra", hint: "Vittoria continentale · rischio delusione", outcomes: outcomes() },
     ],
   };
 }
@@ -542,6 +572,7 @@ export function generateSponsorDeal(player: Player, rng: Rng = Math.random): Dec
       {
         id: "accept",
         label: "Accetta",
+        hint: "Guadagno assicurato · popolarità incerta",
         outcomes: [
           economicOutcome(70, "L'accordo va in porto: incassi e popolarità in crescita.", {
             savingsDelta: template.savingsGain,
@@ -556,6 +587,7 @@ export function generateSponsorDeal(player: Player, rng: Rng = Math.random): Dec
       {
         id: "decline",
         label: "Rifiuta",
+        hint: "Nessun rischio",
         outcomes: [economicOutcome(100, "Rifiuti l'offerta, nulla cambia.", {})],
       },
     ],
