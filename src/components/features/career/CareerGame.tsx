@@ -3,6 +3,7 @@
 import { useState } from "react";
 import type { GameSpeed, PlayerIdentity } from "@/types/career";
 import { useCareerGame } from "@/hooks/useCareerGame";
+import { ThemeToggle } from "@/components/theme-toggle";
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
 import { cn } from "@/lib/utils";
@@ -53,21 +54,29 @@ export function CareerGame() {
       )}
     >
       {showPlaying ? (
-        <header className="flex items-baseline justify-between">
+        <header className="flex items-center justify-between gap-4">
           <p className="font-display text-lg tracking-[0.2em] text-(--color-accent)">CARRIERA</p>
-          <Button variant="ghost" onClick={handleRestart} className="px-0 text-xs">
-            Ricomincia
-          </Button>
+          <div className="flex items-center gap-3">
+            <Button variant="ghost" onClick={handleRestart} className="px-0 text-xs">
+              Ricomincia
+            </Button>
+            <ThemeToggle />
+          </div>
         </header>
       ) : (
-        <header className="text-center">
-          <p className="font-display text-xs tracking-[0.35em] text-(--color-accent)">Carriera</p>
-          <h1 className="font-display text-4xl text-(--color-text) sm:text-5xl">
-            Costruisci la tua carriera da calciatore
-          </h1>
-          <p className="mt-2 text-(--color-text-muted)">
-            Scegli chi sei, affronta le decisioni che contano, scrivi la tua leggenda.
-          </p>
+        <header className="flex flex-col gap-4">
+          <div className="flex justify-end">
+            <ThemeToggle />
+          </div>
+          <div className="text-center">
+            <p className="font-display text-xs tracking-[0.35em] text-(--color-accent)">Carriera</p>
+            <h1 className="font-display text-4xl text-(--color-text) sm:text-5xl">
+              Costruisci la tua carriera da calciatore
+            </h1>
+            <p className="mt-2 text-(--color-text-muted)">
+              Scegli chi sei, affronta le decisioni che contano, scrivi la tua leggenda.
+            </p>
+          </div>
         </header>
       )}
 

@@ -1,20 +1,21 @@
 ---
 type: memory
 tags: [memory, index]
-updated: [2026-08-04]
+updated: [2026-08-05]
 ---
 
 # Carriera — Next.js
 > Contesto persistente. Aggiornato da /remember. Vault Obsidian: vedi workflows/obsidian-vault.md.
 
-**Stack:** Next.js 16 (App Router) · TypeScript strict · Tailwind v4 · Vitest  **Sprint:** Fasi 6-8 (loop di gioco, fine carriera, polish)  **Aggiornamento:** 2026-08-04
+**Stack:** Next.js 16 (App Router) · TypeScript strict · Tailwind v4 · Vitest  **Sprint:** 8/8 fasi complete (build iniziale conclusa)  **Aggiornamento:** 2026-08-05
 
 ## Contesto
 Clone testuale di "Copero — Simulador de carrera" (https://copero.com.ar/juegos/simulador-carrera):
 simulatore della carriera di un calciatore, tutto in italiano, nomi reali di club/leghe/nazionali,
 solo locale (localStorage, no backend). Piano completo con 4 sezioni di ricerca sul gioco originale
-in `C:\Users\Gioix\.claude\plans\piped-bouncing-cocke.md`. Fasi 1-5/8 completate e committate
-(60ce3b1): scaffold, dominio puro, dati (84 club/41 paesi), decisioni, UI creazione personaggio.
+in `C:\Users\Gioix\.claude\plans\piped-bouncing-cocke.md`. Tutte le 8 fasi della build iniziale
+completate: scaffold, dominio puro, dati (84 club/41 paesi), decisioni, UI creazione personaggio,
+loop di gioco, fine carriera (CareerSummary), polish (dark mode toggle, empty state, a11y).
 
 ## File memoria (carica su richiesta)
 > `@file.md` = import Claude · `[[file]]` = wikilink Obsidian (graph). Tieni entrambi.

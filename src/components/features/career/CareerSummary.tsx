@@ -16,6 +16,16 @@ const AWARD_LABELS: Record<AwardType, string> = {
   "top-scorer": "Capocannoniere",
 };
 
+/** Vetrina vuota — echeggia la "empty trophy case" dell'originale per le sezioni mai raggiunte. */
+function EmptyShowcase({ children }: { children: string }) {
+  return (
+    <div className="flex flex-col items-center gap-2 rounded-lg border border-dashed border-(--color-border) py-6 text-center">
+      <TrophyIcon size={20} aria-hidden="true" className="text-(--color-text-muted)/60" />
+      <p className="text-sm text-(--color-text-muted)">{children}</p>
+    </div>
+  );
+}
+
 export function CareerSummary({ player, onRestart }: CareerSummaryProps) {
   const clubs = summarizeClubHistory(player.clubHistory);
   const trophies = [...player.trophies].sort((a, b) => a.age - b.age);
@@ -125,7 +135,7 @@ export function CareerSummary({ player, onRestart }: CareerSummaryProps) {
             </div>
           </div>
         ) : (
-          <p className="text-sm text-(--color-text-muted)">Mai convocato in nazionale.</p>
+          <EmptyShowcase>Mai convocato in nazionale.</EmptyShowcase>
         )}
       </Card>
 
@@ -134,7 +144,7 @@ export function CareerSummary({ player, onRestart }: CareerSummaryProps) {
           Trofei e premi
         </h3>
         {trophies.length === 0 && awards.length === 0 ? (
-          <p className="text-sm text-(--color-text-muted)">Nessun trofeo o premio vinto in carriera.</p>
+          <EmptyShowcase>Nessun trofeo o premio vinto in carriera.</EmptyShowcase>
         ) : (
           <ul className="flex flex-col gap-2 text-sm">
             {trophies.map((t, i) => (
