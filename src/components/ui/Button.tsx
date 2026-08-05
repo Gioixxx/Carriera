@@ -1,4 +1,4 @@
-import { type ButtonHTMLAttributes } from "react";
+import { type ButtonHTMLAttributes, forwardRef } from "react";
 import { cn } from "@/lib/utils";
 
 type ButtonVariant = "primary" | "secondary" | "ghost";
@@ -14,9 +14,13 @@ const VARIANT_CLASSES: Record<ButtonVariant, string> = {
   ghost: "bg-transparent text-(--color-text-muted) hover:text-(--color-text)",
 };
 
-export function Button({ variant = "primary", className, ...props }: ButtonProps) {
+export const Button = forwardRef<HTMLButtonElement, ButtonProps>(function Button(
+  { variant = "primary", className, ...props },
+  ref,
+) {
   return (
     <button
+      ref={ref}
       className={cn(
         "inline-flex items-center justify-center gap-2 rounded-md px-5 py-2.5 text-sm font-semibold",
         "transition-[background-color,color,border-color,transform] duration-150 active:scale-[0.98]",
@@ -28,4 +32,4 @@ export function Button({ variant = "primary", className, ...props }: ButtonProps
       {...props}
     />
   );
-}
+});

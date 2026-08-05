@@ -106,6 +106,35 @@ body {
   animation: fade-in-up 0.35s ease-out;
 }
 
+@keyframes moment-in {
+  from {
+    opacity: 0;
+    transform: scale(0.94) translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+.animate-moment-in {
+  animation: moment-in 0.4s ease-out;
+}
+
+@keyframes count-flash {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  40% {
+    transform: scale(1.08);
+  }
+}
+
+.animate-count-flash {
+  animation: count-flash 0.55s ease-out;
+}
+
 /* Bordo "perforato" del cartellino — richiama il taglio di un vero tesserino. */
 .dossier-perforated {
   background-image: radial-gradient(

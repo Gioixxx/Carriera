@@ -1,5 +1,6 @@
-import { Trophy as TrophyIcon } from "lucide-react";
-import type { AwardType, Player } from "@/types/career";
+import { Flag, Trophy as TrophyIcon } from "lucide-react";
+import type { Player } from "@/types/career";
+import { AWARD_LABELS } from "@/lib/career/award-labels";
 import { peakOvr, summarizeClubHistory } from "@/lib/career/summary";
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
@@ -13,18 +14,11 @@ interface CareerSummaryProps {
   onRestart: () => void;
 }
 
-const AWARD_LABELS: Record<AwardType, string> = {
-  "player-of-the-season": "Giocatore della stagione",
-  "ballon-dor": "Pallone d'Oro",
-  "top-scorer": "Capocannoniere",
-};
-
-/** Vetrina vuota — echeggia la "empty trophy case" dell'originale per le sezioni mai raggiunte. */
 function EmptyShowcase({ children }: { children: string }) {
   return (
-    <div className="flex flex-col items-center gap-2 rounded-lg border border-dashed border-(--color-border) py-6 text-center">
-      <TrophyIcon size={20} aria-hidden="true" className="text-(--color-text-muted)/60" />
-      <p className="text-sm text-(--color-text-muted)">{children}</p>
+    <div className="flex flex-col items-center gap-1.5 rounded-lg border border-dashed border-(--color-border) py-4 text-center">
+      <TrophyIcon size={18} aria-hidden="true" className="text-(--color-text-muted)/60" />
+      <p className="text-xs text-(--color-text-muted)">{children}</p>
     </div>
   );
 }
@@ -34,152 +28,259 @@ export function CareerSummary({ player, onRestart }: CareerSummaryProps) {
   const trophies = [...player.trophies].sort((a, b) => a.age - b.age);
   const awards = [...player.awards].sort((a, b) => a.age - b.age);
 
-  return (
-    <div className="animate-step-in flex flex-col gap-6">
-      <Card className="flex flex-col items-center gap-3 p-10 text-center">
-        <p className="font-display text-xs tracking-[0.35em] text-(--color-accent)">
-          Carriera conclusa
-        </p>
-        <h2 className="font-display text-3xl text-(--color-text)">
-          {player.lastName.toUpperCase()}
-        </h2>
-        <p className="text-(--color-text-muted)">
-          Ritirato a {player.age} anni dopo {player.clubHistory.length}{" "}
-          {player.clubHistory.length === 1 ? "ciclo" : "cicli"} di carriera
-        </p>
+  const highlightTrophies = [...trophies].slice(-3).reverse();
+  const highlightAwards = [...awards].slice(-2).reverse();
+  const hasHighlights =
+    highlightTrophies.length > 0 ||
+    highlightAwards.length > 0 ||
+    player.nationalTeam.called;
 
-        <div className="mt-2 grid w-full grid-cols-2 gap-2 sm:grid-cols-4">
-          <div className="flex flex-col items-center gap-1 rounded-lg bg-(--color-surface-raised) py-3">
+  return (
+    <div className="animate-step-in flex min-h-0 min-w-0 flex-1 flex-col gap-3 overflow-y-auto lg:overflow-hidden">
+      {/* Hero — compact, no wasted space */}
+      <Card className="flex shrink-0 flex-col gap-3 p-4 sm:flex-row sm:items-center sm:gap-5 sm:p-5">
+        <div className="min-w-0 flex-1 text-center sm:text-left">
+          <p className="font-display text-[10px] tracking-[0.35em] text-(--color-accent)">
+            Carriera conclusa
+          </p>
+          <h2 className="font-display text-2xl leading-tight text-(--color-text) sm:text-3xl">
+            {player.lastName.toUpperCase()}
+          </h2>
+          <p className="text-xs text-(--color-text-muted) sm:text-sm">
+            Ritirato a {player.age} anni · {player.clubHistory.length}{" "}
+            {player.clubHistory.length === 1 ? "ciclo" : "cicli"}
+          </p>
+        </div>
+
+        <div className="grid grid-cols-4 gap-1.5 sm:w-[22rem] sm:shrink-0">
+          <div className="flex flex-col items-center gap-0.5 rounded-lg bg-(--color-surface-raised) py-2">
             <OvrBadge ovr={peakOvr(player)} size="sm" />
-            <p className="text-[10px] tracking-wide text-(--color-text-muted) uppercase">Ovr max</p>
+            <p className="text-[9px] tracking-wide text-(--color-text-muted) uppercase">Ovr</p>
           </div>
-          <div className="flex flex-col justify-center rounded-lg bg-(--color-surface-raised) py-3">
-            <p className="font-display text-xl text-(--color-text)">{player.career.apps}</p>
-            <p className="text-[10px] tracking-wide text-(--color-text-muted) uppercase">Presenze</p>
+          <div className="flex flex-col items-center justify-center rounded-lg bg-(--color-surface-raised) py-2">
+            <p className="font-display text-lg leading-none text-(--color-text)">
+              {player.career.apps}
+            </p>
+            <p className="text-[9px] tracking-wide text-(--color-text-muted) uppercase">Pres.</p>
           </div>
-          <div className="flex flex-col justify-center rounded-lg bg-(--color-surface-raised) py-3">
-            <p className="font-display text-xl text-(--color-text)">{player.career.goals}</p>
-            <p className="text-[10px] tracking-wide text-(--color-text-muted) uppercase">Gol</p>
+          <div className="flex flex-col items-center justify-center rounded-lg bg-(--color-surface-raised) py-2">
+            <p className="font-display text-lg leading-none text-(--color-text)">
+              {player.career.goals}
+            </p>
+            <p className="text-[9px] tracking-wide text-(--color-text-muted) uppercase">Gol</p>
           </div>
-          <div className="flex flex-col justify-center rounded-lg bg-(--color-surface-raised) py-3">
-            <p className="font-display text-xl text-(--color-text)">{player.career.assists}</p>
-            <p className="text-[10px] tracking-wide text-(--color-text-muted) uppercase">Assist</p>
+          <div className="flex flex-col items-center justify-center rounded-lg bg-(--color-surface-raised) py-2">
+            <p className="font-display text-lg leading-none text-(--color-text)">
+              {player.career.assists}
+            </p>
+            <p className="text-[9px] tracking-wide text-(--color-text-muted) uppercase">Ast.</p>
           </div>
         </div>
 
-        <Button variant="secondary" onClick={onRestart} className="mt-2">
+        <Button variant="secondary" onClick={onRestart} className="shrink-0 self-center sm:self-auto">
           Gioca ancora
         </Button>
       </Card>
 
-      <Card className="p-6">
-        <h3 className="font-display mb-3 text-sm tracking-[0.2em] text-(--color-text-muted) uppercase">
-          Club
-        </h3>
-        {clubs.length > 0 ? (
-          <div className="overflow-x-auto">
-            <table className="w-full min-w-[420px] text-sm">
-              <thead>
-                <tr className="border-b border-(--color-border) text-left text-xs text-(--color-text-muted) uppercase">
-                  <th className="px-3 py-2 font-medium">Club</th>
-                  <th className="px-3 py-2 font-medium">Età</th>
-                  <th className="px-3 py-2 text-right font-medium">Pres.</th>
-                  <th className="px-3 py-2 text-right font-medium">Gol</th>
-                  <th className="px-3 py-2 text-right font-medium">Assist</th>
-                </tr>
-              </thead>
-              <tbody>
+      {hasHighlights ? (
+        <div className="flex shrink-0 flex-wrap items-center gap-2">
+          <span className="font-display text-[10px] tracking-[0.2em] text-(--color-ovr-gold) uppercase">
+            Momenti
+          </span>
+          {highlightTrophies.map((t, i) => (
+            <span
+              key={`hl-trophy-${i}`}
+              className="inline-flex max-w-full items-center gap-1.5 rounded-full border border-(--color-ovr-gold)/35 bg-(--color-ovr-gold)/10 px-2.5 py-1 text-xs text-(--color-text)"
+            >
+              <CompetitionBadge competition={t.competition} size={16} />
+              <span className="truncate">
+                {t.competition}
+                <span className="text-(--color-text-muted)"> · {t.age}</span>
+              </span>
+            </span>
+          ))}
+          {highlightAwards.map((a, i) => (
+            <span
+              key={`hl-award-${i}`}
+              className="inline-flex max-w-full items-center gap-1.5 rounded-full border border-(--color-ovr-gold)/35 bg-(--color-ovr-gold)/10 px-2.5 py-1 text-xs text-(--color-text)"
+            >
+              <AwardBadge size={16} />
+              <span className="truncate">
+                {AWARD_LABELS[a.type]}
+                <span className="text-(--color-text-muted)"> · {a.age}</span>
+              </span>
+            </span>
+          ))}
+          {player.nationalTeam.called ? (
+            <span className="inline-flex items-center gap-1.5 rounded-full border border-(--color-accent)/40 bg-(--color-accent)/10 px-2.5 py-1 text-xs text-(--color-accent)">
+              <Flag size={14} aria-hidden="true" />
+              Nazionale · {player.nationalTeam.apps} pres.
+            </span>
+          ) : null}
+        </div>
+      ) : null}
+
+      {/* Detail panels — fill remaining viewport, scroll inside */}
+      <div className="grid min-h-0 min-w-0 gap-3 lg:flex-1 lg:grid-cols-2 lg:overflow-hidden">
+        <Card className="flex min-h-0 min-w-0 flex-col p-3 sm:p-4 lg:overflow-hidden">
+          <h3 className="font-display mb-2 shrink-0 text-xs tracking-[0.2em] text-(--color-text-muted) uppercase">
+            Club
+          </h3>
+          {clubs.length > 0 ? (
+            <div className="min-h-0 min-w-0 flex-1 overflow-x-hidden overflow-y-auto">
+              <ul className="divide-y divide-(--color-border) md:hidden">
                 {clubs.map((c) => (
-                  <tr
+                  <li
                     key={c.club.id}
-                    className="border-b border-(--color-border) last:border-0 odd:bg-(--color-surface-raised)/40"
+                    className="flex flex-col gap-0.5 py-2 odd:bg-(--color-surface-raised)/40"
                   >
-                    <td className="px-3 py-2 font-medium text-(--color-text)">
-                      <span className="flex items-center gap-2">
-                        <ClubCrest crestUrl={c.club.crestUrl} clubName={c.club.name} size={18} />
+                    <div className="flex min-w-0 items-center gap-2 px-1">
+                      <ClubCrest
+                        crestUrl={c.club.crestUrl}
+                        clubName={c.club.name}
+                        size={16}
+                        className="shrink-0"
+                      />
+                      <span className="min-w-0 truncate text-sm font-medium text-(--color-text)">
                         {c.club.name}
-                        {c.stintCount > 1 ? (
-                          <span className="text-xs text-(--color-text-muted)">
-                            ({c.stintCount} cicli)
-                          </span>
-                        ) : null}
                       </span>
-                    </td>
-                    <td className="px-3 py-2 text-(--color-text-muted)">
-                      {c.ageFrom}–{c.ageTo}
-                    </td>
-                    <td className="px-3 py-2 text-right text-(--color-text)">{c.stats.apps}</td>
-                    <td className="px-3 py-2 text-right text-(--color-text)">{c.stats.goals}</td>
-                    <td className="px-3 py-2 text-right text-(--color-text)">{c.stats.assists}</td>
-                  </tr>
+                      <span className="shrink-0 text-[11px] text-(--color-text-muted)">
+                        {c.ageFrom}–{c.ageTo}
+                      </span>
+                    </div>
+                    <p className="px-1 pl-6 text-[11px] text-(--color-text-muted)">
+                      {c.stats.apps}P · {c.stats.goals}G · {c.stats.assists}A
+                      {c.stintCount > 1 ? ` · ×${c.stintCount}` : ""}
+                    </p>
+                  </li>
                 ))}
-              </tbody>
-            </table>
-          </div>
-        ) : (
-          <p className="text-sm text-(--color-text-muted)">Nessun club nella carriera.</p>
-        )}
-      </Card>
+              </ul>
+              <table className="hidden w-full table-fixed text-sm md:table">
+                <thead className="sticky top-0 bg-(--color-surface)">
+                  <tr className="border-b border-(--color-border) text-left text-[10px] text-(--color-text-muted) uppercase">
+                    <th className="px-1.5 py-1.5 font-medium">Club</th>
+                    <th className="w-16 px-1.5 py-1.5 font-medium">Età</th>
+                    <th className="w-10 px-1.5 py-1.5 text-right font-medium">P</th>
+                    <th className="w-9 px-1.5 py-1.5 text-right font-medium">G</th>
+                    <th className="w-9 px-1.5 py-1.5 text-right font-medium">A</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {clubs.map((c) => (
+                    <tr
+                      key={c.club.id}
+                      className="border-b border-(--color-border) last:border-0 odd:bg-(--color-surface-raised)/40"
+                    >
+                      <td className="max-w-0 px-1.5 py-1.5 font-medium text-(--color-text)">
+                        <span className="flex min-w-0 items-center gap-1.5">
+                          <ClubCrest
+                            crestUrl={c.club.crestUrl}
+                            clubName={c.club.name}
+                            size={16}
+                            className="shrink-0"
+                          />
+                          <span className="truncate text-sm">{c.club.name}</span>
+                          {c.stintCount > 1 ? (
+                            <span className="shrink-0 text-[10px] text-(--color-text-muted)">
+                              ({c.stintCount})
+                            </span>
+                          ) : null}
+                        </span>
+                      </td>
+                      <td className="px-1.5 py-1.5 text-xs text-(--color-text-muted)">
+                        {c.ageFrom}–{c.ageTo}
+                      </td>
+                      <td className="px-1.5 py-1.5 text-right text-sm text-(--color-text)">
+                        {c.stats.apps}
+                      </td>
+                      <td className="px-1.5 py-1.5 text-right text-sm text-(--color-text)">
+                        {c.stats.goals}
+                      </td>
+                      <td className="px-1.5 py-1.5 text-right text-sm text-(--color-text)">
+                        {c.stats.assists}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          ) : (
+            <p className="text-sm text-(--color-text-muted)">Nessun club nella carriera.</p>
+          )}
+        </Card>
 
-      <Card className="p-6">
-        <h3 className="font-display mb-3 text-sm tracking-[0.2em] text-(--color-text-muted) uppercase">
-          Nazionale
-        </h3>
-        {player.nationalTeam.called ? (
-          <div className="grid grid-cols-3 gap-2 text-center">
-            <div className="rounded-lg bg-(--color-surface-raised) py-2">
-              <p className="font-display text-lg text-(--color-text)">{player.nationalTeam.apps}</p>
-              <p className="text-[10px] tracking-wide text-(--color-text-muted) uppercase">Pres.</p>
-            </div>
-            <div className="rounded-lg bg-(--color-surface-raised) py-2">
-              <p className="font-display text-lg text-(--color-text)">{player.nationalTeam.goals}</p>
-              <p className="text-[10px] tracking-wide text-(--color-text-muted) uppercase">Gol</p>
-            </div>
-            <div className="rounded-lg bg-(--color-surface-raised) py-2">
-              <p className="font-display text-lg text-(--color-text)">{player.nationalTeam.assists}</p>
-              <p className="text-[10px] tracking-wide text-(--color-text-muted) uppercase">Assist</p>
-            </div>
-          </div>
-        ) : (
-          <EmptyShowcase>Mai convocato in nazionale.</EmptyShowcase>
-        )}
-      </Card>
+        <div className="flex min-h-0 min-w-0 flex-col gap-3 lg:overflow-hidden">
+          <Card className="shrink-0 p-3 sm:p-4">
+            <h3 className="font-display mb-2 text-xs tracking-[0.2em] text-(--color-text-muted) uppercase">
+              Nazionale
+            </h3>
+            {player.nationalTeam.called ? (
+              <div className="grid grid-cols-3 gap-1.5 text-center">
+                <div className="rounded-lg bg-(--color-surface-raised) py-1.5">
+                  <p className="font-display text-base text-(--color-text)">
+                    {player.nationalTeam.apps}
+                  </p>
+                  <p className="text-[9px] tracking-wide text-(--color-text-muted) uppercase">
+                    Pres.
+                  </p>
+                </div>
+                <div className="rounded-lg bg-(--color-surface-raised) py-1.5">
+                  <p className="font-display text-base text-(--color-text)">
+                    {player.nationalTeam.goals}
+                  </p>
+                  <p className="text-[9px] tracking-wide text-(--color-text-muted) uppercase">Gol</p>
+                </div>
+                <div className="rounded-lg bg-(--color-surface-raised) py-1.5">
+                  <p className="font-display text-base text-(--color-text)">
+                    {player.nationalTeam.assists}
+                  </p>
+                  <p className="text-[9px] tracking-wide text-(--color-text-muted) uppercase">
+                    Assist
+                  </p>
+                </div>
+              </div>
+            ) : (
+              <EmptyShowcase>Mai convocato in nazionale.</EmptyShowcase>
+            )}
+          </Card>
 
-      <Card className="p-6">
-        <h3 className="font-display mb-3 text-sm tracking-[0.2em] text-(--color-text-muted) uppercase">
-          Trofei e premi
-        </h3>
-        {trophies.length === 0 && awards.length === 0 ? (
-          <EmptyShowcase>Nessun trofeo o premio vinto in carriera.</EmptyShowcase>
-        ) : (
-          <ul className="flex flex-col gap-2 text-sm">
-            {trophies.map((t, i) => (
-              <li key={`trophy-${i}`} className="flex items-center gap-2">
-                <CompetitionBadge competition={t.competition} size={18} />
-                <span className="text-(--color-text)">
-                  {t.competition}
-                  <span className="text-(--color-text-muted)">
-                    {" "}
-                    — {t.club ? t.club.name : "Nazionale"}, {t.age} anni
-                  </span>
-                </span>
-              </li>
-            ))}
-            {awards.map((a, i) => (
-              <li key={`award-${i}`} className="flex items-center gap-2">
-                <AwardBadge size={18} />
-                <span className="text-(--color-text)">
-                  {AWARD_LABELS[a.type]}
-                  <span className="text-(--color-text-muted)">
-                    {" "}
-                    — {a.club ? a.club.name : "Nazionale"}, {a.age} anni
-                  </span>
-                </span>
-              </li>
-            ))}
-          </ul>
-        )}
-      </Card>
+          <Card className="flex min-h-0 min-w-0 flex-1 flex-col p-3 sm:p-4">
+            <h3 className="font-display mb-2 shrink-0 text-xs tracking-[0.2em] text-(--color-text-muted) uppercase">
+              Trofei e premi
+            </h3>
+            {trophies.length === 0 && awards.length === 0 ? (
+              <EmptyShowcase>Nessun trofeo o premio vinto in carriera.</EmptyShowcase>
+            ) : (
+              <ul className="flex min-h-0 flex-1 flex-col gap-1.5 overflow-y-auto text-sm">
+                {trophies.map((t, i) => (
+                  <li key={`trophy-${i}`} className="flex min-w-0 items-center gap-2">
+                    <CompetitionBadge competition={t.competition} size={16} />
+                    <span className="min-w-0 truncate text-(--color-text)">
+                      {t.competition}
+                      <span className="text-(--color-text-muted)">
+                        {" "}
+                        — {t.club ? t.club.name : "Nazionale"}, {t.age}
+                      </span>
+                    </span>
+                  </li>
+                ))}
+                {awards.map((a, i) => (
+                  <li key={`award-${i}`} className="flex min-w-0 items-center gap-2">
+                    <AwardBadge size={16} />
+                    <span className="min-w-0 truncate text-(--color-text)">
+                      {AWARD_LABELS[a.type]}
+                      <span className="text-(--color-text-muted)">
+                        {" "}
+                        — {a.club ? a.club.name : "Nazionale"}, {a.age}
+                      </span>
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </Card>
+        </div>
+      </div>
     </div>
   );
 }

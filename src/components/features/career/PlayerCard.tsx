@@ -1,12 +1,18 @@
+"use client";
+
+import { useEffect, useRef, useState } from "react";
 import { Award as AwardIcon, Trophy as TrophyIcon } from "lucide-react";
 import type { Player } from "@/types/career";
 import { countries } from "@/data/countries";
+import { cn } from "@/lib/utils";
 import { ClubCrest } from "./ClubCrest";
 import { JerseyBadge } from "./JerseyBadge";
 import { OvrBadge } from "./OvrBadge";
 
 interface PlayerCardProps {
   player: Player;
+  /** Compact layout for mobile playing shell */
+  compact?: boolean;
 }
 
 const VALUE_FORMATTER = new Intl.NumberFormat("it-IT", {
@@ -16,20 +22,55 @@ const VALUE_FORMATTER = new Intl.NumberFormat("it-IT", {
   maximumFractionDigits: 1,
 });
 
-export function PlayerCard({ player }: PlayerCardProps) {
+export function PlayerCard({ player, compact = false }: PlayerCardProps) {
   const flag = countries.find((c) => c.name === player.nationality)?.flag;
   const trophyCount = player.trophies.length;
   const awardCount = player.awards.length;
 
+  const prevCounts = useRef({ trophies: trophyCount, awards: awardCount });
+  const [flashTrophies, setFlashTrophies] = useState(false);
+  const [flashAwards, setFlashAwards] = useState(false);
+
+  useEffect(() => {
+    const prev = prevCounts.current;
+    let trophyTimer: ReturnType<typeof setTimeout> | undefined;
+    let awardTimer: ReturnType<typeof setTimeout> | undefined;
+
+    if (trophyCount > prev.trophies) {
+      setFlashTrophies(true);
+      trophyTimer = setTimeout(() => setFlashTrophies(false), 1200);
+    }
+    if (awardCount > prev.awards) {
+      setFlashAwards(true);
+      awardTimer = setTimeout(() => setFlashAwards(false), 1200);
+    }
+    prevCounts.current = { trophies: trophyCount, awards: awardCount };
+
+    return () => {
+      if (trophyTimer) clearTimeout(trophyTimer);
+      if (awardTimer) clearTimeout(awardTimer);
+    };
+  }, [trophyCount, awardCount]);
+
   return (
-    <div className="dossier-perforated flex flex-col gap-4 rounded-2xl border border-(--color-accent)/30 bg-(--color-surface-raised) p-5 shadow-lg shadow-black/5">
-      <div className="flex items-center gap-4">
+    <div
+      className={cn(
+        "dossier-perforated flex flex-col rounded-2xl border border-(--color-accent)/30 bg-(--color-surface-raised) shadow-lg shadow-black/5",
+        compact ? "gap-2.5 p-3 sm:p-4" : "gap-4 p-5",
+      )}
+    >
+      <div className="flex items-center gap-3 sm:gap-4">
         <JerseyBadge number={player.number} flag={flag} size="sm" />
         <div className="min-w-0 flex-1">
           <span className="rounded bg-(--color-surface) px-1.5 py-0.5 text-[10px] font-semibold tracking-wide text-(--color-text-muted) uppercase">
             {player.position}
           </span>
-          <p className="font-display truncate text-2xl leading-tight text-(--color-text)">
+          <p
+            className={cn(
+              "font-display truncate leading-tight text-(--color-text)",
+              compact ? "text-xl" : "text-2xl",
+            )}
+          >
             {player.lastName.toUpperCase()}
           </p>
           <p className="flex items-center gap-1.5 truncate text-xs text-(--color-text-muted)">
@@ -42,14 +83,16 @@ export function PlayerCard({ player }: PlayerCardProps) {
         <OvrBadge ovr={player.ovr} />
       </div>
 
-      <div className="flex items-center justify-between rounded-lg bg-(--color-surface) px-3 py-2 text-sm">
-        <span className="text-(--color-text-muted)">Valore</span>
-        <span className="font-semibold text-(--color-text)">
-          {VALUE_FORMATTER.format(player.marketValueEur)}
-        </span>
-      </div>
+      {!compact ? (
+        <div className="flex items-center justify-between rounded-lg bg-(--color-surface) px-3 py-2 text-sm">
+          <span className="text-(--color-text-muted)">Valore</span>
+          <span className="font-semibold text-(--color-text)">
+            {VALUE_FORMATTER.format(player.marketValueEur)}
+          </span>
+        </div>
+      ) : null}
 
-      <div className="grid grid-cols-3 gap-2 text-center">
+      <div className={cn("grid grid-cols-3 gap-2 text-center", compact && "hidden sm:grid")}>
         <div className="rounded-lg bg-(--color-surface) py-2">
           <p className="font-display text-lg text-(--color-text)">{player.career.apps}</p>
           <p className="text-[10px] tracking-wide text-(--color-text-muted) uppercase">Pres.</p>
@@ -64,9 +107,28 @@ export function PlayerCard({ player }: PlayerCardProps) {
         </div>
       </div>
 
-      <div className="flex items-center gap-4 border-t border-(--color-border) pt-3 text-xs">
+      {compact ? (
+        <div className="flex items-center justify-between gap-2 text-xs sm:hidden">
+          <span className="text-(--color-text-muted)">
+            {VALUE_FORMATTER.format(player.marketValueEur)}
+          </span>
+          <span className="text-(--color-text-muted)">
+            {player.career.apps}P · {player.career.goals}G · {player.career.assists}A
+          </span>
+        </div>
+      ) : null}
+
+      <div
+        className={cn(
+          "flex items-center gap-4 border-t border-(--color-border) text-xs",
+          compact ? "pt-2" : "pt-3",
+        )}
+      >
         <span
-          className="flex items-center gap-1.5"
+          className={cn(
+            "flex items-center gap-1.5 rounded-md px-1.5 py-0.5 transition-colors",
+            flashTrophies && "animate-count-flash bg-(--color-ovr-gold)/20",
+          )}
           title={trophyCount > 0 ? `${trophyCount} trofei vinti` : "Nessun trofeo vinto finora"}
         >
           <TrophyIcon
@@ -79,7 +141,10 @@ export function PlayerCard({ player }: PlayerCardProps) {
           </span>
         </span>
         <span
-          className="flex items-center gap-1.5"
+          className={cn(
+            "flex items-center gap-1.5 rounded-md px-1.5 py-0.5 transition-colors",
+            flashAwards && "animate-count-flash bg-(--color-ovr-gold)/20",
+          )}
           title={awardCount > 0 ? `${awardCount} premi individuali` : "Nessun premio individuale finora"}
         >
           <AwardIcon

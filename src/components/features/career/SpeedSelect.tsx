@@ -28,7 +28,7 @@ export function SpeedSelect({ onSelect }: SpeedSelectProps) {
   const [speed, setSpeed] = useState<GameSpeed>("normal");
 
   return (
-    <div className="flex flex-col items-center gap-5 text-center">
+    <div className="flex min-w-0 flex-col items-center gap-4 text-center sm:gap-5">
       <div>
         <p className="font-display text-xs tracking-[0.3em] text-(--color-accent)">Passo 1</p>
         <h2 className="font-display text-2xl text-(--color-text)">Scegli il ritmo di carriera</h2>
@@ -37,6 +37,7 @@ export function SpeedSelect({ onSelect }: SpeedSelectProps) {
         name="Ritmo di carriera"
         value={speed}
         onChange={setSpeed}
+        className="w-full max-w-md"
         options={SPEED_ORDER.map((s) => ({ value: s, label: SPEED_LABELS[s] }))}
       />
       <p className="max-w-sm text-sm text-(--color-text-muted)">{SPEED_DESCRIPTIONS[speed]}</p>
