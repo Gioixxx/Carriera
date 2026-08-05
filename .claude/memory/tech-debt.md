@@ -1,7 +1,7 @@
 ---
 type: tech-debt
 tags: [memory, tech-debt]
-updated: [2026-08-04]
+updated: [2026-08-05]
 ---
 
 # Tech Debt
@@ -64,10 +64,64 @@ Registro debito tecnico con priorità. Aggiornato da /session-end. Origine spess
 - **Impatto:** rischio medio — è UI nuova e non banale (focus trap, coda di overlay multipli, animazioni condizionate), un bug qui sarebbe visibile all'utente ad ogni trofeo/premio vinto.
 - **Risoluzione suggerita:** prima della prossima release, giocare una carriera fino a ottenere almeno un trofeo, un premio e una convocazione in nazionale nella stessa sessione per vedere la coda di overlay in sequenza; testare anche con `prefers-reduced-motion: reduce` attivo nel sistema.
 
+### Champions League ed Europa League non distinte (un solo trofeo continentale UEFA)
+- **Priorità:** Alta
+- **Area:** `data/clubs.ts` (`CONTINENTAL_CUP`), `lib/career/trophies.ts` (`rollClubTrophies`)
+- **Data:** 2026-08-05
+- **Descrizione:** un agente ha giocato una carriera fresca sul sito originale e una equivalente sul clone (confrontate anche col codice sorgente): `CONTINENTAL_CUP` mappa **un solo** trofeo per confederazione (UEFA → sempre "Champions League" fisso, CONMEBOL → sempre "Copa Libertadores" fisso). L'originale tratta Champions League ed Europa League come due trofei europei distinti e non intercambiabili (confermato più volte anche nella ricerca precedente, Esplorazione 4, e nell'evento "Club priority" che a volte fa scegliere quale delle due inseguire).
+- **Perché rimandato:** non emerso come gap fino a questo confronto diretto — la scelta di un trofeo continentale fisso per confederazione era stata presa senza verificare che l'originale ne distinguesse due per l'Europa.
+- **Impatto:** un club di prestigio medio-alto in UEFA nel clone può vincere solo "Champions League", mai "Europa League" — meno fedele e meno varietà nei trofei di fine carriera.
+- **Risoluzione suggerita:** introdurre un secondo tier di coppa continentale UEFA (Champions vs Europa League, probabilmente legato al prestigio del club) in `CONTINENTAL_CUP`/`rollClubTrophies`; basso costo, la logica di roll pesato esiste già. Badge TheSportsDB da verificare/aggiungere in `data/competition-badges.ts`.
+
+### Copertura club/campionati limitata a 4 paesi nonostante 41 nazionalità in `countries.ts`
+- **Priorità:** Media
+- **Area:** `data/clubs.ts`, `data/countries.ts`, `lib/career/decisions.ts` (`generateAcademyOffer`, `clubsByCountry`)
+- **Data:** 2026-08-05
+- **Descrizione:** confermato giocando una carriera con un giocatore portoghese sul clone: ha ricevuto offerte da club italiani/spagnoli (Novara, Frosinone, Real Oviedo) perché `clubs.ts` copre solo Italia (Serie A/B/C), Inghilterra (Premier/Championship), Spagna (La Liga/LaLiga2) e Brasile (Série A/B) — 2 confederazioni. `countries.ts` ha invece 41 nazionalità, quasi tutte senza club corrispondenti. **La logica di filtro per nazionalità è già corretta** (`generateAcademyOffer` prova prima `clubsByCountry(identity.nationality)`, ripiega sul pool globale solo se <3 club) — è un gap di dati, non di logica.
+- **Perché rimandato:** le 84 squadre attuali coprivano il minimo per far girare il loop di gioco end-to-end; estendere il dataset non era mai stato prioritario finché non si è osservato l'effetto pratico (offerte cross-country immotivate per nazionalità comuni).
+- **Impatto:** qualunque giocatore con nazionalità fuori dai 4 paesi coperti riceve offerte "casuali" per nazionalità invece che dal proprio paese — rompe l'immersione per le nazionalità più probabili da scegliere (europee/sudamericane popolari).
+- **Risoluzione suggerita:** estendere `clubs.ts` per le nazionalità più comuni già in `countries.ts`, in ordine di priorità: Portogallo, Francia, Germania, Paesi Bassi, Argentina (tutte osservate ripetutamente sia nell'originale che già presenti come nazionalità selezionabili nel clone).
+
+### Eventi narrativi osservati nell'originale ma assenti in `decisions.ts`
+- **Priorità:** Media
+- **Area:** `lib/career/decisions.ts` (pool lifestyle/club-crisis)
+- **Data:** 2026-08-05
+- **Descrizione:** confronto diretto originale-vs-clone (più il piano di ricerca esterno) elenca eventi mai portati nel codice: **"Club priority"** (scegli se lottare per il campionato o la coppa internazionale, nome reale della coppa in card), **"Unexpected prospect"** (mentore vs "look for a way out", doppio effetto deterministico), **"Triumphant return"** (offerta di tornare al primo club a fine carriera), **"Finish high school"**, **"Honesty test"**, **"Controversial post"** (distinto da "Controversial statement", già implementato). Verificato via grep che nessuno di questi id/nomi esiste in `decisions.ts`.
+- **Perché rimandato:** il pool di decisioni attuale copre già tutte le categorie principali (academy, prestito, competizione per il posto, lifestyle, club-crisis) e non ha bloccato le fasi 1-8; questi sono eventi aggiuntivi di varietà, non funzionalità core mancanti.
+- **Impatto:** varietà ridotta rispetto all'originale — un giocatore che gioca molte carriere sul clone incontra un ventaglio di situazioni più stretto.
+- **Risoluzione suggerita:** portare questi eventi in `decisions.ts` seguendo lo stesso pattern `resolveOutcome`/outcome pesati già usato per gli eventi esistenti; basso rischio architetturale, nessuna modifica al motore. "Triumphant return" richiede accesso al primo club della carriera (già disponibile in `clubHistory[0]`).
+
+### Card di decisione probabilistica senza percentuali visibili (a differenza dell'originale)
+- **Priorità:** Bassa
+- **Area:** `components/features/career/DecisionPanel.tsx`
+- **Data:** 2026-08-05
+- **Descrizione:** l'originale mostra badge percentuale colorati direttamente sulla card prima della scelta (es. "Starter 50%" verde / "Low rotation 50%" rosso) per gli outcome pesati. Verificato via grep che `DecisionPanel.tsx` non stampa alcuna percentuale/peso — la scelta è "al buio" nel clone.
+- **Perché rimandato:** non bloccante, differenza di trasparenza/tensione del gameplay più che di funzionalità; scoperta solo in questa sessione di confronto diretto.
+- **Impatto:** basso — il clone resta giocabile, ma il giocatore ha meno informazione su cui basare la scelta rispetto all'originale.
+- **Risoluzione suggerita:** esporre i pesi già presenti su `DecisionOption`/`DecisionOutcome` come badge percentuale sulla card in `DecisionPanel.tsx`; dato dominio già disponibile, tocca solo la UI.
+
+### Evento "Grandfather from another country" (switch nazionalità) mai implementato
+- **Priorità:** Bassa
+- **Area:** `lib/career/decisions.ts`, `types/career.ts` (`Player.nationality`)
+- **Data:** 2026-08-05
+- **Descrizione:** durante il confronto è emerso per la prima volta (mai osservato nelle 14 carriere di ricerca precedenti) un evento sull'originale in cui si scopre un nonno di un altro paese, con scelta esplicita tra due nazionali per cui si diventa eleggibili. Il nostro dominio ha `Player.nationality` come campo immutabile per tutta la carriera — implementarlo richiede rendere la nazionalità mutabile e propagare l'effetto su nazionale/convocazioni/trofei nazionali già maturati.
+- **Perché rimandato:** singola osservazione (1 carriera), impatto sul modello di dominio non banale (nazionalità oggi assunta fissa in più punti: `trophies.ts`, futuro `rollNationalTrophy` per confederazione — vedi [[backlog]]); da valutare a parte prima di decidere se vale la complessità.
+- **Impatto:** basso nel breve termine (evento raro anche nell'originale, 1/15 carriere osservate finora) ma alto se implementato male, dato che tocca l'identità del giocatore in un punto usato in più moduli.
+- **Risoluzione suggerita:** raccogliere altre osservazioni prima di procedere (frequenza reale, se l'effetto è retroattivo su trofei/convocazioni nazionali già ottenuti); solo dopo valutare se rendere `Player.nationality` mutabile.
+
+### Possibile assenza di finestra anti-ripetizione per eventi lifestyle/club-crisis
+- **Priorità:** Bassa
+- **Area:** `lib/career/loop.ts` (`pickClubCrisisDecision` e pool lifestyle)
+- **Data:** 2026-08-05
+- **Descrizione:** in una carriera di confronto, "Dichiarazione controversa" è comparsa due volte in 3 cicli consecutivi (età 18 e 22) sul clone — singolo data point, non ancora confermato come pattern sistematico né confrontato con la frequenza di ripetizione osservata sull'originale.
+- **Perché rimandato:** un solo campione non giustifica un intervento; serve più playtest prima di trattarlo come bug.
+- **Impatto:** se confermato sistematico, minore varietà percepita — lo stesso evento che ricompare troppo presto rompe l'illusione di eventi diversi ad ogni ciclo.
+- **Risoluzione suggerita:** in una sessione futura, loggare la sequenza di categorie/generatori scelti su più carriere simulate (RNG reale) e verificare se esiste già una finestra anti-ripetizione in `pickClubCrisisDecision`; se assente, valutare di aggiungerne una semplice (es. non ripetere lo stesso generatore per N cicli).
+
 ## Priorità
-- **Alta:** —
-- **Media:** statistiche portiere; probabilità trofei/award/nazionale non validate con playtest; momenti celebrativi/timeline non verificati end-to-end (vedi sopra)
-- **Bassa:** soglia di ritiro automatico; generatori club-crisis con probabilità uniforme (vedi sopra)
+- **Alta:** Champions League/Europa League non distinte (vedi sopra)
+- **Media:** statistiche portiere; probabilità trofei/award/nazionale non validate con playtest; momenti celebrativi/timeline non verificati end-to-end; copertura club/campionati limitata a 4 paesi; eventi narrativi mancanti rispetto all'originale (vedi sopra)
+- **Bassa:** soglia di ritiro automatico; generatori club-crisis con probabilità uniforme; percentuali outcome non visibili in `DecisionPanel`; evento cambio-nazionalità mai implementato; possibile assenza di finestra anti-ripetizione eventi lifestyle (vedi sopra)
 
 ## Archiviato
 - [item risolti]
