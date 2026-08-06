@@ -132,12 +132,28 @@ internal sealed class MainForm : Form
 
             if (result == DialogResult.Yes)
             {
-                await UpdateInstaller.DownloadAndApplyAsync(update);
+                try
+                {
+                    await UpdateInstaller.DownloadAndApplyAsync(update);
+                }
+                catch (Exception ex)
+                {
+                    // A differenza del controllo di versione (silenzioso, best-effort: non deve
+                    // mai impedire di giocare), qui l'utente ha esplicitamente chiesto di
+                    // aggiornare — un fallimento del download va segnalato, altrimenti sembra che
+                    // l'aggiornamento non abbia fatto nulla senza lasciare alcuna traccia.
+                    MessageBox.Show(
+                        $"Download dell'aggiornamento non riuscito, la versione attuale resta invariata.\n\nDettagli: {ex.Message}",
+                        "Aggiornamento non riuscito",
+                        MessageBoxButtons.OK,
+                        MessageBoxIcon.Warning);
+                }
             }
         }
         catch
         {
-            // Best-effort: un aggiornamento fallito non deve mai impedire di giocare.
+            // Best-effort: un controllo aggiornamenti fallito (rete assente, rate limit
+            // GitHub, ecc.) non deve mai impedire di giocare.
         }
     }
 }
