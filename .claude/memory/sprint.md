@@ -216,6 +216,32 @@ Stato lavoro in corso. Aggiornato con /sprint. Backlog in [[backlog]], debito in
   verdi, `tsc` pulito. **Il flusso di aggiornamento non è stato riverificato end-to-end** (serve
   installare la v0.3.0 e testare l'update verso questa v0.3.1 dal vivo) — vedi [[tech-debt]].
 
+- [x] **Trovata la vera causa dell'auto-updater rotto (HTTP/2) + release v0.3.2** (2026-08-06,
+  commit 57437a0, 8caf9ae + tag v0.3.2): l'utente ha confermato che l'update continuava a non
+  funzionare anche dopo il fix precedente. Diagnosticato ispezionando `%TEMP%\CarrieraUpdate\`
+  sulla sua macchina: `Carriera.new.exe` troncato a ~4.9 MB (di ~58 MB attesi), nessun
+  `update-log.txt` — il fallimento avveniva nel download stesso, prima dello script. Un download
+  diretto dello stesso URL via `Invoke-WebRequest` completava regolarmente, isolando il problema a
+  `HttpClient`: la CDN dei release GitHub parla HTTP/2 e lo stream si interrompeva a metà senza
+  eccezione .NET su questa configurazione. Fix: download forzato su HTTP/1.1
+  (`HttpVersion.Version11`/`RequestVersionExact`), controllo integrità confrontato col
+  `Content-Length` del server. Rilasciato come v0.3.2 (l'asset v0.3.1 aveva già il primo fix ma non
+  questo). **Verificato dall'utente end-to-end**: exe di test pinnato a v0.1.0 → rilevato v0.3.2 →
+  scaricato e applicato con successo (FileVersion 0.3.2.0 confermato post-update). Prima verifica
+  live del flusso di auto-update da quando esiste. Vedi [[decisions]] per il dettaglio completo.
+
+- [x] **Musica di sottofondo avviata insieme al menu invece che al primo click** (2026-08-06,
+  commit 32f317c, non ancora rilasciato a fine di questa voce): segnalazione utente — la musica
+  partiva solo dopo un click su una voce del menu, non insieme alla schermata iniziale. Causa:
+  autoplay policy del motore Chromium (anche dentro WebView2), che blocca `audio.play()` prima di
+  un gesto reale; con la sola schermata menu cliccabile il "primo gesto" coincideva per forza con
+  un click sul menu. Fix: `MainForm.cs` avvia l'ambiente WebView2 con
+  `--autoplay-policy=no-user-gesture-required` (sicuro: è la nostra unica finestra dedicata, non
+  una pagina web pubblica); `useBackgroundMusic.ts` tenta `play()` subito al mount invece di
+  aspettare solo un gesto, con fallback al comportamento precedente per il browser normale (dove
+  quel flag non esiste). 274 test invariati, `tsc`/`dotnet build` puliti. **Verificato dall'utente**
+  eseguendo l'exe rigenerato: musica avviata da sola col menu, senza click.
+
 ## Note tecniche emerse in fase 6
 - jsdom 30 + Node 22+ non espone `window.localStorage` di default (ExperimentalWarning nativa) — polyfill minimale in `vitest.setup.ts`, non è un problema di codice applicativo
 - `ClubStint` ora ha un campo `ovr` (OVR del giocatore alla fine di quel ciclo) — necessario per la CareerTable, che deve mostrare l'OVR storico per riga, non quello attuale
