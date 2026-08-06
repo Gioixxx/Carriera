@@ -11,6 +11,7 @@ interface PenaltyShootoutProps {
 
 export function PenaltyShootout({ decision, onChoose }: PenaltyShootoutProps) {
   const [selected, setSelected] = useState<string | null>(null);
+  const scoreChance = decision.options[0]?.outcomes.find((o) => o.continentalWin)?.weight ?? null;
 
   function handleChoose(optionId: string) {
     setSelected(optionId);
@@ -55,8 +56,10 @@ export function PenaltyShootout({ decision, onChoose }: PenaltyShootoutProps) {
           </button>
         ))}
       </div>
-      {decision.options[0]?.hint ? (
-        <p className="text-xs text-(--color-text-muted)">{decision.options[0].hint}</p>
+      {scoreChance !== null ? (
+        <p className="text-xs text-(--color-text-muted)">
+          Probabilità di segnare: <span className="font-semibold text-(--color-text)">{scoreChance}%</span>
+        </p>
       ) : null}
     </div>
   );
