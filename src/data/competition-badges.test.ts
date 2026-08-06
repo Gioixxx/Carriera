@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { clubs, leagues } from "./clubs";
-import { COMPETITION_BADGES, getCompetitionBadge } from "./competition-badges";
+import { COMPETITION_BADGES, CUP_BADGES_KNOWN_GAP, getCompetitionBadge } from "./competition-badges";
 
 describe("COMPETITION_BADGES", () => {
   it("ogni URL è un hotlink https a thesportsdb.com", () => {
@@ -9,10 +9,17 @@ describe("COMPETITION_BADGES", () => {
     }
   });
 
-  it("copre campionato e coppa nazionale di ogni lega tranne Serie C (nessun badge unico)", () => {
+  it("copre il campionato di ogni lega tranne Serie C (nessun badge unico)", () => {
     for (const league of leagues) {
       if (league.name === "Serie C") continue;
       expect(getCompetitionBadge(league.name)).toBeDefined();
+    }
+  });
+
+  it("copre la coppa nazionale quando esiste ed è fuori dai gap noti di copertura TSDB", () => {
+    for (const league of leagues) {
+      if (!league.cup) continue; // niente coppa nazionale attiva (es. Messico)
+      if (CUP_BADGES_KNOWN_GAP.includes(league.cup)) continue; // copertura TSDB nota mancante
       expect(getCompetitionBadge(league.cup)).toBeDefined();
     }
   });

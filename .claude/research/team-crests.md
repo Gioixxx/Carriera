@@ -189,6 +189,336 @@ Colonna "TSDB idTeam" = id squadra su TheSportsDB (utile per richieste future, e
 
 **Copertura club: 84/84 trovati.** Nessun club mancante.
 
+### Marocco — Botola Pro
+
+| id club | Nome | TSDB idTeam | URL stemma |
+|---|---|---|---|
+| wydad-casablanca | Wydad Casablanca | 136402 | https://r2.thesportsdb.com/images/media/team/badge/vio4271750784379.png |
+| raja-casablanca | Raja Casablanca | 136404 | https://r2.thesportsdb.com/images/media/team/badge/1cg64m1551428003.png |
+| far-rabat | FAR Rabat | 136403 | https://r2.thesportsdb.com/images/media/team/badge/jkjp961777421509.png |
+| rs-berkane | RS Berkane | 137425 | https://r2.thesportsdb.com/images/media/team/badge/f296p91743053568.png |
+| fus-rabat | FUS Rabat | 136410 | https://r2.thesportsdb.com/images/media/team/badge/vxk3aj1551518378.png |
+| difaa-el-jadidi | Difaâ Hassani El Jadidi | 137426 | https://r2.thesportsdb.com/images/media/team/badge/v8y3qa1638560041.png |
+| kawkab-marrakech | Kawkab Marrakech | 136407 | https://r2.thesportsdb.com/images/media/team/badge/7qfuus1551898115.png |
+| chabab-mohammedia | Chabab Mohammédia | 136418 | https://r2.thesportsdb.com/images/media/team/badge/5evxcx1609193564.png |
+
+> Prestige suggerito (3/3/2/2/1/1/0/0): Wydad (3, 22 titoli, il più decorato) e Raja (3, "il club
+> del popolo", 12 titoli + 3x CAF Champions League) come big-two; FAR Rabat (2, 13 titoli storici)
+> e RS Berkane (2, vincitore CAF Confederation Cup) come secondo livello; FUS Rabat (1, campione
+> 2015-16) e Difaâ El Jadidi (1) come terzo; Kawkab Marrakech (0) e Chabab Mohammédia (0) come
+> club minori. "AS FAR" (nome ufficiale completo, cercato per esteso) non trovato su TSDB con
+> quella dicitura — risolto cercando "FAR Rabat", stesso club (Association Sportive des Forces
+> Armées Royales). "Olympique Safi" cercato in due varianti, non trovato su TSDB — sostituito con
+> Chabab Mohammédia (club reale, storico, verificato).
+
+### Senegal — Ligue 1 Sénégalaise
+
+| id club | Nome | TSDB idTeam | URL stemma |
+|---|---|---|---|
+| asc-jaraaf | Jaraaf (ASC Jeanne d'Arc) | 139287 | https://r2.thesportsdb.com/images/media/team/badge/p25tdp1720157205.png |
+| casa-sport | Casa Sport | 139294 | https://r2.thesportsdb.com/images/media/team/badge/0cqkoc1673938919.png |
+| teungueth-fc | Teungueth FC | 139285 | https://r2.thesportsdb.com/images/media/team/badge/i6s10n1720157496.png |
+| generation-foot | Génération Foot | 139286 | https://r2.thesportsdb.com/images/media/team/badge/i5glvd1720156796.png |
+| diambars | Diambars FC | 139291 | https://r2.thesportsdb.com/images/media/team/badge/3ci0k01720156622.png |
+| as-pikine | AS Pikine | 139292 | https://r2.thesportsdb.com/images/media/team/badge/xgrkyp1720157272.png |
+| us-ouakam | US Ouakam | 149363 | https://r2.thesportsdb.com/images/media/team/badge/qbyvf91727194024.png |
+| guediawaye-fc | Guédiawaye FC | 144163 | https://r2.thesportsdb.com/images/media/team/badge/vul8d71720157041.png |
+
+> Prestige suggerito: Jaraaf (3, record 13-14 titoli) e Casa Sport (3, storico club di Ziguinchor,
+> 2 titoli) come big-two; Teungueth FC (2, campione 2025-26, miglior difesa) e Génération Foot (2,
+> famosa accademia — Sadio Mané —, miglior attacco 2025-26) come secondo livello; Diambars FC (1)
+> e AS Pikine (1) come terzo; US Ouakam (0) e Guédiawaye FC (0) come club minori. TSDB restituisce
+> nomi leggermente abbreviati rispetto al nome ufficiale completo (es. "Jaraaf" invece di "ASC
+> Jeanne d'Arc/Jaraaf", "Casa Sport" al singolare invece di "Casa Sports", "Pikine" invece di "AS
+> Pikine") — normale per l'API, non un problema per l'hotlink.
+
+### Nigeria — Nigeria Professional Football League (NPFL)
+
+| id club | Nome | TSDB idTeam | URL stemma |
+|---|---|---|---|
+| enyimba | Enyimba International | 139746 | https://r2.thesportsdb.com/images/media/team/badge/27km6p1720154537.png |
+| kano-pillars | Kano Pillars | 139751 | https://r2.thesportsdb.com/images/media/team/badge/bgleh01589375519.png |
+| rangers-international | Rangers International (Enugu Rangers) | 139911 | https://r2.thesportsdb.com/images/media/team/badge/j6uqt31720154917.png |
+| rivers-united | Rivers United | 139914 | https://r2.thesportsdb.com/images/media/team/badge/4atnuh1720155248.png |
+| plateau-united | Plateau United | 139910 | https://r2.thesportsdb.com/images/media/team/badge/2z80yh1720154812.png |
+| akwa-united | Akwa United | 139905 | https://r2.thesportsdb.com/images/media/team/badge/e087l51590183336.png |
+| sunshine-stars | Sunshine Stars | 139917 | https://r2.thesportsdb.com/images/media/team/badge/9s5g3t1590183469.png |
+| shooting-stars | Shooting Stars (3SC) | 144674 | https://r2.thesportsdb.com/images/media/team/badge/uk3c7q1720155122.png |
+
+> Prestige suggerito: Enyimba (3, 9 titoli, 2x CAF Champions League 2003/2004) e Kano Pillars (3,
+> rivalità storica con Enyimba, entrambi mai fuori dalla top-8 per 12 stagioni consecutive) come
+> big-two; Rangers International (2, 9 titoli storici come Enugu Rangers) e Rivers United (2,
+> presenza CAF costante) come secondo livello; Plateau United (1) e Akwa United (1) come terzo;
+> Sunshine Stars (0) e Shooting Stars/3SC (0) come club minori.
+
+### Ghana — Ghana Premier League
+
+| id club | Nome | TSDB idTeam | URL stemma |
+|---|---|---|---|
+| asante-kotoko | Asante Kotoko | 137741 | https://r2.thesportsdb.com/images/media/team/badge/u1mppc1578401554.png |
+| hearts-of-oak | Accra Hearts of Oak | 141199 | https://r2.thesportsdb.com/images/media/team/badge/v3eyvw1617287212.png |
+| aduana-stars | Aduana Stars | 141190 | https://r2.thesportsdb.com/images/media/team/badge/5qeyq71617287049.png |
+| medeama-sc | Medeama SC | 141205 | https://r2.thesportsdb.com/images/media/team/badge/p8p3jr1617287252.png |
+| bechem-united | Bechem United | 141192 | https://r2.thesportsdb.com/images/media/team/badge/y3uo7z1720155733.png |
+| berekum-chelsea | Berekum Chelsea | 141193 | https://r2.thesportsdb.com/images/media/team/badge/tu3hvi1694900545.png |
+| king-faisal | King Faisal Babes | 141202 | https://r2.thesportsdb.com/images/media/team/badge/tzfizy1617287235.png |
+| karela-united | Karela United | 141201 | https://r2.thesportsdb.com/images/media/team/badge/wx2ydh1617287231.png |
+
+> Prestige suggerito: Asante Kotoko (3, 21 titoli, 2x CAF Champions League) e Hearts of Oak (3, 21
+> titoli, rivalità "Super Clash") come big-two; Aduana Stars (2) e Medeama SC (2, ha tenuto Kotoko
+> e Hearts fuori dal vertice in stagioni recenti) come secondo livello; Bechem United (1) e
+> Berekum Chelsea (1) come terzo; King Faisal Babes (0) e Karela United (0) come club minori.
+
+### Egitto — Egyptian Premier League
+
+| id club | Nome | TSDB idTeam | URL stemma |
+|---|---|---|---|
+| al-ahly | Al Ahly | 138995 | https://r2.thesportsdb.com/images/media/team/badge/x8753q1751421890.png |
+| zamalek | Zamalek | 138997 | https://r2.thesportsdb.com/images/media/team/badge/tgekj81580930027.png |
+| pyramids-fc | Pyramids FC | 139838 | https://r2.thesportsdb.com/images/media/team/badge/8liy611607352549.png |
+| ismaily | Ismaily SC | 139843 | https://r2.thesportsdb.com/images/media/team/badge/1g46qo1589807617.png |
+| al-masry | Al Masry | 139844 | https://r2.thesportsdb.com/images/media/team/badge/3aw86h1589807260.png |
+| enppi | ENPPI | 139841 | https://r2.thesportsdb.com/images/media/team/badge/uht79n1589807327.png |
+| ceramica-cleopatra | Ceramica Cleopatra | 140795 | https://r2.thesportsdb.com/images/media/team/badge/xy4shs1751422167.png |
+| smouha | Smouha SC | 139840 | https://r2.thesportsdb.com/images/media/team/badge/qq4pkd1589807413.png |
+
+> Prestige suggerito: Al Ahly (3, 45 titoli, club più decorato d'Africa) e Zamalek (3, 14 titoli,
+> acerrimo rivale) come big-two; Pyramids FC (2, club recente/ambizioso, molto competitivo) e
+> Ismaily SC (2, storicamente la "terza forza" del calcio egiziano) come secondo livello; Al Masry
+> (1) e ENPPI (1) come terzo; Ceramica Cleopatra (0, campione Egyptian League Cup 2024, ma ancora
+> minore in campionato) e Smouha SC (0) come club minori.
+
+### Costa d'Avorio — Ligue 1 (Côte d'Ivoire)
+
+| id club | Nome | TSDB idTeam | URL stemma |
+|---|---|---|---|
+| asec-mimosas | ASEC Mimosas | 139744 | https://r2.thesportsdb.com/images/media/team/badge/b9e1cr1589312301.png |
+| stade-abidjan | Stade d'Abidjan | 146972 | https://r2.thesportsdb.com/images/media/team/badge/zr19ao1776292889.png |
+| fc-san-pedro | FC San Pédro | 142431 | https://r2.thesportsdb.com/images/media/team/badge/3hjar61708390704.png |
+| rc-abidjan | Racing Club Abidjan | 140649 | https://www.thesportsdb.com/images/media/team/badge/ou01i81784654220.png |
+| afad-djekanou | AFAD Djékanou | 145378 | https://r2.thesportsdb.com/images/media/team/badge/j0le3l1649203762.png |
+| isca | ISCA | 152897 | https://r2.thesportsdb.com/images/media/team/badge/u4i9c91755367271.png |
+| bouake | Bouaké | 145380 | https://r2.thesportsdb.com/images/media/team/badge/98rmfk1649204189.png |
+| es-agboville | ES Agboville | 152899 | https://r2.thesportsdb.com/images/media/team/badge/icb4qq1755367665.png |
+
+> **Copertura TSDB debole su questo paese**: "Africa Sports d'Abidjan" (storico rivale di ASEC
+> Mimosas, il candidato naturale per il secondo posto "prestige 3") e "Séwé Sport" **non sono
+> stati trovati** su TheSportsDB nonostante diverse varianti di nome tentate (con/senza "d'",
+> "Abidjan"/"National", ecc.) — sostituiti rispettivamente con Stade d'Abidjan (club reale,
+> storico: 6 titoli 1962-1969 + titolo 2025 dopo 56 anni di attesa, verificato) e FC San Pédro
+> (già scelto). Gli altri 5 club (AFAD Djékanou/RC Abidjan/ISCA/Bouaké/ES Agboville) sono stati
+> trovati tramite il roster corrente della lega (`search_all_teams.php?l=Ivory Coast Ligue 1`,
+> senza `&s=Soccer` — con quel parametro l'endpoint dava errore "Invalid League ID passed" per
+> tutti i paesi di questa ricerca, risolto omettendolo), non tramite ricerca nominale mirata: sono
+> club reali e verificati, ma meno "di richiamo" per un giocatore rispetto ai big storici — accettato
+> per via della copertura debole. Prestige suggerito: ASEC Mimosas (3, 29 titoli, unico club
+> ivoriano a vincere la CAF Champions League nel 1998) e Stade d'Abidjan (3, storico, titolo 2025)
+> come big-two; FC San Pédro (2, qualificazione CAF Confederation Cup 2020-21) e Racing Club
+> Abidjan (2, club di lunga presenza in Ligue 1) come secondo livello; AFAD Djékanou (1) e ISCA (1)
+> come terzo; Bouaké (0) e ES Agboville (0) come club minori.
+
+**Copertura club Marocco/Senegal/Nigeria/Ghana/Egitto/Costa d'Avorio: 48/48 trovati** (6 paesi ×
+8 club), tutti con `crestUrl` verificato live su TheSportsDB il 2026-08-06. 3 sostituzioni rispetto
+alla rosa inizialmente ipotizzata per assenza di copertura TSDB (Olympique Safi → Chabab
+Mohammédia; Africa Sports d'Abidjan → Stade d'Abidjan; Séwé Sport → non necessario, sostituito da
+FC San Pédro già in lista) — vedi note sopra per il dettaglio.
+
+## 2bis. Club — Messico, Stati Uniti, Canada (CONCACAF) — ricerca 2026-08-06
+
+> Estensione per dare club reali a Messico, Stati Uniti, Canada (nazionalità già presenti in
+> `src/data/countries.ts` ma con 0 club in `src/data/clubs.ts`). Stesso metodo delle sezioni sopra:
+> `searchteams.php?t=<nome>` per i club, `lookupleague.php?id=<id>` per leghe/coppe, chiave
+> pubblica `123`. Ogni URL verificato individualmente con una richiesta diretta (HTTP 200,
+> `image/png`) prima di essere riportato qui — non solo letto dal payload JSON.
+>
+> **Nota tecnica**: il campo badge nel payload `searchteams.php` si chiama `strBadge` (non
+> `strTeamBadge`) — stesso dato delle sezioni precedenti, nome campo corretto per chi rifà questa
+> ricerca in futuro.
+> **Nota rate limit**: durante questa sessione TheSportsDB ha restituito ripetuti errori Cloudflare
+> `1015` (rate limit edge, più aggressivo del "30 richieste/minuto" dichiarato nei Termini) —
+> risolto spaziando le richieste di ~5-8s l'una dall'altra con retry automatico, nessun impatto sui
+> dati riportati (solo sul tempo impiegato).
+
+### Messico — Liga MX
+
+| id club | Nome | TSDB idTeam | URL stemma |
+|---|---|---|---|
+| america | América | 134193 | https://r2.thesportsdb.com/images/media/team/badge/amy1xs1581857392.png |
+| cruz-azul | Cruz Azul | 134196 | https://r2.thesportsdb.com/images/media/team/badge/wcd2yi1781543370.png |
+| guadalajara | CD Guadalajara (Chivas) | 134206 | https://r2.thesportsdb.com/images/media/team/badge/mp1box1593452087.png |
+| toluca | Toluca | 134204 | https://r2.thesportsdb.com/images/media/team/badge/y64wy91523913186.png |
+| tigres-uanl | Tigres UANL | 134197 | https://r2.thesportsdb.com/images/media/team/badge/lh80fx1701423708.png |
+| monterrey | Monterrey | 134198 | https://r2.thesportsdb.com/images/media/team/badge/yglj911721542561.png |
+| necaxa | Necaxa | 135662 | https://r2.thesportsdb.com/images/media/team/badge/tqdk9e1779772432.png |
+| puebla | Puebla | 134199 | https://r2.thesportsdb.com/images/media/team/badge/h0jgg51593451845.png |
+
+Prestige assegnato (0-3, distribuzione 3/3/2/2/1/1/0/0 per stature/storia trofei reali — América 42
+trofei complessivi e Cruz Azul 27 sono i due maggiori tra gli 8 scelti, Necaxa e Puebla i due
+minori): **america 3, cruz-azul 3, guadalajara 2, toluca 2, tigres-uanl 1, monterrey 1, necaxa 0,
+puebla 0.**
+
+**Coppa nazionale**: **nessuna coppa nazionale attiva.** La Copa MX è stata sospesa dopo l'edizione
+2019-20 (calendario compresso per le qualificazioni al Mondiale 2026 co-ospitato dal Messico) e non
+risulta rivista al 2026 — confermato sia da ricerca web (nessuna edizione successiva alla 2019-20,
+futuro "incerto" secondo le fonti consultate) sia dall'assenza della lega in
+`search_all_leagues.php?c=Mexico&s=Soccer` su TheSportsDB (solo 4 competizioni messicane presenti:
+Liga MX, Liga de Expansión MX, Liga Femenil, Campeón de Campeones — nessuna Copa MX). La "Leagues
+Cup" (Liga MX vs MLS) esiste ma è una competizione internazionale incrociata con gli USA, non una
+coppa nazionale messicana — fuori scope qui.
+
+### Stati Uniti — MLS
+
+| id club | Nome | TSDB idTeam | URL stemma |
+|---|---|---|---|
+| la-galaxy | LA Galaxy | 134153 | https://r2.thesportsdb.com/images/media/team/badge/ysyysr1420227188.png |
+| dc-united | D.C. United | 134145 | https://r2.thesportsdb.com/images/media/team/badge/uwvsyt1467462609.png |
+| columbus-crew | Columbus Crew | 134152 | https://r2.thesportsdb.com/images/media/team/badge/dzs8cp1629059854.png |
+| seattle-sounders | Seattle Sounders FC | 134149 | https://r2.thesportsdb.com/images/media/team/badge/2dy5cx1706711036.png |
+| atlanta-united | Atlanta United FC | 135851 | https://r2.thesportsdb.com/images/media/team/badge/ej091x1602103070.png |
+| lafc | Los Angeles FC | 136050 | https://r2.thesportsdb.com/images/media/team/badge/7nbj2a1602103638.png |
+| new-york-red-bulls | New York Red Bulls | 134156 | https://r2.thesportsdb.com/images/media/team/badge/suytvy1473536462.png |
+| philadelphia-union | Philadelphia Union | 134142 | https://r2.thesportsdb.com/images/media/team/badge/gyznyo1602103682.png |
+
+Prestige assegnato (basato sui titoli MLS Cup all-time: LA Galaxy 6 e D.C. United 4 sono i due
+maggiori tra gli 8 scelti; New York Red Bulls e Philadelphia Union non hanno mai vinto una MLS Cup
+nonostante siano club storici/molto seguiti, i due minori qui): **la-galaxy 3, dc-united 3,
+columbus-crew 2 (3 MLS Cup), seattle-sounders 2 (2 MLS Cup + CONCACAF Champions Cup 2022),
+atlanta-united 1 (1 MLS Cup 2018, record di affluenza MLS), lafc 1 (1 MLS Cup 2022 + CONCACAF
+Champions Cup 2023), new-york-red-bulls 0, philadelphia-union 0.**
+
+**Coppa nazionale**: **Lamar Hunt US Open Cup**, tuttora attiva (edizione 2026 in corso, 111ª
+edizione, 48 squadre professionistiche + qualificazioni, finale 21 ottobre 2026), confermata sia da
+ricerca web sia da TheSportsDB (`lookupleague.php?id=5199`, `strLeague` = "US Open Cup").
+
+### Canada — Canadian Premier League
+
+> **Scelta di lega — nota esplicita**: il calcio canadese è diviso tra 3 club canadesi che giocano
+> nella MLS (lega statunitense — Toronto FC, CF Montréal, Vancouver Whitecaps FC) e la **Canadian
+> Premier League** (CPL), il campionato di prima divisione **sanzionato da Canada Soccer** con sole
+> squadre canadesi. Scelta: **CPL**, per due motivi — (1) è la lega che la federazione nazionale
+> riconosce come massima divisione del paese, mentre i 3 club MLS giocano nel campionato di un
+> altro paese; (2) la CPL ha esattamente 8 squadre nella stagione 2026, un fit naturale per il
+> numero di club richiesto da questa ricerca, mentre i soli 3 club MLS canadesi non sarebbero
+> bastati. Il roster scelto sotto **coincide con le 8 squadre della stagione CPL 2026** confermata
+> via ricerca web (Wikipedia/Northern Tribune): Atlético Ottawa, Cavalry FC, Forge FC, HFX
+> Wanderers FC, Inter Toronto FC (ex York United/York9, ribattezzata per il 2026), Pacific FC, FC
+> Supra du Québec (nuovo club, esordio 2026, Laval QC), Vancouver FC. **Valour FC** (Winnipeg,
+> socio fondatore CPL) è stato escluso perché ha sospeso le attività a novembre 2025 (confermato
+> anche da TheSportsDB: il suo `strLeague` è ora `"_No League Soccer"` invece di `"Canadian
+> Premier League"`) — sostituito nel roster 2026 da FC Supra du Québec, il suo rimpiazzo effettivo
+> nella lega.
+
+| id club | Nome | TSDB idTeam | URL stemma |
+|---|---|---|---|
+| forge-fc | Forge FC | 139321 | https://r2.thesportsdb.com/images/media/team/badge/48dk0h1582572865.png |
+| cavalry-fc | Cavalry FC | 139462 | https://r2.thesportsdb.com/images/media/team/badge/gpi5qj1583351269.png |
+| atletico-ottawa | Atlético Ottawa | 139461 | https://r2.thesportsdb.com/images/media/team/badge/k5gzuw1583351260.png |
+| pacific-fc | Pacific FC | 139464 | https://r2.thesportsdb.com/images/media/team/badge/6qzhpj1583351283.png |
+| inter-toronto | Inter Toronto FC (ex York United/York9) | 139466 | https://r2.thesportsdb.com/images/media/team/badge/kevy591770133070.png |
+| hfx-wanderers | HFX Wanderers FC | 139463 | https://r2.thesportsdb.com/images/media/team/badge/uqkf0n1583351277.png |
+| vancouver-fc | Vancouver FC | 147076 | https://r2.thesportsdb.com/images/media/team/badge/map6vh1770132710.png |
+| fc-supra-quebec | FC Supra du Québec | 154611 | https://www.thesportsdb.com/images/media/team/badge/lm3a4f1784038568.png |
+
+Prestige assegnato (basato su titoli CPL all-time + stature attuale: Forge FC, 4 titoli
+2019/2020/2021/2023, è il più decorato; Cavalry FC campione 2024 + più volte finalista; Atlético
+Ottawa campione 2025 [finale nella neve, 2-1 su Cavalry] + sostegno finanziario Atlético Madrid;
+Pacific FC campione 2021; Inter Toronto/York United socio fondatore ma mai campione; HFX Wanderers
+socio fondatore; Vancouver FC identità più recente, rebrand 2023 di Valley FC; FC Supra du Québec
+esordiente 2026, zero storia): **forge-fc 3, cavalry-fc 3, atletico-ottawa 2, pacific-fc 2,
+inter-toronto 1, hfx-wanderers 1, vancouver-fc 0, fc-supra-quebec 0.**
+
+**Coppa nazionale**: **Canadian Championship** (Voyageurs Cup), tuttora attiva (edizione 2026, 19ª,
+15 squadre da 6 leghe incluse le 8 CPL + le 3 MLS canadesi, 5 maggio–21 ottobre 2026), confermata
+sia da ricerca web sia da TheSportsDB (`lookupleague.php?id=5922`, `strLeague` = "Canadian
+Championship"). Nota: il badge CONCACAF Champions Cup (competizione per club a livello di
+confederazione) è **fuori scope di questa ricerca** — va aggiunto separatamente da chi cabla la
+coppa confederale.
+
+**Copertura club: 24/24 trovati** (8 Messico + 8 Stati Uniti + 8 Canada). Nessun club mancante.
+
+## 2ter. Club — Giappone, Corea del Sud, Australia (AFC) — ricerca 2026-08-06
+
+> Estensione per dare club reali a Giappone, Corea del Sud, Australia (nazionalità già presenti in
+> `src/data/countries.ts` ma con 0 club in `src/data/clubs.ts`). Stesso metodo delle sezioni sopra.
+> **Arabia Saudita e Qatar restano fuori scope di questa sessione** (ricerca interrotta su
+> richiesta esplicita, dati parziali/non verificati — vedi [[backlog]] per il follow-up):
+> Arabia Saudita aveva solo 4/8 club verificati (mancavano proprio i big Al-Hilal/Al-Ittihad/
+> Al-Ahli/Al-Shabab, cioè gli slot di prestige 3/2), Qatar aveva 7/8 club trovati ma **nessuno
+> con `crestUrl` verificato live** (solo letto dal payload JSON, mai richiesto direttamente) — nessun
+> dato per questi due paesi è stato trascritto in `clubs.ts`.
+
+### Giappone — J1 League
+
+| id club | Nome | TSDB idTeam | URL stemma |
+|---|---|---|---|
+| kashima-antlers | Kashima Antlers | 137707 | https://r2.thesportsdb.com/images/media/team/badge/2s8ady1578238881.png |
+| urawa-red-diamonds | Urawa Red Diamonds | 137716 | https://r2.thesportsdb.com/images/media/team/badge/ce3lhk1578239741.png |
+| yokohama-f-marinos | Yokohama F. Marinos | 137719 | https://r2.thesportsdb.com/images/media/team/badge/rgeshm1578240000.png |
+| kawasaki-frontale | Kawasaki Frontale | 137709 | https://r2.thesportsdb.com/images/media/team/badge/c6pot51578239112.png |
+| gamba-osaka | Gamba Osaka | 137705 | https://r2.thesportsdb.com/images/media/team/badge/tq9edk1638813311.png |
+| vissel-kobe | Vissel Kobe | 137717 | https://r2.thesportsdb.com/images/media/team/badge/2axjch1578239819.png |
+| fc-tokyo | FC Tokyo | 137704 | https://r2.thesportsdb.com/images/media/team/badge/9ls6lr1698754779.png |
+| nagoya-grampus | Nagoya Grampus | 137710 | https://r2.thesportsdb.com/images/media/team/badge/a1ucr01706244426.png |
+
+Prestige assegnato (3/3/2/2/1/1/0/0): Kashima Antlers (3, 8 titoli J1, il più decorato) e Urawa
+Red Diamonds (3, tifoseria più imponente del Giappone, AFC Champions League 2007/2017) come
+big-two; Yokohama F. Marinos (2, 5 titoli) e Kawasaki Frontale (2, 4 titoli recenti, dominante
+2017-2021) come secondo livello; Gamba Osaka (1) e Vissel Kobe (1, Iniesta 2018-2024) come terzo;
+FC Tokyo (0, mai campione J1) e Nagoya Grampus (0) come club minori.
+
+**Coppa nazionale**: **Emperor's Cup** (Japan Emperor's Cup), coppa nazionale storica giapponese
+(dal 1921), tuttora attiva — confermata via TheSportsDB (`lookupleague.php?id=5637`).
+
+### Corea del Sud — K League 1
+
+| id club | Nome | TSDB idTeam | URL stemma |
+|---|---|---|---|
+| jeonbuk-hyundai-motors | Jeonbuk Hyundai Motors | 138111 | https://r2.thesportsdb.com/images/media/team/badge/8jif3b1747853225.png |
+| ulsan-hd | Ulsan HD | 138117 | https://r2.thesportsdb.com/images/media/team/badge/0wooic1706533767.png |
+| pohang-steelers | Pohang Steelers | 138112 | https://r2.thesportsdb.com/images/media/team/badge/63jst01769097748.png |
+| fc-seoul | FC Seoul | 138115 | https://r2.thesportsdb.com/images/media/team/badge/31z1zf1579473186.png |
+| jeju-sk | Jeju SK | 139078 | https://r2.thesportsdb.com/images/media/team/badge/hna7ae1736207131.png |
+| gangwon-fc | Gangwon FC | 138108 | https://r2.thesportsdb.com/images/media/team/badge/c4igx71579729617.png |
+| daegu-fc | Daegu FC | 138107 | https://r2.thesportsdb.com/images/media/team/badge/xzjzn11579473073.png |
+| gwangju-fc | Gwangju FC | 138109 | https://r2.thesportsdb.com/images/media/team/badge/uuzr4x1579473084.png |
+
+Prestige assegnato (3/3/2/2/1/1/0/0): Jeonbuk Hyundai Motors (3, 9 titoli K League, il più
+decorato) e Ulsan HD (3, 2x AFC Champions League, campione 2022/2023/2024) come big-two; Pohang
+Steelers (2, club fondatore, 5 titoli + prima squadra coreana a vincere l'Asian Champions League)
+e FC Seoul (2, club della capitale, 6 titoli) come secondo livello; Jeju SK (1) e Gangwon FC (1)
+come terzo; Daegu FC (0) e Gwangju FC (0) come club minori.
+
+**Coppa nazionale**: **Korea Cup** (rinominata dalla precedente "Korean FA Cup" nel 2024) —
+confermata via TheSportsDB (`lookupleague.php?id=5635`).
+
+### Australia — A-League Men
+
+| id club | Nome | TSDB idTeam | URL stemma |
+|---|---|---|---|
+| sydney-fc | Sydney FC | 134473 | https://r2.thesportsdb.com/images/media/team/badge/utgq8z1546110747.png |
+| melbourne-victory | Melbourne Victory | 134477 | https://r2.thesportsdb.com/images/media/team/badge/wwvsqx1473454564.png |
+| melbourne-city | Melbourne City | 134634 | https://r2.thesportsdb.com/images/media/team/badge/rkeqme1603301840.png |
+| western-sydney-wanderers | Western Sydney Wanderers | 134480 | https://r2.thesportsdb.com/images/media/team/badge/yotugj1759632879.png |
+| brisbane-roar | Brisbane Roar | 134476 | https://r2.thesportsdb.com/images/media/team/badge/sypxsu1473454634.png |
+| central-coast-mariners | Central Coast Mariners | 134479 | https://r2.thesportsdb.com/images/media/team/badge/ncdx4p1759642161.png |
+| adelaide-united | Adelaide United | 134472 | https://r2.thesportsdb.com/images/media/team/badge/wpyuwv1473454602.png |
+| perth-glory | Perth Glory | 134481 | https://r2.thesportsdb.com/images/media/team/badge/2c9k5p1679114095.png |
+
+Prestige assegnato (3/3/2/2/1/1/0/0): Sydney FC (3, 4 titoli A-League + record punti) e Melbourne
+Victory (3, 4 titoli, più titoli AFC Champions League tra i due) come big-two; Melbourne City (2,
+gruppo City Football Group, campione 2021) e Western Sydney Wanderers (2, unico club australiano
+a vincere l'AFC Champions League, 2014) come secondo livello; Brisbane Roar (1, 3 titoli storici)
+e Central Coast Mariners (1, 2 titoli) come terzo; Adelaide United (0) e Perth Glory (0, mai
+campione A-League nonostante tifoseria numerosa) come club minori.
+
+**Coppa nazionale**: **Australia Cup**, coppa nazionale aperta a club di ogni livello (sistema
+piramidale) — confermata via TheSportsDB (`lookupleague.php?id=5180`).
+
+**Copertura club Giappone/Corea del Sud/Australia: 24/24 trovati** (3 paesi × 8 club), tutti con
+`crestUrl` e badge lega/coppa verificati live su TheSportsDB il 2026-08-06 (badge lega/coppa
+verificati con una richiesta HTTP diretta dall'orchestratore di sessione, non dall'agente di
+ricerca — l'agente aveva verificato solo i crest club per Corea del Sud/Australia).
+
 ## 3. Competizioni — URL badge
 
 Endpoint usati: `search_all_leagues.php?c=<paese>&s=Soccer` per scoprire gli id, poi
@@ -213,6 +543,44 @@ la fonte affidabile qui).
 | Copa do Brasil | Copa do Brasil | 4725 | https://r2.thesportsdb.com/images/media/league/badge/h38dax1582151151.png |
 | Champions League (UEFA) | UEFA Champions League | 4480 | https://r2.thesportsdb.com/images/media/league/badge/facv1u1742998896.png |
 | Copa Libertadores | Copa Libertadores | 4501 | https://r2.thesportsdb.com/images/media/league/badge/9shr931685425181.png |
+| Liga MX (Messico) | Mexican Liga MX | 4350 | https://r2.thesportsdb.com/images/media/league/badge/mav5rx1686157960.png |
+| MLS (Stati Uniti) | American Major League Soccer | 4346 | https://r2.thesportsdb.com/images/media/league/badge/dqo6r91549878326.png |
+| US Open Cup (Stati Uniti) | US Open Cup | 5199 | https://r2.thesportsdb.com/images/media/league/badge/nda9e31726722125.png |
+| Canadian Premier League (Canada) | Canadian Premier League | 4820 | https://r2.thesportsdb.com/images/media/league/badge/oxb08k1769615518.png |
+| Canadian Championship (Canada) | Canadian Championship | 5922 | https://www.thesportsdb.com/images/media/league/badge/mux94s1784004460.png |
+| Botola Pro (Marocco) | Moroccan Championship | 4520 | https://r2.thesportsdb.com/images/media/league/badge/bhuork1638558615.png |
+| Ligue 1 Sénégalaise (Senegal) | Senegal Ligue 1 | 4754 | https://r2.thesportsdb.com/images/media/league/badge/r2m5o11583947531.png |
+| NPFL (Nigeria) | Nigerian NPFL | 4827 | https://r2.thesportsdb.com/images/media/league/badge/k4hgin1590183498.png |
+| Ghana Premier League (Ghana) | Ghanaian Premier League | 4974 | https://r2.thesportsdb.com/images/media/league/badge/fk51ll1691567032.png |
+| Egyptian Premier League (Egitto) | Egyptian Premier League | 4829 | https://r2.thesportsdb.com/images/media/league/badge/air7qk1715766146.png |
+| Ligue 1 (Costa d'Avorio) | Ivory Coast Ligue 1 | 5241 | https://r2.thesportsdb.com/images/media/league/badge/fhrsyb1645300539.png |
+| J1 League (Giappone) | Japanese J1 League | 4633 | https://r2.thesportsdb.com/images/media/league/badge/3j8bni1675170553.png |
+| Emperor's Cup (Giappone) | Japan Emperor's Cup | 5637 | https://r2.thesportsdb.com/images/media/league/badge/nd13o11750442580.png |
+| K League 1 (Corea del Sud) | South Korean K League 1 | 4689 | https://r2.thesportsdb.com/images/media/league/badge/zaw2cj1628430843.png |
+| Korea Cup (Corea del Sud) | Korea Cup | 5635 | https://www.thesportsdb.com/images/media/league/badge/lu5cbf1782691118.png |
+| A-League Men (Australia) | Australian A-League | 4356 | https://r2.thesportsdb.com/images/media/league/badge/2u78lm1638459575.png |
+| Australia Cup (Australia) | Australia Cup | 5180 | https://r2.thesportsdb.com/images/media/league/badge/bjqd291645454828.png |
+
+> Messico non ha una riga "coppa nazionale": la Copa MX è sospesa dal 2019-20 e non risulta
+> rivista al 2026 — vedi sezione 2bis per il dettaglio.
+
+> **Coppe nazionali di Marocco/Senegal/Nigeria/Ghana/Egitto/Costa d'Avorio — nomi reali verificati,
+> nessun badge TSDB trovato.** `search_all_leagues.php?c=<paese>&s=Soccer` per questi 6 paesi
+> restituisce solo il/i campionato/i (nessuna coppa), e un giro di verifica mirato (ricerca web
+> `site:thesportsdb.com` per ciascun nome di coppa, più un tentativo di scansione di
+> `all_leagues.php` per "Cup"/"Coupe" + paese) non ha trovato una pagina/voce TheSportsDB dedicata
+> per nessuna delle 6 — copertura debole per le coppe domestiche africane su questa fonte, coerente
+> col pattern già osservato per i club (vedi sezioni sopra). I nomi reali sotto sono comunque
+> verificati via fonti web dirette (Wikipedia in italiano/francese/inglese), solo senza badge:
+>
+> | Paese | Coppa nazionale (nome reale) |
+> |---|---|
+> | Marocco | Coupe du Trône |
+> | Senegal | Coupe du Sénégal (esiste anche una "Coupe de la Ligue" separata, aggiunta nel 2009 — Coupe du Sénégal è la coppa nazionale storica principale) |
+> | Nigeria | Nigeria Federation Cup |
+> | Ghana | Ghana FA Cup (sponsorizzata "MTN FA Cup") |
+> | Egitto | Egypt Cup (distinta dalla "Egyptian League Cup"/WE League Cup, idLeague 5185, trovata su TSDB ma è una coppa diversa) |
+> | Costa d'Avorio | Coupe de Côte d'Ivoire |
 
 **Serie C — dettaglio gironi** (TheSportsDB non ha un'unica lega "Serie C", la modella come 3
 gironi separati, coerente col fatto che è davvero organizzata così nella realtà):

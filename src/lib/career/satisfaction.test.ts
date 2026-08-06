@@ -41,6 +41,7 @@ function baseCtx(overrides: Partial<Parameters<typeof evaluateSeasonTitle>[0]> =
     ovrDelta: 1,
     nationalCallup: false,
     nationalGoals: 0,
+    cupUpsetWin: false,
     ...overrides,
   };
 }
@@ -106,6 +107,19 @@ describe("evaluateSeasonTitle", () => {
       ).id,
     ).toBe("champion");
   });
+
+  it("dovrebbe scegliere giantKiller per una sorpresa di coppa vinta", () => {
+    const title = evaluateSeasonTitle(baseCtx({ cupUpsetWin: true }));
+    expect(title.id).toBe("giantKiller");
+    expect(title.label).toBe("Ammazzagigante");
+  });
+
+  it("giantKiller dovrebbe prevalere su champion anche con altri trofei nello stesso ciclo", () => {
+    const title = evaluateSeasonTitle(
+      baseCtx({ cupUpsetWin: true, trophies: [{ competition: "Coppa Italia", age: 24 }] }),
+    );
+    expect(title.id).toBe("giantKiller");
+  });
 });
 
 describe("pushSeasonTitle / pickBestCareerTitle", () => {
@@ -122,6 +136,15 @@ describe("pushSeasonTitle / pickBestCareerTitle", () => {
         { age: 22, id: "champion", label: "Campione" },
       ]),
     ).toBe("Campione");
+  });
+
+  it("giantKiller dovrebbe prevalere su champion come miglior titolo di carriera", () => {
+    expect(
+      pickBestCareerTitle([
+        { age: 20, id: "champion", label: "Campione" },
+        { age: 23, id: "giantKiller", label: "Ammazzagigante" },
+      ]),
+    ).toBe("Ammazzagigante");
   });
 });
 

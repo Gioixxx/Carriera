@@ -10,6 +10,7 @@ import {
   pushRecentCategory,
   resolveCycle,
   shouldTriggerContinentalFinal,
+  shouldTriggerCupUpset,
   type LoopContext,
 } from "./loop";
 
@@ -95,12 +96,43 @@ describe("shouldTriggerContinentalFinal", () => {
   });
 });
 
+describe("shouldTriggerCupUpset", () => {
+  it("dovrebbe essere falso se il giocatore è in prestito", () => {
+    const context: LoopContext = { loanParentClub: JUVENTUS };
+    expect(shouldTriggerCupUpset(playerAt(SAMPDORIA), context, () => 0)).toBe(false);
+  });
+
+  it("dovrebbe essere falso se il club è sopra la soglia di prestigio sottodotato", () => {
+    expect(shouldTriggerCupUpset(playerAt(JUVENTUS), INITIAL_LOOP_CONTEXT, () => 0)).toBe(false);
+  });
+
+  it("dovrebbe essere falso se il club non ha una coppa nazionale (es. Messico, Copa MX sospesa)", () => {
+    const necaxa = getClub("necaxa")!; // prestige 0, Liga MX, nessuna coppa nazionale attiva
+    expect(shouldTriggerCupUpset(playerAt(necaxa), INITIAL_LOOP_CONTEXT, () => 0)).toBe(false);
+  });
+
+  it("dovrebbe essere vero se il club è sottodotato e il roll è favorevole", () => {
+    expect(shouldTriggerCupUpset(playerAt(SAMPDORIA), INITIAL_LOOP_CONTEXT, () => 0)).toBe(true);
+  });
+
+  it("dovrebbe rispettare la soglia di probabilità", () => {
+    expect(shouldTriggerCupUpset(playerAt(SAMPDORIA), INITIAL_LOOP_CONTEXT, () => 0.99)).toBe(false);
+  });
+});
+
 describe("pickNextDecision", () => {
   it("dovrebbe generare la finale di coppa continentale quando le condizioni sono soddisfatte", () => {
     const player = { ...playerAt(), ovr: 90 };
     const { decision, category } = pickNextDecision(player, INITIAL_LOOP_CONTEXT, [], () => 0);
     expect(category).toBe("continental-final");
     expect(decision.category).toBe("continental-final");
+  });
+
+  it("dovrebbe generare una sorpresa di coppa quando il club è sottodotato e le condizioni sono soddisfatte", () => {
+    const player = playerAt(SAMPDORIA);
+    const { decision, category } = pickNextDecision(player, INITIAL_LOOP_CONTEXT, [], () => 0);
+    expect(category).toBe("cup-upset");
+    expect(decision.category).toBe("cup-upset");
   });
 
   it("dovrebbe generare una loan-return se il giocatore è in prestito", () => {
@@ -247,6 +279,38 @@ describe("resolveCycle", () => {
     const result = resolveCycle(player, INITIAL_LOOP_CONTEXT, "continental-final", option, "normal", () => 0);
 
     expect(result.newTrophies.some((t) => t.competition === JUVENTUS.competitions.continental)).toBe(false);
+  });
+
+  it("dovrebbe assegnare il trofeo di coppa se la sorpresa è vinta", () => {
+    const player = playerAt(SAMPDORIA);
+    const option = {
+      id: "left",
+      label: "Sinistra",
+      outcomes: [
+        {
+          weight: 100,
+          effect: {},
+          resultText: `Gol! Il tuo club sovverte il pronostico in ${SAMPDORIA.competitions.cup}.`,
+          cupUpsetWin: true,
+        },
+      ],
+    };
+    // rng alto per evitare che rollClubTrophies assegni incidentalmente anche il trofeo di lega.
+    const result = resolveCycle(player, INITIAL_LOOP_CONTEXT, "cup-upset", option, "normal", () => 0.99);
+
+    expect(result.newTrophies.some((t) => t.competition === SAMPDORIA.competitions.cup)).toBe(true);
+  });
+
+  it("non dovrebbe assegnare il trofeo di coppa se la sorpresa è persa", () => {
+    const player = playerAt(SAMPDORIA);
+    const option = {
+      id: "left",
+      label: "Sinistra",
+      outcomes: [{ weight: 100, effect: { popularityDelta: 3 }, resultText: "Niente impresa." }],
+    };
+    const result = resolveCycle(player, INITIAL_LOOP_CONTEXT, "cup-upset", option, "normal", () => 0.99);
+
+    expect(result.newTrophies.some((t) => t.competition === SAMPDORIA.competitions.cup)).toBe(false);
   });
 
   it("dovrebbe promuovere il club se il campionato del tier corrente è vinto", () => {

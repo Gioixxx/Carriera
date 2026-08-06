@@ -639,7 +639,7 @@ export function CareerGame() {
                           decisionExiting ? "animate-step-out" : "animate-step-in",
                         )}
                       >
-                        {state.currentCategory === "continental-final" ? (
+                        {state.currentCategory === "continental-final" || state.currentCategory === "cup-upset" ? (
                           <PenaltyShootout
                             decision={state.currentDecision}
                             onChoose={handleChoose}

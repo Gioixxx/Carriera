@@ -47,6 +47,7 @@ it("simula molte carriere e stampa le frequenze osservate", () => {
   const categoryTotals: Partial<Record<DecisionCategory, number>> = {};
   let totalCyclesPlayed = 0;
   let totalPeakOvr = 0;
+  let totalCupUpsetWins = 0;
   const peakOvrBuckets: Record<string, number> = {
     "<70": 0,
     "70-79": 0,
@@ -55,13 +56,14 @@ it("simula molte carriere e stampa le frequenze osservate", () => {
     "90+": 0,
   };
 
-  for (const { player, categoryPicks, cyclesPlayed, peakOvr } of results) {
+  for (const { player, categoryPicks, cyclesPlayed, peakOvr, cupUpsetWinCount } of results) {
     totalTrophies += player.trophies.length;
     totalAwards += player.awards.length;
     for (const award of player.awards) awardCounts[award.type] += 1;
     retirementAges[player.age] = (retirementAges[player.age] ?? 0) + 1;
     totalCyclesPlayed += cyclesPlayed;
     totalPeakOvr += peakOvr;
+    totalCupUpsetWins += cupUpsetWinCount;
     if (peakOvr < 70) peakOvrBuckets["<70"] += 1;
     else if (peakOvr < 80) peakOvrBuckets["70-79"] += 1;
     else if (peakOvr < 85) peakOvrBuckets["80-84"] += 1;
@@ -98,6 +100,13 @@ it("simula molte carriere e stampa le frequenze osservate", () => {
   console.log(`\n--- Frequenza scelta categoria (su ${totalCyclesPlayed} cicli totali) ---`);
   for (const [cat, count] of Object.entries(categoryTotals).sort((a, b) => (b[1] ?? 0) - (a[1] ?? 0))) {
     console.log(`  ${cat}: ${pct(count ?? 0, totalCyclesPlayed)}`);
+  }
+
+  const cupUpsetCycles = categoryTotals["cup-upset"] ?? 0;
+  if (cupUpsetCycles > 0) {
+    console.log(`\n--- Sorpresa di coppa ("Giant Killer") ---`);
+    console.log(`  Cicli innescati: ${cupUpsetCycles} (${pct(cupUpsetCycles, totalCyclesPlayed)} dei cicli totali)`);
+    console.log(`  Vinti: ${totalCupUpsetWins} (${pct(totalCupUpsetWins, cupUpsetCycles)} dei cicli innescati)`);
   }
   console.log("");
 });

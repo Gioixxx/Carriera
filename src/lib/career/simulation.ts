@@ -16,6 +16,8 @@ export interface SimulatedCareerResult {
   categoryPicks: Partial<Record<DecisionCategory, number>>;
   /** OVR massimo raggiunto durante la carriera — il finale non basta, il declino di fine carriera lo abbassa. */
   peakOvr: number;
+  /** Cicli "cup-upset" vinti (titolo di stagione "giantKiller" assegnato) — per misurare il win rate reale. */
+  cupUpsetWinCount: number;
 }
 
 /**
@@ -47,6 +49,7 @@ export function simulateCareer(
   let cyclesPlayed = 0;
   let injuryCount = 0;
   let peakOvr = player.ovr;
+  let cupUpsetWinCount = 0;
   const categoryPicks: Partial<Record<DecisionCategory, number>> = {};
 
   while (decision && !player.retired && cyclesPlayed < MAX_SIMULATED_CYCLES) {
@@ -59,6 +62,7 @@ export function simulateCareer(
     cyclesPlayed += 1;
     if (result.newInjury) injuryCount += 1;
     if (player.ovr > peakOvr) peakOvr = player.ovr;
+    if (result.seasonTitle?.id === "giantKiller") cupUpsetWinCount += 1;
 
     if (player.retired) break;
 
@@ -69,5 +73,5 @@ export function simulateCareer(
     context = next.context;
   }
 
-  return { player, cyclesPlayed, injuryCount, categoryPicks, peakOvr };
+  return { player, cyclesPlayed, injuryCount, categoryPicks, peakOvr, cupUpsetWinCount };
 }

@@ -113,6 +113,7 @@ export interface PersonalRecords {
 }
 
 export type SeasonTitleId =
+  | "giantKiller"
   | "champion"
   | "ballondorSeason"
   | "nationalHero"
@@ -188,6 +189,7 @@ export type DecisionCategory =
   | "lifestyle"
   | "callup"
   | "continental-final"
+  | "cup-upset"
   | "narrative"
   | "sponsor";
 
@@ -198,6 +200,8 @@ export interface DecisionOutcome {
   resultText: string;
   /** true solo sull'outcome che rappresenta la vittoria di una finale continentale. */
   continentalWin?: boolean;
+  /** true solo sull'outcome che rappresenta la vittoria di una sorpresa di coppa ("Giant Killer"). */
+  cupUpsetWin?: boolean;
 }
 
 export interface DecisionOption {

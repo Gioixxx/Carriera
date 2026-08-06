@@ -11,7 +11,8 @@ interface PenaltyShootoutProps {
 
 export function PenaltyShootout({ decision, onChoose }: PenaltyShootoutProps) {
   const [selected, setSelected] = useState<string | null>(null);
-  const scoreChance = decision.options[0]?.outcomes.find((o) => o.continentalWin)?.weight ?? null;
+  const scoreChance =
+    decision.options[0]?.outcomes.find((o) => o.continentalWin || o.cupUpsetWin)?.weight ?? null;
 
   function handleChoose(optionId: string) {
     setSelected(optionId);

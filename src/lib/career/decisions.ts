@@ -846,6 +846,114 @@ export function generateContinentalFinalDecision(
   };
 }
 
+// ---------- Sorpresa di coppa — "Giant Killer" ----------
+
+/** Scarto minimo di prestige richiesto per considerare un club avversario una "corazzata". */
+const CUP_UPSET_OPPONENT_PRESTIGE_GAP = 2;
+
+/**
+ * Cerca un avversario molto più quotato per la sorpresa di coppa — stesso paese se possibile
+ * (fallback su un pool globale se il paese non ha un club abbastanza forte, difensivo: con la
+ * distribuzione di prestige 3/3/2/2/1/1/0/0 usata per ogni paese, il fallback resta teorico).
+ */
+export function pickCupUpsetOpponent(club: Club, rng: Rng = Math.random): Club {
+  const sameCountryGiants = clubsByCountry(club.country).filter(
+    (c) => c.id !== club.id && c.prestige >= club.prestige + CUP_UPSET_OPPONENT_PRESTIGE_GAP,
+  );
+  const globalGiants = clubs.filter((c) => c.id !== club.id && c.prestige >= 2);
+  const pool = sameCountryGiants.length > 0 ? sameCountryGiants : globalGiants;
+  const chosen = pickClubs(pool, 1, rng)[0];
+  return chosen ?? clubs.reduce((best, c) => (c.prestige > best.prestige ? c : best), club);
+}
+
+const CUP_UPSET_BASE_CHANCE = 0.28;
+const CUP_UPSET_OVR_BASELINE = 65;
+const CUP_UPSET_OVR_DIVISOR = 250;
+const CUP_UPSET_GAP_PENALTY = 0.03;
+const CUP_UPSET_CHANCE_FLOOR = 0.15;
+const CUP_UPSET_CHANCE_CAP = 0.45;
+
+/**
+ * Probabilità di completare la sorpresa — deliberatamente sotto il 50%, è per definizione un
+ * evento improbabile. Valori provvisori, da confermare con l'harness (npm run simulate) come
+ * ogni altra costante probabilistica in questo file.
+ */
+export function cupUpsetWinChance(ovr: number, clubPrestige: number, opponentPrestige: number): number {
+  const gap = opponentPrestige - clubPrestige;
+  const base = CUP_UPSET_BASE_CHANCE + Math.max(ovr - CUP_UPSET_OVR_BASELINE, 0) / CUP_UPSET_OVR_DIVISOR;
+  return clamp(base - gap * CUP_UPSET_GAP_PENALTY, CUP_UPSET_CHANCE_FLOOR, CUP_UPSET_CHANCE_CAP);
+}
+
+interface CupUpsetTemplate {
+  id: string;
+  title: string;
+  description: (opponent: string, cup: string) => string;
+  winText: (opponent: string, cup: string) => string;
+  loseText: (opponent: string, cup: string) => string;
+  labelA: string;
+  labelB: string;
+}
+
+/**
+ * Varianti narrative dello stesso momento (stesso schema della finale continentale, ma qui è il
+ * club sottodotato a sfidare una corazzata) — gli `id` delle opzioni restano "left"/"right":
+ * PenaltyShootout.tsx li usa per l'animazione, nessuna modifica UI necessaria.
+ */
+const CUP_UPSET_TEMPLATES: CupUpsetTemplate[] = [
+  {
+    id: "penalty",
+    title: "Sorpresa di coppa",
+    description: (opp, cup) =>
+      `Il ${opp}, corazzata del torneo, è avanti di un gol nei minuti finali di ${cup}. Hai un rigore per pareggiare e ribaltare tutto.`,
+    winText: (opp, cup) => `Gol! Il tuo club sovverte il pronostico e batte il ${opp} in ${cup}.`,
+    loseText: (opp, cup) => `Il portiere del ${opp} para tutto. Il sogno finisce qui in ${cup}.`,
+    labelA: "Angolo basso",
+    labelB: "Angolo alto",
+  },
+  {
+    id: "breakaway",
+    title: "Contropiede all'ultimo respiro",
+    description: (opp, cup) =>
+      `Contro ogni pronostico sei solo davanti al portiere del ${opp}, nel recupero di ${cup}.`,
+    winText: (opp, cup) => `Freddezza assoluta: batti il portiere e regali l'impresa contro il ${opp} in ${cup}!`,
+    loseText: (opp, cup) => `Il portiere del ${opp} chiude lo specchio. Niente impresa in ${cup}.`,
+    labelA: "Tiro sul primo palo",
+    labelB: "Pallonetto",
+  },
+];
+
+/** Popularità di consolazione alla sconfitta — piccola, la sorpresa mancata resta comunque un momento sentito. */
+const CUP_UPSET_LOSS_POPULARITY_BONUS = 3;
+
+export function generateCupUpsetDecision(
+  player: Player,
+  opponent: Club,
+  cup: string,
+  rng: Rng = Math.random,
+): Decision {
+  const template =
+    CUP_UPSET_TEMPLATES[Math.floor(rng() * CUP_UPSET_TEMPLATES.length)] ?? CUP_UPSET_TEMPLATES[0];
+  const winChance = Math.round(
+    cupUpsetWinChance(player.ovr, player.club?.prestige ?? 0, opponent.prestige) * 100,
+  );
+  const outcomes = (): DecisionOutcome[] => [
+    { ...outcome(winChance, template.winText(opponent.name, cup)), cupUpsetWin: true },
+    economicOutcome(100 - winChance, template.loseText(opponent.name, cup), {
+      popularityDelta: CUP_UPSET_LOSS_POPULARITY_BONUS,
+    }),
+  ];
+  return {
+    id: `cup-upset-${template.id}-${player.age}`,
+    category: "cup-upset",
+    title: template.title,
+    description: template.description(opponent.name, cup),
+    options: [
+      { id: "left", label: template.labelA, hint: "Sorpresa di coppa · rischio delusione", outcomes: outcomes() },
+      { id: "right", label: template.labelB, hint: "Sorpresa di coppa · rischio delusione", outcomes: outcomes() },
+    ],
+  };
+}
+
 // ---------- Sponsor/endorsement ----------
 
 const SPONSOR_ELIGIBILITY_POPULARITY = 25;

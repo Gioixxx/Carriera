@@ -38,7 +38,42 @@ export const COMPETITION_BADGES: Record<string, string> = {
   "KNVB Beker": "https://r2.thesportsdb.com/images/media/league/badge/to8dpt1757803973.png",
   "Liga Profesional": "https://r2.thesportsdb.com/images/media/league/badge/rk9xhx1768238251.png",
   "Copa Argentina": "https://r2.thesportsdb.com/images/media/league/badge/welbig1655924428.png",
+  "CONCACAF Champions Cup": "https://r2.thesportsdb.com/images/media/league/badge/njx38y1691129615.png",
+  "CAF Champions League": "https://r2.thesportsdb.com/images/media/league/badge/nxb5g41762186344.png",
+  "AFC Champions League Elite": "https://r2.thesportsdb.com/images/media/league/badge/gsbq4k1719686780.png",
+  "Liga MX": "https://r2.thesportsdb.com/images/media/league/badge/mav5rx1686157960.png",
+  MLS: "https://r2.thesportsdb.com/images/media/league/badge/dqo6r91549878326.png",
+  "US Open Cup": "https://r2.thesportsdb.com/images/media/league/badge/nda9e31726722125.png",
+  "Canadian Premier League": "https://r2.thesportsdb.com/images/media/league/badge/oxb08k1769615518.png",
+  "Canadian Championship": "https://www.thesportsdb.com/images/media/league/badge/mux94s1784004460.png",
+  "Botola Pro": "https://r2.thesportsdb.com/images/media/league/badge/bhuork1638558615.png",
+  "Ligue 1 Sénégalaise": "https://r2.thesportsdb.com/images/media/league/badge/r2m5o11583947531.png",
+  NPFL: "https://r2.thesportsdb.com/images/media/league/badge/k4hgin1590183498.png",
+  "Ghana Premier League": "https://r2.thesportsdb.com/images/media/league/badge/fk51ll1691567032.png",
+  "Egyptian Premier League": "https://r2.thesportsdb.com/images/media/league/badge/air7qk1715766146.png",
+  "Ligue 1 Côte d'Ivoire": "https://r2.thesportsdb.com/images/media/league/badge/fhrsyb1645300539.png",
+  "J1 League": "https://r2.thesportsdb.com/images/media/league/badge/3j8bni1675170553.png",
+  "Emperor's Cup": "https://r2.thesportsdb.com/images/media/league/badge/nd13o11750442580.png",
+  "K League 1": "https://r2.thesportsdb.com/images/media/league/badge/zaw2cj1628430843.png",
+  "Korea Cup": "https://www.thesportsdb.com/images/media/league/badge/lu5cbf1782691118.png",
+  "A-League Men": "https://r2.thesportsdb.com/images/media/league/badge/2u78lm1638459575.png",
+  "Australia Cup": "https://r2.thesportsdb.com/images/media/league/badge/bjqd291645454828.png",
 };
+
+/**
+ * Coppe nazionali con nome reale verificato ma senza badge TheSportsDB trovato (ricerca 2026-08-06
+ * — vedi .claude/research/team-crests.md, sezione CAF): la copertura badge di TheSportsDB per le
+ * coppe domestiche africane è debole. Usato da competition-badges.test.ts per non trattare questi
+ * casi come un gap involontario.
+ */
+export const CUP_BADGES_KNOWN_GAP: readonly string[] = [
+  "Coupe du Trône",
+  "Coupe du Sénégal",
+  "Nigeria Federation Cup",
+  "Ghana FA Cup",
+  "Egypt Cup",
+  "Coupe de Côte d'Ivoire",
+];
 
 export function getCompetitionBadge(competition: string): string | undefined {
   return COMPETITION_BADGES[competition];

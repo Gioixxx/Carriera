@@ -3,6 +3,7 @@ import type { DecisionCategory, DecisionOption, Player, PlayerIdentity } from "@
 import { getClub } from "@/data/clubs";
 import { createPlayer, signWithClub } from "./engine";
 import {
+  cupUpsetWinChance,
   favorableOutcomeWeight,
   generateAcademyOffer,
   generateClubCrisis,
@@ -11,6 +12,7 @@ import {
   generateContinentalFinalDecision,
   generateControversialPost,
   generateControversialStatement,
+  generateCupUpsetDecision,
   generateEndOfCycle,
   generateLoanOffer,
   generateLoanReturn,
@@ -31,6 +33,7 @@ import {
   LIFESTYLE_DECISIONS,
   nationalCallupChance,
   penaltyScoreChance,
+  pickCupUpsetOpponent,
   pickDecisionCategory,
   rollNationalCallup,
 } from "./decisions";
@@ -454,6 +457,88 @@ describe("generateContinentalFinalDecision", () => {
       [0, 0.4, 0.9].map((rngValue) => generateContinentalFinalDecision(player, "Champions League", () => rngValue).title),
     );
     expect(titles.size).toBeGreaterThan(1);
+  });
+});
+
+describe("cupUpsetWinChance", () => {
+  it("dovrebbe restare entro i limiti [0.15, 0.45]", () => {
+    expect(cupUpsetWinChance(30, 0, 3)).toBeGreaterThanOrEqual(0.15);
+    expect(cupUpsetWinChance(99, 0, 2)).toBeLessThanOrEqual(0.45);
+  });
+
+  it("dovrebbe restare sempre sotto il 50% — è per definizione una sorpresa", () => {
+    for (const ovr of [40, 60, 80, 99]) {
+      for (const gap of [2, 3]) {
+        expect(cupUpsetWinChance(ovr, 0, gap)).toBeLessThan(0.5);
+      }
+    }
+  });
+
+  it("dovrebbe crescere con l'OVR del giocatore", () => {
+    expect(cupUpsetWinChance(85, 0, 3)).toBeGreaterThan(cupUpsetWinChance(60, 0, 3));
+  });
+
+  it("dovrebbe calare all'aumentare dello scarto di prestigio con l'avversario", () => {
+    expect(cupUpsetWinChance(70, 0, 2)).toBeGreaterThan(cupUpsetWinChance(70, 0, 3));
+  });
+});
+
+describe("pickCupUpsetOpponent", () => {
+  it("dovrebbe restituire sempre un club di prestigio maggiore", () => {
+    const carrarese = getClub("carrarese")!; // prestige 0
+    for (const rngValue of [0, 0.3, 0.7, 0.99]) {
+      const opponent = pickCupUpsetOpponent(carrarese, () => rngValue);
+      expect(opponent.prestige).toBeGreaterThan(carrarese.prestige);
+      expect(opponent.id).not.toBe(carrarese.id);
+    }
+  });
+
+  it("dovrebbe preferire un avversario dello stesso paese quando disponibile", () => {
+    const carrarese = getClub("carrarese")!; // Italia, prestige 0
+    const opponent = pickCupUpsetOpponent(carrarese, () => 0);
+    expect(opponent.country).toBe(carrarese.country);
+  });
+});
+
+describe("generateCupUpsetDecision", () => {
+  const underdog = getClub("carrarese")!;
+  const giant = getClub("juventus")!;
+
+  it("dovrebbe avere due opzioni (sinistra/destra) con outcome che sommano a 100", () => {
+    const player = playerAt(underdog);
+    const decision = generateCupUpsetDecision(player, giant, "Coppa Italia");
+    expect(decision.options).toHaveLength(2);
+    for (const option of decision.options) {
+      const totalWeight = option.outcomes.reduce((sum, o) => sum + o.weight, 0);
+      expect(totalWeight).toBe(100);
+    }
+  });
+
+  it("il testo dell'esito dovrebbe citare l'avversario e la coppa passati", () => {
+    const player = playerAt(underdog);
+    const decision = generateCupUpsetDecision(player, giant, "Coppa Italia");
+    expect(decision.description).toContain(giant.name);
+    expect(decision.description).toContain("Coppa Italia");
+  });
+
+  it("solo l'outcome vincente dovrebbe avere cupUpsetWin: true, la sconfitta non deve penalizzare l'OVR", () => {
+    const player = playerAt(underdog);
+    const decision = generateCupUpsetDecision(player, giant, "Coppa Italia");
+    for (const option of decision.options) {
+      const [winOutcome, loseOutcome] = option.outcomes;
+      expect(winOutcome.cupUpsetWin).toBe(true);
+      expect(loseOutcome.cupUpsetWin).toBeUndefined();
+      expect(loseOutcome.effect.ovrDelta).toBeUndefined();
+      expect(loseOutcome.effect.popularityDelta).toBeGreaterThan(0);
+    }
+  });
+
+  it("gli id delle opzioni restano sempre left/right qualunque sia il template scelto (vincolo UI)", () => {
+    const player = playerAt(underdog);
+    for (const rngValue of [0, 0.9]) {
+      const decision = generateCupUpsetDecision(player, giant, "Coppa Italia", () => rngValue);
+      expect(decision.options.map((o) => o.id)).toEqual(["left", "right"]);
+    }
   });
 });
 

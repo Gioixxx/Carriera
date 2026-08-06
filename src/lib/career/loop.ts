@@ -42,6 +42,7 @@ import {
   generateContinentalFinalDecision,
   generateControversialPost,
   generateControversialStatement,
+  generateCupUpsetDecision,
   generateEndOfCycle,
   generateLoanOffer,
   generateLoanReturn,
@@ -60,6 +61,7 @@ import {
   isTriumphantReturnEligible,
   isUnexpectedProspectEligible,
   LIFESTYLE_DECISIONS,
+  pickCupUpsetOpponent,
   pickDecisionCategory,
   rollNationalCallup,
 } from "./decisions";
@@ -78,6 +80,11 @@ export const INITIAL_LOOP_CONTEXT: LoopContext = { loanParentClub: null };
 
 const MIN_CONTINENTAL_FINAL_OVR = 78;
 const CONTINENTAL_FINAL_CHANCE = 0.15;
+
+/** Un club è eleggibile alla sorpresa di coppa fino a questo prestige incluso (club "sottodotato"). */
+const CUP_UPSET_MAX_CLUB_PRESTIGE = 1;
+/** Sotto la chance della finale continentale, così i due eventi decisivi non competono troppo spesso. */
+const CUP_UPSET_CHANCE = 0.12;
 
 const RECENT_DECISIONS_WINDOW = 4;
 const EVENT_REPEAT_PENALTY = 0.2;
@@ -154,6 +161,17 @@ export function shouldTriggerContinentalFinal(
   return rng() < CONTINENTAL_FINAL_CHANCE;
 }
 
+export function shouldTriggerCupUpset(
+  player: Player,
+  context: LoopContext,
+  rng: Rng = Math.random,
+): boolean {
+  if (context.loanParentClub) return false;
+  if (!player.club?.competitions.cup) return false;
+  if (player.club.prestige > CUP_UPSET_MAX_CLUB_PRESTIGE) return false;
+  return rng() < CUP_UPSET_CHANCE;
+}
+
 /** "Finish high school" ha senso solo a inizio carriera — unico evento del pool con un gate d'età. */
 function pickStaticDecision(
   category: DecisionCategory,
@@ -223,6 +241,15 @@ export function pickNextDecision(
     return {
       decision: generateContinentalFinalDecision(player, player.club!.competitions.continental!, rng),
       category: "continental-final",
+      context,
+    };
+  }
+
+  if (shouldTriggerCupUpset(player, context, rng)) {
+    const opponent = pickCupUpsetOpponent(player.club!, rng);
+    return {
+      decision: generateCupUpsetDecision(player, opponent, player.club!.competitions.cup!, rng),
+      category: "cup-upset",
       context,
     };
   }
@@ -436,6 +463,16 @@ export function resolveCycle(
     }
   }
 
+  if (category === "cup-upset" && nextPlayer.club?.competitions.cup) {
+    if (outcome.cupUpsetWin === true) {
+      newTrophies.push({
+        competition: nextPlayer.club.competitions.cup,
+        club: nextPlayer.club,
+        age: nextPlayer.age,
+      });
+    }
+  }
+
   let clubTierChange: "promoted" | "relegated" | null = null;
   if (nextPlayer.club) {
     const wonLeagueTitle = newTrophies.some(
@@ -551,6 +588,7 @@ export function resolveCycle(
     ovrDelta: nextPlayer.ovr - ovrBefore,
     nationalCallup,
     nationalGoals: nationalGoalsThisCycle,
+    cupUpsetWin: outcome.cupUpsetWin === true,
   });
   nextPlayer = {
     ...nextPlayer,

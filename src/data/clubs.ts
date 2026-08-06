@@ -1,6 +1,5 @@
 import type { Club } from "@/types/career";
-
-export type Confederation = "UEFA" | "CONMEBOL";
+import type { Confederation } from "@/data/countries";
 
 export interface League {
   id: string;
@@ -9,13 +8,17 @@ export interface League {
   /** 1 = massima divisione, 2 = seconda, 3 = terza. */
   tier: number;
   confederation: Confederation;
-  cup: string;
+  /** undefined se il paese non ha (più) una coppa nazionale attiva (es. Messico, Copa MX sospesa). */
+  cup?: string;
 }
 
 /** Nome reale della coppa continentale per confederazione — assegnata ai club di tier 1. */
 export const CONTINENTAL_CUP: Record<Confederation, string> = {
   UEFA: "Champions League",
   CONMEBOL: "Copa Libertadores",
+  CONCACAF: "CONCACAF Champions Cup",
+  CAF: "CAF Champions League",
+  AFC: "AFC Champions League Elite",
 };
 
 const UEFA_EUROPA_LEAGUE = "Europa League";
@@ -48,6 +51,18 @@ export const leagues: League[] = [
   { id: "ger-bundesliga", name: "Bundesliga", country: "Germany", tier: 1, confederation: "UEFA", cup: "DFB-Pokal" },
   { id: "ned-eredivisie", name: "Eredivisie", country: "Netherlands", tier: 1, confederation: "UEFA", cup: "KNVB Beker" },
   { id: "arg-liga-profesional", name: "Liga Profesional", country: "Argentina", tier: 1, confederation: "CONMEBOL", cup: "Copa Argentina" },
+  { id: "mex-liga-mx", name: "Liga MX", country: "Mexico", tier: 1, confederation: "CONCACAF" },
+  { id: "usa-mls", name: "MLS", country: "United States", tier: 1, confederation: "CONCACAF", cup: "US Open Cup" },
+  { id: "can-premier-league", name: "Canadian Premier League", country: "Canada", tier: 1, confederation: "CONCACAF", cup: "Canadian Championship" },
+  { id: "mar-botola-pro", name: "Botola Pro", country: "Morocco", tier: 1, confederation: "CAF", cup: "Coupe du Trône" },
+  { id: "sen-ligue-1", name: "Ligue 1 Sénégalaise", country: "Senegal", tier: 1, confederation: "CAF", cup: "Coupe du Sénégal" },
+  { id: "nga-npfl", name: "NPFL", country: "Nigeria", tier: 1, confederation: "CAF", cup: "Nigeria Federation Cup" },
+  { id: "gha-premier-league", name: "Ghana Premier League", country: "Ghana", tier: 1, confederation: "CAF", cup: "Ghana FA Cup" },
+  { id: "egy-premier-league", name: "Egyptian Premier League", country: "Egypt", tier: 1, confederation: "CAF", cup: "Egypt Cup" },
+  { id: "civ-ligue-1", name: "Ligue 1 Côte d'Ivoire", country: "Ivory Coast", tier: 1, confederation: "CAF", cup: "Coupe de Côte d'Ivoire" },
+  { id: "jpn-j1-league", name: "J1 League", country: "Japan", tier: 1, confederation: "AFC", cup: "Emperor's Cup" },
+  { id: "kor-k-league-1", name: "K League 1", country: "South Korea", tier: 1, confederation: "AFC", cup: "Korea Cup" },
+  { id: "aus-a-league", name: "A-League Men", country: "Australia", tier: 1, confederation: "AFC", cup: "Australia Cup" },
 ];
 
 const leagueById = new Map(leagues.map((league) => [league.id, league]));
@@ -232,6 +247,126 @@ export const clubs: Club[] = [
   club("estudiantes", "Estudiantes de La Plata", "arg-liga-profesional", 1, "https://r2.thesportsdb.com/images/media/team/badge/pf08dq1760634366.png"),
   club("velez-sarsfield", "Vélez Sarsfield", "arg-liga-profesional", 0, "https://r2.thesportsdb.com/images/media/team/badge/jo98m71517769587.png"),
   club("newells-old-boys", "Newell's Old Boys", "arg-liga-profesional", 0, "https://r2.thesportsdb.com/images/media/team/badge/23aftf1580842633.png"),
+
+  // --- Messico — Liga MX ---
+  club("america", "América", "mex-liga-mx", 3, "https://r2.thesportsdb.com/images/media/team/badge/amy1xs1581857392.png"),
+  club("cruz-azul", "Cruz Azul", "mex-liga-mx", 3, "https://r2.thesportsdb.com/images/media/team/badge/wcd2yi1781543370.png"),
+  club("guadalajara", "CD Guadalajara (Chivas)", "mex-liga-mx", 2, "https://r2.thesportsdb.com/images/media/team/badge/mp1box1593452087.png"),
+  club("toluca", "Toluca", "mex-liga-mx", 2, "https://r2.thesportsdb.com/images/media/team/badge/y64wy91523913186.png"),
+  club("tigres-uanl", "Tigres UANL", "mex-liga-mx", 1, "https://r2.thesportsdb.com/images/media/team/badge/lh80fx1701423708.png"),
+  club("monterrey", "Monterrey", "mex-liga-mx", 1, "https://r2.thesportsdb.com/images/media/team/badge/yglj911721542561.png"),
+  club("necaxa", "Necaxa", "mex-liga-mx", 0, "https://r2.thesportsdb.com/images/media/team/badge/tqdk9e1779772432.png"),
+  club("puebla", "Puebla", "mex-liga-mx", 0, "https://r2.thesportsdb.com/images/media/team/badge/h0jgg51593451845.png"),
+
+  // --- Stati Uniti — MLS ---
+  club("la-galaxy", "LA Galaxy", "usa-mls", 3, "https://r2.thesportsdb.com/images/media/team/badge/ysyysr1420227188.png"),
+  club("dc-united", "D.C. United", "usa-mls", 3, "https://r2.thesportsdb.com/images/media/team/badge/uwvsyt1467462609.png"),
+  club("columbus-crew", "Columbus Crew", "usa-mls", 2, "https://r2.thesportsdb.com/images/media/team/badge/dzs8cp1629059854.png"),
+  club("seattle-sounders", "Seattle Sounders FC", "usa-mls", 2, "https://r2.thesportsdb.com/images/media/team/badge/2dy5cx1706711036.png"),
+  club("atlanta-united", "Atlanta United FC", "usa-mls", 1, "https://r2.thesportsdb.com/images/media/team/badge/ej091x1602103070.png"),
+  club("lafc", "Los Angeles FC", "usa-mls", 1, "https://r2.thesportsdb.com/images/media/team/badge/7nbj2a1602103638.png"),
+  club("new-york-red-bulls", "New York Red Bulls", "usa-mls", 0, "https://r2.thesportsdb.com/images/media/team/badge/suytvy1473536462.png"),
+  club("philadelphia-union", "Philadelphia Union", "usa-mls", 0, "https://r2.thesportsdb.com/images/media/team/badge/gyznyo1602103682.png"),
+
+  // --- Canada — Canadian Premier League ---
+  club("forge-fc", "Forge FC", "can-premier-league", 3, "https://r2.thesportsdb.com/images/media/team/badge/48dk0h1582572865.png"),
+  club("cavalry-fc", "Cavalry FC", "can-premier-league", 3, "https://r2.thesportsdb.com/images/media/team/badge/gpi5qj1583351269.png"),
+  club("atletico-ottawa", "Atlético Ottawa", "can-premier-league", 2, "https://r2.thesportsdb.com/images/media/team/badge/k5gzuw1583351260.png"),
+  club("pacific-fc", "Pacific FC", "can-premier-league", 2, "https://r2.thesportsdb.com/images/media/team/badge/6qzhpj1583351283.png"),
+  club("inter-toronto", "Inter Toronto FC", "can-premier-league", 1, "https://r2.thesportsdb.com/images/media/team/badge/kevy591770133070.png"),
+  club("hfx-wanderers", "HFX Wanderers FC", "can-premier-league", 1, "https://r2.thesportsdb.com/images/media/team/badge/uqkf0n1583351277.png"),
+  club("vancouver-fc", "Vancouver FC", "can-premier-league", 0, "https://r2.thesportsdb.com/images/media/team/badge/map6vh1770132710.png"),
+  club("fc-supra-quebec", "FC Supra du Québec", "can-premier-league", 0, "https://www.thesportsdb.com/images/media/team/badge/lm3a4f1784038568.png"),
+
+  // --- Marocco — Botola Pro ---
+  club("wydad-casablanca", "Wydad Casablanca", "mar-botola-pro", 3, "https://r2.thesportsdb.com/images/media/team/badge/vio4271750784379.png"),
+  club("raja-casablanca", "Raja Casablanca", "mar-botola-pro", 3, "https://r2.thesportsdb.com/images/media/team/badge/1cg64m1551428003.png"),
+  club("far-rabat", "FAR Rabat", "mar-botola-pro", 2, "https://r2.thesportsdb.com/images/media/team/badge/jkjp961777421509.png"),
+  club("rs-berkane", "RS Berkane", "mar-botola-pro", 2, "https://r2.thesportsdb.com/images/media/team/badge/f296p91743053568.png"),
+  club("fus-rabat", "FUS Rabat", "mar-botola-pro", 1, "https://r2.thesportsdb.com/images/media/team/badge/vxk3aj1551518378.png"),
+  club("difaa-el-jadidi", "Difaâ Hassani El Jadidi", "mar-botola-pro", 1, "https://r2.thesportsdb.com/images/media/team/badge/v8y3qa1638560041.png"),
+  club("kawkab-marrakech", "Kawkab Marrakech", "mar-botola-pro", 0, "https://r2.thesportsdb.com/images/media/team/badge/7qfuus1551898115.png"),
+  club("chabab-mohammedia", "Chabab Mohammédia", "mar-botola-pro", 0, "https://r2.thesportsdb.com/images/media/team/badge/5evxcx1609193564.png"),
+
+  // --- Senegal — Ligue 1 Sénégalaise ---
+  club("asc-jaraaf", "Jaraaf", "sen-ligue-1", 3, "https://r2.thesportsdb.com/images/media/team/badge/p25tdp1720157205.png"),
+  club("casa-sport", "Casa Sport", "sen-ligue-1", 3, "https://r2.thesportsdb.com/images/media/team/badge/0cqkoc1673938919.png"),
+  club("teungueth-fc", "Teungueth FC", "sen-ligue-1", 2, "https://r2.thesportsdb.com/images/media/team/badge/i6s10n1720157496.png"),
+  club("generation-foot", "Génération Foot", "sen-ligue-1", 2, "https://r2.thesportsdb.com/images/media/team/badge/i5glvd1720156796.png"),
+  club("diambars", "Diambars FC", "sen-ligue-1", 1, "https://r2.thesportsdb.com/images/media/team/badge/3ci0k01720156622.png"),
+  club("as-pikine", "AS Pikine", "sen-ligue-1", 1, "https://r2.thesportsdb.com/images/media/team/badge/xgrkyp1720157272.png"),
+  club("us-ouakam", "US Ouakam", "sen-ligue-1", 0, "https://r2.thesportsdb.com/images/media/team/badge/qbyvf91727194024.png"),
+  club("guediawaye-fc", "Guédiawaye FC", "sen-ligue-1", 0, "https://r2.thesportsdb.com/images/media/team/badge/vul8d71720157041.png"),
+
+  // --- Nigeria — NPFL ---
+  club("enyimba", "Enyimba International", "nga-npfl", 3, "https://r2.thesportsdb.com/images/media/team/badge/27km6p1720154537.png"),
+  club("kano-pillars", "Kano Pillars", "nga-npfl", 3, "https://r2.thesportsdb.com/images/media/team/badge/bgleh01589375519.png"),
+  club("rangers-international", "Rangers International", "nga-npfl", 2, "https://r2.thesportsdb.com/images/media/team/badge/j6uqt31720154917.png"),
+  club("rivers-united", "Rivers United", "nga-npfl", 2, "https://r2.thesportsdb.com/images/media/team/badge/4atnuh1720155248.png"),
+  club("plateau-united", "Plateau United", "nga-npfl", 1, "https://r2.thesportsdb.com/images/media/team/badge/2z80yh1720154812.png"),
+  club("akwa-united", "Akwa United", "nga-npfl", 1, "https://r2.thesportsdb.com/images/media/team/badge/e087l51590183336.png"),
+  club("sunshine-stars", "Sunshine Stars", "nga-npfl", 0, "https://r2.thesportsdb.com/images/media/team/badge/9s5g3t1590183469.png"),
+  club("shooting-stars", "Shooting Stars (3SC)", "nga-npfl", 0, "https://r2.thesportsdb.com/images/media/team/badge/uk3c7q1720155122.png"),
+
+  // --- Ghana — Ghana Premier League ---
+  club("asante-kotoko", "Asante Kotoko", "gha-premier-league", 3, "https://r2.thesportsdb.com/images/media/team/badge/u1mppc1578401554.png"),
+  club("hearts-of-oak", "Accra Hearts of Oak", "gha-premier-league", 3, "https://r2.thesportsdb.com/images/media/team/badge/v3eyvw1617287212.png"),
+  club("aduana-stars", "Aduana Stars", "gha-premier-league", 2, "https://r2.thesportsdb.com/images/media/team/badge/5qeyq71617287049.png"),
+  club("medeama-sc", "Medeama SC", "gha-premier-league", 2, "https://r2.thesportsdb.com/images/media/team/badge/p8p3jr1617287252.png"),
+  club("bechem-united", "Bechem United", "gha-premier-league", 1, "https://r2.thesportsdb.com/images/media/team/badge/y3uo7z1720155733.png"),
+  club("berekum-chelsea", "Berekum Chelsea", "gha-premier-league", 1, "https://r2.thesportsdb.com/images/media/team/badge/tu3hvi1694900545.png"),
+  club("king-faisal", "King Faisal Babes", "gha-premier-league", 0, "https://r2.thesportsdb.com/images/media/team/badge/tzfizy1617287235.png"),
+  club("karela-united", "Karela United", "gha-premier-league", 0, "https://r2.thesportsdb.com/images/media/team/badge/wx2ydh1617287231.png"),
+
+  // --- Egitto — Egyptian Premier League ---
+  club("al-ahly", "Al Ahly", "egy-premier-league", 3, "https://r2.thesportsdb.com/images/media/team/badge/x8753q1751421890.png"),
+  club("zamalek", "Zamalek", "egy-premier-league", 3, "https://r2.thesportsdb.com/images/media/team/badge/tgekj81580930027.png"),
+  club("pyramids-fc", "Pyramids FC", "egy-premier-league", 2, "https://r2.thesportsdb.com/images/media/team/badge/8liy611607352549.png"),
+  club("ismaily", "Ismaily SC", "egy-premier-league", 2, "https://r2.thesportsdb.com/images/media/team/badge/1g46qo1589807617.png"),
+  club("al-masry", "Al Masry", "egy-premier-league", 1, "https://r2.thesportsdb.com/images/media/team/badge/3aw86h1589807260.png"),
+  club("enppi", "ENPPI", "egy-premier-league", 1, "https://r2.thesportsdb.com/images/media/team/badge/uht79n1589807327.png"),
+  club("ceramica-cleopatra", "Ceramica Cleopatra", "egy-premier-league", 0, "https://r2.thesportsdb.com/images/media/team/badge/xy4shs1751422167.png"),
+  club("smouha", "Smouha SC", "egy-premier-league", 0, "https://r2.thesportsdb.com/images/media/team/badge/qq4pkd1589807413.png"),
+
+  // --- Costa d'Avorio — Ligue 1 ---
+  club("asec-mimosas", "ASEC Mimosas", "civ-ligue-1", 3, "https://r2.thesportsdb.com/images/media/team/badge/b9e1cr1589312301.png"),
+  club("stade-abidjan", "Stade d'Abidjan", "civ-ligue-1", 3, "https://r2.thesportsdb.com/images/media/team/badge/zr19ao1776292889.png"),
+  club("fc-san-pedro", "FC San Pédro", "civ-ligue-1", 2, "https://r2.thesportsdb.com/images/media/team/badge/3hjar61708390704.png"),
+  club("rc-abidjan", "Racing Club Abidjan", "civ-ligue-1", 2, "https://www.thesportsdb.com/images/media/team/badge/ou01i81784654220.png"),
+  club("afad-djekanou", "AFAD Djékanou", "civ-ligue-1", 1, "https://r2.thesportsdb.com/images/media/team/badge/j0le3l1649203762.png"),
+  club("isca", "ISCA", "civ-ligue-1", 1, "https://r2.thesportsdb.com/images/media/team/badge/u4i9c91755367271.png"),
+  club("bouake", "Bouaké", "civ-ligue-1", 0, "https://r2.thesportsdb.com/images/media/team/badge/98rmfk1649204189.png"),
+  club("es-agboville", "ES Agboville", "civ-ligue-1", 0, "https://r2.thesportsdb.com/images/media/team/badge/icb4qq1755367665.png"),
+
+  // --- Giappone — J1 League ---
+  club("kashima-antlers", "Kashima Antlers", "jpn-j1-league", 3, "https://r2.thesportsdb.com/images/media/team/badge/2s8ady1578238881.png"),
+  club("urawa-red-diamonds", "Urawa Red Diamonds", "jpn-j1-league", 3, "https://r2.thesportsdb.com/images/media/team/badge/ce3lhk1578239741.png"),
+  club("yokohama-f-marinos", "Yokohama F. Marinos", "jpn-j1-league", 2, "https://r2.thesportsdb.com/images/media/team/badge/rgeshm1578240000.png"),
+  club("kawasaki-frontale", "Kawasaki Frontale", "jpn-j1-league", 2, "https://r2.thesportsdb.com/images/media/team/badge/c6pot51578239112.png"),
+  club("gamba-osaka", "Gamba Osaka", "jpn-j1-league", 1, "https://r2.thesportsdb.com/images/media/team/badge/tq9edk1638813311.png"),
+  club("vissel-kobe", "Vissel Kobe", "jpn-j1-league", 1, "https://r2.thesportsdb.com/images/media/team/badge/2axjch1578239819.png"),
+  club("fc-tokyo", "FC Tokyo", "jpn-j1-league", 0, "https://r2.thesportsdb.com/images/media/team/badge/9ls6lr1698754779.png"),
+  club("nagoya-grampus", "Nagoya Grampus", "jpn-j1-league", 0, "https://r2.thesportsdb.com/images/media/team/badge/a1ucr01706244426.png"),
+
+  // --- Corea del Sud — K League 1 ---
+  club("jeonbuk-hyundai-motors", "Jeonbuk Hyundai Motors", "kor-k-league-1", 3, "https://r2.thesportsdb.com/images/media/team/badge/8jif3b1747853225.png"),
+  club("ulsan-hd", "Ulsan HD", "kor-k-league-1", 3, "https://r2.thesportsdb.com/images/media/team/badge/0wooic1706533767.png"),
+  club("pohang-steelers", "Pohang Steelers", "kor-k-league-1", 2, "https://r2.thesportsdb.com/images/media/team/badge/63jst01769097748.png"),
+  club("fc-seoul", "FC Seoul", "kor-k-league-1", 2, "https://r2.thesportsdb.com/images/media/team/badge/31z1zf1579473186.png"),
+  club("jeju-sk", "Jeju SK", "kor-k-league-1", 1, "https://r2.thesportsdb.com/images/media/team/badge/hna7ae1736207131.png"),
+  club("gangwon-fc", "Gangwon FC", "kor-k-league-1", 1, "https://r2.thesportsdb.com/images/media/team/badge/c4igx71579729617.png"),
+  club("daegu-fc", "Daegu FC", "kor-k-league-1", 0, "https://r2.thesportsdb.com/images/media/team/badge/xzjzn11579473073.png"),
+  club("gwangju-fc", "Gwangju FC", "kor-k-league-1", 0, "https://r2.thesportsdb.com/images/media/team/badge/uuzr4x1579473084.png"),
+
+  // --- Australia — A-League Men ---
+  club("sydney-fc", "Sydney FC", "aus-a-league", 3, "https://r2.thesportsdb.com/images/media/team/badge/utgq8z1546110747.png"),
+  club("melbourne-victory", "Melbourne Victory", "aus-a-league", 3, "https://r2.thesportsdb.com/images/media/team/badge/wwvsqx1473454564.png"),
+  club("melbourne-city", "Melbourne City", "aus-a-league", 2, "https://r2.thesportsdb.com/images/media/team/badge/rkeqme1603301840.png"),
+  club("western-sydney-wanderers", "Western Sydney Wanderers", "aus-a-league", 2, "https://r2.thesportsdb.com/images/media/team/badge/yotugj1759632879.png"),
+  club("brisbane-roar", "Brisbane Roar", "aus-a-league", 1, "https://r2.thesportsdb.com/images/media/team/badge/sypxsu1473454634.png"),
+  club("central-coast-mariners", "Central Coast Mariners", "aus-a-league", 1, "https://r2.thesportsdb.com/images/media/team/badge/ncdx4p1759642161.png"),
+  club("adelaide-united", "Adelaide United", "aus-a-league", 0, "https://r2.thesportsdb.com/images/media/team/badge/wpyuwv1473454602.png"),
+  club("perth-glory", "Perth Glory", "aus-a-league", 0, "https://r2.thesportsdb.com/images/media/team/badge/2c9k5p1679114095.png"),
 ];
 
 export function getLeague(id: string): League | undefined {

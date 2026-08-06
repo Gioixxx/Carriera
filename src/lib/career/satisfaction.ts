@@ -17,6 +17,7 @@ import type { Rng } from "./progression";
 export const OVR_MILESTONES = [60, 70, 80, 85, 90] as const;
 
 export const SEASON_TITLE_LABELS: Record<SeasonTitleId, string> = {
+  giantKiller: "Ammazzagigante",
   champion: "Campione",
   ballondorSeason: "Stagione da Pallone",
   nationalHero: "Eroe nazionale",
@@ -28,17 +29,22 @@ export const SEASON_TITLE_LABELS: Record<SeasonTitleId, string> = {
   steady: "Stagione solida",
 };
 
-/** Priorità per il "miglior titolo" di carriera (più basso = migliore). */
+/**
+ * Priorità per il "miglior titolo" di carriera (più basso = migliore). "giantKiller" è in cima:
+ * richiede sia un club sottodotato sia due roll consecutivi sotto il 50%, più raro di un normale
+ * "champion" da club di prestigio alto.
+ */
 const TITLE_RANK: Record<SeasonTitleId, number> = {
-  champion: 0,
-  ballondorSeason: 1,
-  nationalHero: 2,
-  ironWall: 3,
-  revelation: 4,
-  comeback: 5,
-  workhorse: 6,
-  toughYear: 7,
-  steady: 8,
+  giantKiller: 0,
+  champion: 1,
+  ballondorSeason: 2,
+  nationalHero: 3,
+  ironWall: 4,
+  revelation: 5,
+  comeback: 6,
+  workhorse: 7,
+  toughYear: 8,
+  steady: 9,
 };
 
 export const SEASON_TITLES_CAP = 12;
@@ -66,6 +72,8 @@ export interface SeasonTitleContext {
   ovrDelta: number;
   nationalCallup: boolean;
   nationalGoals: number;
+  /** true solo sul ciclo in cui è stata vinta una sorpresa di coppa ("Giant Killer"). */
+  cupUpsetWin: boolean;
 }
 
 export interface CycleSatisfactionContext {
@@ -124,6 +132,7 @@ export function evaluateSeasonTitle(ctx: SeasonTitleContext): SeasonTitleEntry {
 const IRON_WALL_CLEAN_SHEETS_THRESHOLD = 15;
 
 function pickSeasonTitleId(ctx: SeasonTitleContext): SeasonTitleId {
+  if (ctx.cupUpsetWin) return "giantKiller";
   if (ctx.trophies.length > 0) return "champion";
   if (ctx.award || ctx.goals >= 25) return "ballondorSeason";
   if ((ctx.cleanSheets ?? 0) >= IRON_WALL_CLEAN_SHEETS_THRESHOLD) return "ironWall";
