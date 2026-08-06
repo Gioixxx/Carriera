@@ -27,8 +27,10 @@ export const SEASONS_PER_CYCLE: Record<GameSpeed, number> = {
 /** Popolarità iniziale di un giovane sconosciuto al debutto. */
 export const STARTING_POPULARITY = 15;
 
-/** Sotto questa età il ritiro non è mai possibile. */
-const RETIREMENT_RISK_START_AGE = 34;
+/** Sotto questa età il ritiro non è mai possibile — allargata da 34 a 31 dopo aver osservato
+ * ritiri probabilistici già a 31-34 anni sul gioco originale (vedi piano, esplorazione
+ * aggiuntiva 5, 23 carriere su 3 agenti paralleli). */
+const RETIREMENT_RISK_START_AGE = 31;
 /** Da questa età il ritiro è automatico — soglia allineata a 3 osservazioni concordanti sul
  * gioco originale (vedi piano, esplorazione aggiuntiva 3). */
 const RETIREMENT_AUTOMATIC_AGE = 40;
@@ -171,14 +173,19 @@ export function resolveOutcome(
   return outcomes[outcomes.length - 1];
 }
 
-/** Ritiro probabilistico crescente dai 34 anni, automatico da 40 (vedi costanti sopra). */
+/** Ritiro probabilistico crescente dai 31 anni, automatico da 40 (vedi costanti sopra). */
 export function checkRetirement(player: Player, rng: Rng = Math.random): boolean {
   if (player.age < RETIREMENT_RISK_START_AGE) return false;
   if (player.age >= RETIREMENT_AUTOMATIC_AGE) return true;
   const progress =
     (player.age - RETIREMENT_RISK_START_AGE) /
     (RETIREMENT_AUTOMATIC_AGE - RETIREMENT_RISK_START_AGE);
-  const chance = clamp(progress * progress, 0, 1);
+  // Cubica invece di quadratica: con la finestra allargata a 31 anni, il quadrato da solo
+  // spostava troppo peso verso i ritiri anticipati (~50% a 40 anni scendeva a ~22%, contro un
+  // ~50% osservato nella ricerca sull'originale) — il cubo tiene il grosso della probabilità
+  // vicino al taglio automatico (40) aggiungendo solo una coda minoritaria a 32-34 anni,
+  // verificato con `npm run simulate` (vedi [[decisions]]).
+  const chance = clamp(progress * progress * progress, 0, 1);
   return rng() < chance;
 }
 

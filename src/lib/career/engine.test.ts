@@ -191,8 +191,8 @@ describe("resolveOutcome", () => {
 });
 
 describe("checkRetirement", () => {
-  it("dovrebbe restituire false se il giocatore ha meno di 34 anni", () => {
-    const player = { ...createPlayer(IDENTITY), age: 33 };
+  it("dovrebbe restituire false se il giocatore ha meno di 31 anni", () => {
+    const player = { ...createPlayer(IDENTITY), age: 30 };
     expect(checkRetirement(player, () => 0)).toBe(false);
   });
 
@@ -201,8 +201,8 @@ describe("checkRetirement", () => {
     expect(checkRetirement(player, () => 0.999)).toBe(true);
   });
 
-  it("dovrebbe essere probabilistico tra i 34 e i 40 anni", () => {
-    const player = { ...createPlayer(IDENTITY), age: 37 }; // progress = 3/6, chance = (3/6)^2 = 0.25
+  it("dovrebbe essere probabilistico tra i 31 e i 40 anni", () => {
+    const player = { ...createPlayer(IDENTITY), age: 37 }; // progress = 6/9, chance = (6/9)^3 ≈ 0.296
     expect(checkRetirement(player, () => 0)).toBe(true); // roll 0 < chance
     expect(checkRetirement(player, () => 0.9)).toBe(false); // roll 0.9 > chance
   });

@@ -34,10 +34,10 @@ describe("simulateCareer — batch smoke test (seed fisso)", () => {
     simulateCareer(buildIdentity(index), "normal", rng),
   );
 
-  it("ogni carriera si ritira entro la finestra 34-40 anni", () => {
+  it("ogni carriera si ritira entro la finestra 31-40 anni", () => {
     for (const { player } of results) {
       expect(player.retired).toBe(true);
-      expect(player.age).toBeGreaterThanOrEqual(34);
+      expect(player.age).toBeGreaterThanOrEqual(31);
       expect(player.age).toBeLessThanOrEqual(40);
     }
   });

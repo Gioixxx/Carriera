@@ -311,6 +311,18 @@ describe("LIFESTYLE_DECISIONS — nuovi eventi", () => {
     expect(ids).toContain("finish-high-school");
     expect(ids).toContain("honesty-test");
   });
+
+  it("l'esito negativo di 'Sostanza misteriosa' dovrebbe squalificare (infortunare) il giocatore", () => {
+    const mysteriousSubstance = LIFESTYLE_DECISIONS.find((d) => d.id === "mysterious-substance")!;
+    const takeIt = mysteriousSubstance.options.find((o) => o.id === "take-it")!;
+    const injury = takeIt.outcomes.find((o) => o.effect.injury);
+    expect(injury?.effect.injury).toMatchObject({
+      turnsRemaining: expect.any(Number),
+      ovrPenalty: expect.any(Number),
+    });
+    const rejectIt = mysteriousSubstance.options.find((o) => o.id === "reject-it")!;
+    expect(rejectIt.outcomes.every((o) => !o.effect.injury && !o.effect.ovrDelta)).toBe(true);
+  });
 });
 
 describe("generateEndOfCycle", () => {

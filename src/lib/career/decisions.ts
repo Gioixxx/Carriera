@@ -153,6 +153,33 @@ export const LIFESTYLE_DECISIONS: Decision[] = [
     ],
   },
   {
+    id: "mysterious-substance",
+    category: "lifestyle",
+    title: "Sostanza misteriosa",
+    description: "Il medico del club ti offre un integratore di dubbia origine.",
+    options: [
+      {
+        id: "take-it",
+        label: "Prendilo",
+        hint: "Forte crescita OVR · rischio squalifica",
+        outcomes: [
+          outcome(75, "L'integratore funziona, ti senti molto più forte.", 5),
+          injuryOutcome(25, "Risulti positivo ai controlli antidoping e vieni squalificato.", {
+            label: "Squalifica per doping",
+            turnsRemaining: 2,
+            ovrPenalty: 4,
+          }),
+        ],
+      },
+      {
+        id: "reject-it",
+        label: "Rifiuta",
+        hint: "Nessun rischio",
+        outcomes: [outcome(100, "Nessun cambiamento.")],
+      },
+    ],
+  },
+  {
     id: "double-sessions",
     category: "lifestyle",
     title: "Doppie sedute",
