@@ -259,8 +259,28 @@ Stato lavoro in corso. Aggiornato con /sprint. Backlog in [[backlog]], debito in
   saranno automaticamente resilienti. Per sbloccare l'installazione bloccata su questa stessa
   macchina, `dist/Carriera.exe` è stato rigenerato localmente e consegnato per l'esecuzione diretta
   (bypassa del tutto il download flaky, dato che siamo sulla stessa macchina). 274 test invariati,
-  `tsc`/`dotnet build` puliti. **Non ancora riverificato dall'utente** con un nuovo tentativo di
-  update reale — vedi [[tech-debt]].
+  `tsc`/`dotnet build` puliti. **Aggiornamento — verificato in diretta nella stessa sessione**: il
+  retry ha funzionato davvero: i primi due tentativi dell'utente sono stati interrotti a metà (lui
+  ha chiuso l'app pensando fosse bloccata, non un fallimento del retry), il terzo tentativo è
+  arrivato in fondo al primo giro (nessun retry necessario quella volta), script di sostituzione
+  eseguito con successo, app riavviata da sola come v0.3.4 — log completo ispezionato in tempo
+  reale (`update-log.txt`, crescita byte di `Carriera.new.exe` campionata ogni 2s). Item di
+  tech-debt corrispondente archiviato.
+
+- [x] **Indicatore di caricamento durante l'update del launcher** (2026-08-06, commit 14f93fd, non
+  ancora rilasciato a fine di questa voce): causa diretta della chiusura prematura osservata sopra
+  — durante il download non c'era alcun feedback visivo, quindi con i retry automatici (fino a un
+  paio di minuti su rete instabile) sembrava che l'app fosse bloccata. Nuovo
+  `UpdateProgressForm.cs`: finestra non modale con barra di progresso reale (percentuale + MB
+  scaricati/attesi + numero tentativo), testo dedicato per la fase finale ("Applico
+  l'aggiornamento..."), nessun pulsante di chiusura (l'utente ha già confermato). `UpdateInstaller`
+  ora legge il download a blocchi (invece di `CopyToAsync` in un colpo solo) per riportare i byte
+  ricevuti in tempo reale via `IProgress<UpdateProgress>`. Due iterazioni di rifinitura su feedback
+  diretto dell'utente: (1) il menu sotto (WebView2) restava cliccabile durante l'update — fix:
+  `MainForm.Enabled = false` per tutta la durata; (2) finestra troppo piccola e non centrata sullo
+  schermo — ingrandita 360×78→460×140, `CenterParent`→`CenterScreen`. **Verificato dall'utente** con
+  un exe di test pinnato a v0.1.0: barra di progresso visibile e funzionante, menu non
+  interagibile durante l'update.
 
 ## Note tecniche emerse in fase 6
 - jsdom 30 + Node 22+ non espone `window.localStorage` di default (ExperimentalWarning nativa) — polyfill minimale in `vitest.setup.ts`, non è un problema di codice applicativo
