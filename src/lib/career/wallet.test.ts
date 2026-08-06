@@ -44,6 +44,17 @@ describe("popularityDeltaForCycle", () => {
   it("dovrebbe essere leggermente negativo in un ciclo senza gol né successi", () => {
     expect(popularityDeltaForCycle({ goals: 0, trophiesWon: 0, awardsWon: 0 })).toBeLessThan(0);
   });
+
+  it("dovrebbe contare i clean sheet di un portiere come prestazione, non solo i gol", () => {
+    const goalkeeperCycle = popularityDeltaForCycle({
+      goals: 0,
+      cleanSheets: 10,
+      trophiesWon: 0,
+      awardsWon: 0,
+    });
+    const noPerformance = popularityDeltaForCycle({ goals: 0, trophiesWon: 0, awardsWon: 0 });
+    expect(goalkeeperCycle).toBeGreaterThan(noPerformance);
+  });
 });
 
 describe("applyPopularityDelta", () => {

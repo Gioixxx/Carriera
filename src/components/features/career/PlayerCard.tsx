@@ -31,10 +31,13 @@ export function PlayerCard({ player, compact = false, flashRecords }: PlayerCard
   const trophyCount = player.trophies.length;
   const awardCount = player.awards.length;
 
+  const isGoalkeeper = player.position === "GK";
   const displayOvr = useCountUp(player.ovr, 800);
   const displayApps = useCountUp(player.career.apps, 800);
   const displayGoals = useCountUp(player.career.goals, 800);
   const displayAssists = useCountUp(player.career.assists, 800);
+  const displayGoalsAgainst = useCountUp(player.career.goalsAgainst ?? 0, 800);
+  const displayCleanSheets = useCountUp(player.career.cleanSheets ?? 0, 800);
 
   const prevCounts = useRef({ trophies: trophyCount, awards: awardCount });
   const [flashTrophies, setFlashTrophies] = useState(false);
@@ -138,12 +141,16 @@ export function PlayerCard({ player, compact = false, flashRecords }: PlayerCard
           <p
             className={cn(
               "font-display text-lg",
-              recordsFlashKey.includes("gol") ? "text-(--color-ovr-gold)" : "text-(--color-text)",
+              (isGoalkeeper ? recordsFlashKey.includes("clean sheet") : recordsFlashKey.includes("gol"))
+                ? "text-(--color-ovr-gold)"
+                : "text-(--color-text)",
             )}
           >
-            {player.records.bestSeasonGoals}
+            {isGoalkeeper ? (player.records.bestSeasonCleanSheets ?? 0) : player.records.bestSeasonGoals}
           </p>
-          <p className="text-[10px] tracking-wide text-(--color-text-muted) uppercase">Best gol</p>
+          <p className="text-[10px] tracking-wide text-(--color-text-muted) uppercase">
+            {isGoalkeeper ? "Best CS" : "Best gol"}
+          </p>
         </div>
         <div className="rounded-lg bg-(--color-surface) py-2">
           <p
@@ -175,12 +182,20 @@ export function PlayerCard({ player, compact = false, flashRecords }: PlayerCard
           <p className="text-[10px] tracking-wide text-(--color-text-muted) uppercase">Pres.</p>
         </div>
         <div className="rounded-lg bg-(--color-surface) py-2">
-          <p className="font-display text-lg text-(--color-text)">{displayGoals}</p>
-          <p className="text-[10px] tracking-wide text-(--color-text-muted) uppercase">Gol</p>
+          <p className="font-display text-lg text-(--color-text)">
+            {isGoalkeeper ? displayGoalsAgainst : displayGoals}
+          </p>
+          <p className="text-[10px] tracking-wide text-(--color-text-muted) uppercase">
+            {isGoalkeeper ? "Gol subiti" : "Gol"}
+          </p>
         </div>
         <div className="rounded-lg bg-(--color-surface) py-2">
-          <p className="font-display text-lg text-(--color-text)">{displayAssists}</p>
-          <p className="text-[10px] tracking-wide text-(--color-text-muted) uppercase">Assist</p>
+          <p className="font-display text-lg text-(--color-text)">
+            {isGoalkeeper ? displayCleanSheets : displayAssists}
+          </p>
+          <p className="text-[10px] tracking-wide text-(--color-text-muted) uppercase">
+            {isGoalkeeper ? "Clean sheet" : "Assist"}
+          </p>
         </div>
       </div>
 
@@ -190,7 +205,9 @@ export function PlayerCard({ player, compact = false, flashRecords }: PlayerCard
             {VALUE_FORMATTER.format(player.marketValueEur)}
           </span>
           <span className="text-(--color-text-muted)">
-            {displayApps}P · {displayGoals}G · {displayAssists}A
+            {isGoalkeeper
+              ? `${displayApps}P · ${displayGoalsAgainst}GS · ${displayCleanSheets}CS`
+              : `${displayApps}P · ${displayGoals}G · ${displayAssists}A`}
           </span>
         </div>
       ) : null}

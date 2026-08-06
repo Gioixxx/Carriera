@@ -47,6 +47,10 @@ export interface StatLine {
   apps: number;
   goals: number;
   assists: number;
+  /** Valorizzato solo per i portieri (Position "GK"). */
+  goalsAgainst?: number;
+  /** Valorizzato solo per i portieri (Position "GK"). */
+  cleanSheets?: number;
 }
 
 export interface ClubStint {
@@ -102,6 +106,8 @@ export interface PersonalRecords {
   bestSeasonGoals: number;
   bestSeasonAssists: number;
   bestSeasonApps: number;
+  /** Valorizzato solo per i portieri (Position "GK"). */
+  bestSeasonCleanSheets?: number;
   peakMarketValueEur: number;
   firstCallupAge: number | null;
 }
@@ -110,6 +116,7 @@ export type SeasonTitleId =
   | "champion"
   | "ballondorSeason"
   | "nationalHero"
+  | "ironWall"
   | "revelation"
   | "comeback"
   | "workhorse"

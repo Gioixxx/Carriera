@@ -10,11 +10,18 @@ export interface ClubSummary {
 }
 
 function sumStats(a: StatLine, b: StatLine): StatLine {
-  return {
+  const result: StatLine = {
     apps: a.apps + b.apps,
     goals: a.goals + b.goals,
     assists: a.assists + b.assists,
   };
+  if (a.goalsAgainst !== undefined || b.goalsAgainst !== undefined) {
+    result.goalsAgainst = (a.goalsAgainst ?? 0) + (b.goalsAgainst ?? 0);
+  }
+  if (a.cleanSheets !== undefined || b.cleanSheets !== undefined) {
+    result.cleanSheets = (a.cleanSheets ?? 0) + (b.cleanSheets ?? 0);
+  }
+  return result;
 }
 
 /**

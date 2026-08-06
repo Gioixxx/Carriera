@@ -58,6 +58,26 @@ export const ROLE_WEIGHTS: Record<Position, RoleWeights> = {
   ST: { goals: 0.55, assists: 0.18 },
 };
 
+/**
+ * Statistiche aggiuntive per un portiere (gol subiti/clean sheet), sullo stesso stile delle
+ * formule gol/assist per gli outfield: dipendono da OVR (miglior portiere = meno gol subiti,
+ * più clean sheet) e dal fattore di livello del club/nazionale (`levelFactor`, più alto = avversari
+ * più forti = più gol subiti, meno clean sheet).
+ */
+function projectGoalkeeperExtras(
+  apps: number,
+  ovrFactor: number,
+  levelFactor: number,
+  rng: Rng,
+): { goalsAgainst: number; cleanSheets: number } {
+  const variance = () => 0.7 + rng() * 0.6;
+  const concededPerApp = clamp(1.6 * levelFactor - ovrFactor * 1.3, 0.2, 2.2);
+  const goalsAgainst = Math.max(0, Math.round(apps * concededPerApp * variance()));
+  const cleanSheetChance = clamp(0.15 + ovrFactor * 0.35 - (levelFactor - 1) * 0.15, 0.05, 0.6);
+  const cleanSheets = Math.max(0, Math.min(apps, Math.round(apps * cleanSheetChance * variance())));
+  return { goalsAgainst, cleanSheets };
+}
+
 /** Genera le statistiche "offscreen" di una singola stagione da OVR/ruolo/livello del club. */
 export function projectSeasonStats(
   ovr: number,
@@ -79,7 +99,9 @@ export function projectSeasonStats(
   const goals = Math.max(0, Math.round(goalsExpected * variance()));
   const assists = Math.max(0, Math.round(assistsExpected * variance()));
 
-  return { apps, goals, assists };
+  const base: StatLine = { apps, goals, assists };
+  if (position !== "GK") return base;
+  return { ...base, ...projectGoalkeeperExtras(apps, ovrFactor, tierFactor, rng) };
 }
 
 /** Somma le statistiche generate su più stagioni consecutive nello stesso club. */
@@ -97,6 +119,12 @@ export function projectStats(
       apps: total.apps + season.apps,
       goals: total.goals + season.goals,
       assists: total.assists + season.assists,
+      ...(position === "GK"
+        ? {
+            goalsAgainst: (total.goalsAgainst ?? 0) + (season.goalsAgainst ?? 0),
+            cleanSheets: (total.cleanSheets ?? 0) + (season.cleanSheets ?? 0),
+          }
+        : {}),
     };
   }
   return total;
@@ -119,7 +147,9 @@ export function projectNationalSeasonStats(
   const goals = Math.max(0, Math.round(apps * weights.goals * ovrFactor * variance()));
   const assists = Math.max(0, Math.round(apps * weights.assists * ovrFactor * variance()));
 
-  return { apps, goals, assists };
+  const base: StatLine = { apps, goals, assists };
+  if (position !== "GK") return base;
+  return { ...base, ...projectGoalkeeperExtras(apps, ovrFactor, 1, rng) };
 }
 
 /** Somma le statistiche con la nazionale su più stagioni consecutive. */
@@ -136,6 +166,12 @@ export function projectNationalStats(
       apps: total.apps + season.apps,
       goals: total.goals + season.goals,
       assists: total.assists + season.assists,
+      ...(position === "GK"
+        ? {
+            goalsAgainst: (total.goalsAgainst ?? 0) + (season.goalsAgainst ?? 0),
+            cleanSheets: (total.cleanSheets ?? 0) + (season.cleanSheets ?? 0),
+          }
+        : {}),
     };
   }
   return total;

@@ -1,12 +1,15 @@
 import { describe, expect, it } from "vitest";
-import type { DecisionCategory, Player, PlayerIdentity } from "@/types/career";
+import type { DecisionCategory, DecisionOption, Player, PlayerIdentity } from "@/types/career";
 import { getClub } from "@/data/clubs";
 import { createPlayer, signWithClub } from "./engine";
 import {
+  favorableOutcomeWeight,
   generateAcademyOffer,
   generateClubCrisis,
+  generateClubPriority,
   generateCompetitionForSpot,
   generateContinentalFinalDecision,
+  generateControversialPost,
   generateControversialStatement,
   generateEndOfCycle,
   generateLoanOffer,
@@ -15,9 +18,14 @@ import {
   generateSponsorDeal,
   generateTaxTrouble,
   generateTransferWindow,
+  generateTriumphantReturn,
+  generateUnexpectedProspect,
+  isClubPriorityEligible,
   isReturnHomeEligible,
   isSponsorEligible,
   isTaxTroubleEligible,
+  isTriumphantReturnEligible,
+  isUnexpectedProspectEligible,
   LIFESTYLE_DECISIONS,
   nationalCallupChance,
   penaltyScoreChance,
@@ -167,6 +175,102 @@ describe("generateCompetitionForSpot e generateControversialStatement", () => {
     const decision = generateControversialStatement(player, FIXED_RNG);
     const leave = decision.options.find((o) => o.id === "leave");
     expect(leave?.club?.prestige).toBeLessThan(player.club!.prestige);
+  });
+});
+
+describe("generateControversialPost", () => {
+  it("dovrebbe offrire cancella il post (minutaggio ridotto) o firma per un club più debole", () => {
+    const player = playerAt(); // Juventus, prestige 3
+    const decision = generateControversialPost(player, FIXED_RNG);
+    const deletePost = decision.options.find((o) => o.id === "delete-post");
+    const leave = decision.options.find((o) => o.id === "leave");
+    expect(deletePost?.outcomes[0].effect.ovrDelta).toBeLessThan(0);
+    expect(leave?.club?.prestige).toBeLessThan(player.club!.prestige);
+  });
+});
+
+describe("isClubPriorityEligible e generateClubPriority", () => {
+  it("dovrebbe essere vero per un club con coppa nazionale o continentale", () => {
+    expect(isClubPriorityEligible(playerAt())).toBe(true); // Juventus: cup + continental
+  });
+
+  it("dovrebbe essere falso per un club senza coppa né competizione continentale", () => {
+    const clubWithoutCup = { ...getClub("reggiana")!, competitions: { league: "Serie B" } };
+    expect(isClubPriorityEligible(playerAt(clubWithoutCup))).toBe(false);
+  });
+
+  it("dovrebbe proporre campionato vs coppa (nome reale) come opzioni", () => {
+    const player = playerAt();
+    const decision = generateClubPriority(player);
+    expect(decision.options.map((o) => o.id)).toEqual(["prioritize-league", "prioritize-cup"]);
+    expect(decision.options.every((o) => o.outcomes.length === 1)).toBe(true);
+  });
+});
+
+describe("isUnexpectedProspectEligible e generateUnexpectedProspect", () => {
+  it("dovrebbe essere vero per un giovane giocatore in un club a basso prestigio", () => {
+    expect(isUnexpectedProspectEligible(playerAt(getClub("reggiana")!))).toBe(true);
+  });
+
+  it("dovrebbe essere falso per un club di alto prestigio", () => {
+    expect(isUnexpectedProspectEligible(playerAt())).toBe(false); // Juventus, prestige 3
+  });
+
+  it("dovrebbe essere falso oltre i 20 anni", () => {
+    const player = { ...playerAt(getClub("reggiana")!), age: 25 };
+    expect(isUnexpectedProspectEligible(player)).toBe(false);
+  });
+
+  it("dovrebbe proporre mentore (deterministico) o via d'uscita verso un club migliore", () => {
+    const player = playerAt(getClub("reggiana")!);
+    const decision = generateUnexpectedProspect(player, FIXED_RNG);
+    const mentor = decision.options.find((o) => o.id === "accept-mentor");
+    const wayOut = decision.options.find((o) => o.id === "look-for-way-out");
+    expect(mentor?.outcomes).toHaveLength(1);
+    expect(mentor?.outcomes[0].effect.ovrDelta).toBeGreaterThan(0);
+    expect(wayOut?.club?.id).not.toBe(player.club!.id);
+  });
+});
+
+describe("isTriumphantReturnEligible e generateTriumphantReturn", () => {
+  function veteranAwayFromFirstClub(): Player {
+    const firstClub = getClub("reggiana")!;
+    const currentClub = getClub("juventus")!;
+    return {
+      ...playerAt(currentClub),
+      age: 34,
+      clubHistory: [
+        { club: firstClub, ageFrom: 16, ageTo: 18, type: "permanent", stats: { apps: 0, goals: 0, assists: 0 }, ovr: 55 },
+      ],
+    };
+  }
+
+  it("dovrebbe essere vero per un veterano lontano dal primo club", () => {
+    expect(isTriumphantReturnEligible(veteranAwayFromFirstClub())).toBe(true);
+  });
+
+  it("dovrebbe essere falso se il club attuale è già il primo club", () => {
+    const player = veteranAwayFromFirstClub();
+    expect(isTriumphantReturnEligible({ ...player, club: player.clubHistory[0].club })).toBe(false);
+  });
+
+  it("dovrebbe essere falso sotto i 32 anni", () => {
+    expect(isTriumphantReturnEligible({ ...veteranAwayFromFirstClub(), age: 28 })).toBe(false);
+  });
+
+  it("dovrebbe proporre resta o torna al primo club", () => {
+    const player = veteranAwayFromFirstClub();
+    const decision = generateTriumphantReturn(player);
+    const returnOption = decision.options.find((o) => o.id === "return");
+    expect(returnOption?.club?.id).toBe(player.clubHistory[0].club.id);
+  });
+});
+
+describe("LIFESTYLE_DECISIONS — nuovi eventi", () => {
+  it("finish-high-school e honesty-test dovrebbero essere nel pool lifestyle", () => {
+    const ids = LIFESTYLE_DECISIONS.map((d) => d.id);
+    expect(ids).toContain("finish-high-school");
+    expect(ids).toContain("honesty-test");
   });
 });
 
@@ -333,5 +437,44 @@ describe("pickDecisionCategory", () => {
     const roll = 0.3; // sopra la soglia penalizzata, sotto quella non penalizzata
     expect(pickDecisionCategory(categories, [], () => roll)).toBe("transfer");
     expect(pickDecisionCategory(categories, ["transfer"], () => roll)).toBe("lifestyle");
+  });
+});
+
+describe("favorableOutcomeWeight", () => {
+  function option(outcomes: DecisionOption["outcomes"]): DecisionOption {
+    return { id: "opt", label: "Opzione", outcomes };
+  }
+
+  it("dovrebbe restituire null per un'opzione deterministica (un solo outcome)", () => {
+    const opt = option([{ weight: 100, effect: {}, resultText: "..." }]);
+    expect(favorableOutcomeWeight(opt)).toBeNull();
+  });
+
+  it("dovrebbe scegliere l'outcome con ovrDelta più alto", () => {
+    const opt = option([
+      { weight: 30, effect: { ovrDelta: 3 }, resultText: "buono" },
+      { weight: 70, effect: { ovrDelta: -2 }, resultText: "cattivo" },
+    ]);
+    expect(favorableOutcomeWeight(opt)).toBe(30);
+  });
+
+  it("a parità di ovrDelta dovrebbe preferire l'outcome senza infortunio", () => {
+    const opt = option([
+      {
+        weight: 40,
+        effect: { ovrDelta: 0, injury: { label: "Infortunio muscolare", turnsRemaining: 1, ovrPenalty: 2 } },
+        resultText: "rischio",
+      },
+      { weight: 60, effect: { ovrDelta: 0 }, resultText: "sicuro" },
+    ]);
+    expect(favorableOutcomeWeight(opt)).toBe(60);
+  });
+
+  it("a parità di ovrDelta e infortunio dovrebbe preferire savings/popularity più alti", () => {
+    const opt = option([
+      { weight: 45, effect: { ovrDelta: 1, savingsDelta: 100 }, resultText: "ricco" },
+      { weight: 55, effect: { ovrDelta: 1, savingsDelta: 10 }, resultText: "povero" },
+    ]);
+    expect(favorableOutcomeWeight(opt)).toBe(45);
   });
 });

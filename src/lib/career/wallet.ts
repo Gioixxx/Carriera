@@ -17,13 +17,18 @@ export function resignSalary(wallet: Wallet, ovr: number, prestige: number): Wal
   return { ...wallet, salaryEurPerCycle: computeSalaryEur(ovr, prestige) };
 }
 
-/** Variazione di popolarità per un ciclo, in base a prestazioni e successi ottenuti. */
+/**
+ * Variazione di popolarità per un ciclo, in base a prestazioni e successi ottenuti.
+ * `cleanSheets` (valorizzato solo per i portieri) conta come prestazione allo stesso peso dei
+ * gol — altrimenti un portiere (goals sempre ~0) non guadagnerebbe mai popolarità per merito.
+ */
 export function popularityDeltaForCycle(input: {
   goals: number;
+  cleanSheets?: number;
   trophiesWon: number;
   awardsWon: number;
 }): number {
-  const performance = input.goals * 0.3;
+  const performance = input.goals * 0.3 + (input.cleanSheets ?? 0) * 0.3;
   const glory = input.trophiesWon * 5 + input.awardsWon * 8;
   const decay = -0.5;
   return performance + glory + decay;

@@ -78,6 +78,22 @@ describe("projectSeasonStats", () => {
     const goalkeeper = projectSeasonStats(80, "GK", 1, NO_NOISE_RNG);
     expect(goalkeeper.goals).toBe(0);
   });
+
+  it("dovrebbe generare goalsAgainst/cleanSheets solo per un portiere", () => {
+    const goalkeeper = projectSeasonStats(80, "GK", 1, NO_NOISE_RNG);
+    const striker = projectSeasonStats(80, "ST", 1, NO_NOISE_RNG);
+    expect(goalkeeper.goalsAgainst).toBeGreaterThanOrEqual(0);
+    expect(goalkeeper.cleanSheets).toBeGreaterThanOrEqual(0);
+    expect(striker.goalsAgainst).toBeUndefined();
+    expect(striker.cleanSheets).toBeUndefined();
+  });
+
+  it("un portiere con OVR più alto dovrebbe subire meno gol e fare più clean sheet", () => {
+    const highOvr = projectSeasonStats(90, "GK", 1, NO_NOISE_RNG);
+    const lowOvr = projectSeasonStats(55, "GK", 1, NO_NOISE_RNG);
+    expect(highOvr.goalsAgainst!).toBeLessThan(lowOvr.goalsAgainst!);
+    expect(highOvr.cleanSheets!).toBeGreaterThan(lowOvr.cleanSheets!);
+  });
 });
 
 describe("projectStats", () => {
@@ -94,5 +110,17 @@ describe("projectStats", () => {
       goals: season1.goals + season2.goals + season3.goals,
       assists: season1.assists + season2.assists + season3.assists,
     });
+  });
+
+  it("dovrebbe sommare goalsAgainst/cleanSheets su più stagioni per un portiere", () => {
+    // RNG costante: il numero di chiamate rng() per stagione differisce tra outfield e GK
+    // (il GK consuma chiamate extra per goalsAgainst/cleanSheets), quindi uno slicing
+    // sequenziale come sopra sarebbe fragile — con un valore costante il risultato per
+    // stagione è deterministico a prescindere da quante volte rng() viene invocato.
+    const total = projectStats(75, "GK", 1, 2, NO_NOISE_RNG);
+    const season = projectSeasonStats(75, "GK", 1, NO_NOISE_RNG);
+
+    expect(total.goalsAgainst).toBe((season.goalsAgainst ?? 0) * 2);
+    expect(total.cleanSheets).toBe((season.cleanSheets ?? 0) * 2);
   });
 });

@@ -58,6 +58,28 @@ function withHint(option: DecisionOption, hint: string): DecisionOption {
   return { ...option, hint };
 }
 
+/**
+ * Peso (%) dell'outcome più favorevole di un'opzione, per mostrare una probabilità reale
+ * accanto all'hint testuale. `null` se l'opzione è deterministica (un solo outcome) — non c'è
+ * nulla da mostrare. "Favorevole" = ovrDelta più alto; a parità, priorità a chi non infortuna e
+ * poi a savingsDelta/popularityDelta più alti.
+ */
+export function favorableOutcomeWeight(option: DecisionOption): number | null {
+  if (option.outcomes.length < 2) return null;
+  const best = option.outcomes.reduce((a, b) => {
+    const aOvr = a.effect.ovrDelta ?? 0;
+    const bOvr = b.effect.ovrDelta ?? 0;
+    if (aOvr !== bOvr) return aOvr > bOvr ? a : b;
+    const aInjury = a.effect.injury ? 1 : 0;
+    const bInjury = b.effect.injury ? 1 : 0;
+    if (aInjury !== bInjury) return aInjury < bInjury ? a : b;
+    const aSecondary = (a.effect.savingsDelta ?? 0) + (a.effect.popularityDelta ?? 0);
+    const bSecondary = (b.effect.savingsDelta ?? 0) + (b.effect.popularityDelta ?? 0);
+    return aSecondary >= bSecondary ? a : b;
+  });
+  return best.weight;
+}
+
 // ---------- Offerta iniziale (settore giovanile) ----------
 
 export function generateAcademyOffer(
@@ -203,6 +225,50 @@ export const LIFESTYLE_DECISIONS: Decision[] = [
         label: "Rifiuta",
         hint: "Nessun rischio",
         outcomes: [outcome(100, "Nulla succede.")],
+      },
+    ],
+  },
+  {
+    id: "finish-high-school",
+    category: "lifestyle",
+    title: "Diploma di scuola superiore",
+    description: "Devi decidere se proseguire gli studi in parallelo alla carriera calcistica.",
+    options: [
+      {
+        id: "study",
+        label: "Continua gli studi",
+        hint: "Nessun impatto sportivo · sicurezza per il futuro",
+        outcomes: [outcome(100, "Ti diplomi bilanciando scuola e calcio.")],
+      },
+      {
+        id: "focus-football",
+        label: "Abbandona la scuola per concentrarti sul calcio",
+        hint: "Più tempo per allenarti",
+        outcomes: [outcome(100, "Dedichi tutto il tuo tempo al pallone.", 2)],
+      },
+    ],
+  },
+  {
+    id: "honesty-test",
+    category: "lifestyle",
+    title: "Test di onestà",
+    description:
+      "Trovi per sbaglio informazioni riservate sulla formazione avversaria prima di una partita decisiva.",
+    options: [
+      {
+        id: "report-it",
+        label: "Segnala tutto allo staff",
+        hint: "Rispetto dello spogliatoio · nessun vantaggio",
+        outcomes: [outcome(100, "Il tuo gesto viene apprezzato dallo spogliatoio.", 1)],
+      },
+      {
+        id: "use-it",
+        label: "Usa le informazioni a tuo vantaggio",
+        hint: "Vantaggio in campo · rischio se scoperto",
+        outcomes: [
+          outcome(50, "Sfrutti l'informazione e brilli in campo.", 3),
+          outcome(50, "Vieni scoperto e la tua reputazione ne risente.", -3),
+        ],
       },
     ],
   },
@@ -393,6 +459,69 @@ export function generateControversialStatement(player: Player, rng: Rng = Math.r
   };
 }
 
+/** Variante social del post/dichiarazione controversa — stesso schema, contesto diverso. */
+export function generateControversialPost(player: Player, rng: Rng = Math.random): Decision {
+  if (!player.club) {
+    throw new Error("Serve un club corrente per generare questo evento");
+  }
+  const weaker = clubs.filter(
+    (c) => c.id !== player.club!.id && c.prestige < player.club!.prestige,
+  );
+  const pool = weaker.length > 0 ? weaker : eligibleClubs(player.ovr, player.club.id);
+  const [alternative] = pickClubs(pool, 1, rng);
+  return {
+    id: `controversial-post-${player.age}`,
+    category: "club-crisis",
+    title: "Post controverso",
+    description: "Un tuo post sui social scatena polemiche alla vigilia di una partita importante.",
+    options: [
+      {
+        id: "delete-post",
+        label: "Cancella il post e scusati",
+        club: player.club,
+        outcomes: [outcome(100, "Cancelli il post, ma il caso mediatico ti pesa addosso.", -1)],
+      },
+      signOption("leave", `Firma per ${alternative.name}`, alternative, `Lasci per il ${alternative.name}.`),
+    ],
+  };
+}
+
+export function isClubPriorityEligible(player: Player): boolean {
+  if (!player.club) return false;
+  return Boolean(player.club.competitions.cup || player.club.competitions.continental);
+}
+
+/** Scegliere se dare priorità al campionato o alla coppa (nome reale mostrato in card). */
+export function generateClubPriority(player: Player): Decision {
+  if (!player.club) {
+    throw new Error("Serve un club corrente per generare questo evento");
+  }
+  const club = player.club;
+  const cupName = club.competitions.continental ?? club.competitions.cup!;
+  return {
+    id: `club-priority-${player.age}`,
+    category: "club-crisis",
+    title: "Priorità della squadra",
+    description: `Il mister ti chiede su cosa concentrare gli sforzi: il ${club.competitions.league} o ${cupName}.`,
+    options: [
+      {
+        id: "prioritize-league",
+        label: `Punta sul ${club.competitions.league}`,
+        club,
+        hint: "Più possibilità in campionato · meno in coppa",
+        outcomes: [outcome(100, `Ti concentri sul ${club.competitions.league}.`, 1)],
+      },
+      {
+        id: "prioritize-cup",
+        label: `Punta su ${cupName}`,
+        club,
+        hint: "Più possibilità in coppa · meno in campionato",
+        outcomes: [outcome(100, `Ti concentri su ${cupName}.`, 1)],
+      },
+    ],
+  };
+}
+
 export function generateEndOfCycle(player: Player, rng: Rng = Math.random): Decision {
   const offers = pickClubs(eligibleClubs(player.ovr, player.club?.id), 2, rng);
   return {
@@ -471,6 +600,80 @@ export function generateReturnHome(player: Player, rng: Rng = Math.random): Deci
         outcomes: [outcome(100, "Il rapporto con la famiglia si incrina.", -5)],
       },
       signOption("return", `Torna al ${homeClub.name}`, homeClub, `Torni al ${homeClub.name}.`),
+    ],
+  };
+}
+
+export function isUnexpectedProspectEligible(player: Player): boolean {
+  return player.club !== null && player.age <= 20 && player.club.prestige <= 1;
+}
+
+/** Mentore (crescita lenta ma solida) vs "cerca una via d'uscita" (trasferimento immediato). */
+export function generateUnexpectedProspect(player: Player, rng: Rng = Math.random): Decision {
+  if (!player.club) {
+    throw new Error("Serve un club corrente per generare questo evento");
+  }
+  const [biggerClub] = pickClubs(eligibleClubs(player.ovr + 10, player.club.id), 1, rng);
+  return {
+    id: `unexpected-prospect-${player.age}`,
+    category: "narrative",
+    title: "Prospetto inatteso",
+    description:
+      "Un ex giocatore ti nota e si offre come mentore, ma un procuratore ti propone di cercare subito una squadra più ambiziosa.",
+    options: [
+      {
+        id: "accept-mentor",
+        label: "Accetta il mentore",
+        club: player.club,
+        hint: "Crescita costante nel tempo",
+        outcomes: [
+          outcome(100, "Il mentore ti guida con pazienza: cresci con calma ma in modo solido.", 3),
+        ],
+      },
+      signOption(
+        "look-for-way-out",
+        `Cerca una via d'uscita al ${biggerClub.name}`,
+        biggerClub,
+        `Il procuratore ti porta subito al ${biggerClub.name}.`,
+      ),
+    ],
+  };
+}
+
+export function isTriumphantReturnEligible(player: Player): boolean {
+  if (!player.club) return false;
+  const firstClub = player.clubHistory[0]?.club;
+  if (!firstClub) return false;
+  return player.age >= 32 && firstClub.id !== player.club.id;
+}
+
+/** Offerta di tornare al primo club della carriera per chiuderla lì dove è iniziata. */
+export function generateTriumphantReturn(player: Player): Decision {
+  if (!player.club) {
+    throw new Error("Serve un club corrente per generare questo evento");
+  }
+  const firstClub = player.clubHistory[0]?.club;
+  if (!firstClub) {
+    throw new Error("Serve un primo club in clubHistory per generare questo evento");
+  }
+  return {
+    id: `triumphant-return-${player.age}`,
+    category: "narrative",
+    title: "Ritorno trionfale",
+    description: `Il ${firstClub.name}, il club dove tutto è iniziato, ti offre di tornare per chiudere lì la carriera.`,
+    options: [
+      {
+        id: "stay",
+        label: `Resta al ${player.club.name}`,
+        club: player.club,
+        outcomes: [outcome(100, "Rimani dove sei: i tifosi di casa restano in attesa.")],
+      },
+      signOption(
+        "return",
+        `Torna al ${firstClub.name}`,
+        firstClub,
+        `Torni al ${firstClub.name} per chiudere la carriera dove è iniziata.`,
+      ),
     ],
   };
 }

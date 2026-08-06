@@ -36,6 +36,7 @@ function AwardChip({ count }: { count: number }) {
 }
 
 export function CareerTable({ player, pendingLabel }: CareerTableProps) {
+  const isGoalkeeper = player.position === "GK";
   const trophiesByAge = new Map<number, number>();
   for (const trophy of player.trophies) {
     trophiesByAge.set(trophy.age, (trophiesByAge.get(trophy.age) ?? 0) + 1);
@@ -73,7 +74,9 @@ export function CareerTable({ player, pendingLabel }: CareerTableProps) {
                 <OvrBadge ovr={stint.ovr} size="sm" className="ml-auto shrink-0" />
               </div>
               <p className="pl-6 text-xs text-(--color-text-muted)">
-                {stint.stats.apps} pres. · {stint.stats.goals} gol · {stint.stats.assists} assist
+                {isGoalkeeper
+                  ? `${stint.stats.apps} pres. · ${stint.stats.goalsAgainst ?? 0} gol subiti · ${stint.stats.cleanSheets ?? 0} clean sheet`
+                  : `${stint.stats.apps} pres. · ${stint.stats.goals} gol · ${stint.stats.assists} assist`}
               </p>
             </li>
           );
@@ -94,8 +97,8 @@ export function CareerTable({ player, pendingLabel }: CareerTableProps) {
             <th className="px-2 py-2 font-medium">Club</th>
             <th className="w-14 px-2 py-2 text-right font-medium">OVR</th>
             <th className="w-12 px-2 py-2 text-right font-medium">Pres.</th>
-            <th className="w-10 px-2 py-2 text-right font-medium">Gol</th>
-            <th className="w-12 px-2 py-2 text-right font-medium">Ast.</th>
+            <th className="w-10 px-2 py-2 text-right font-medium">{isGoalkeeper ? "GS" : "Gol"}</th>
+            <th className="w-12 px-2 py-2 text-right font-medium">{isGoalkeeper ? "CS" : "Ast."}</th>
           </tr>
         </thead>
         <tbody>
@@ -128,8 +131,12 @@ export function CareerTable({ player, pendingLabel }: CareerTableProps) {
                   <OvrBadge ovr={stint.ovr} size="sm" className="ml-auto" />
                 </td>
                 <td className="px-2 py-2 text-right text-(--color-text)">{stint.stats.apps}</td>
-                <td className="px-2 py-2 text-right text-(--color-text)">{stint.stats.goals}</td>
-                <td className="px-2 py-2 text-right text-(--color-text)">{stint.stats.assists}</td>
+                <td className="px-2 py-2 text-right text-(--color-text)">
+                  {isGoalkeeper ? (stint.stats.goalsAgainst ?? 0) : stint.stats.goals}
+                </td>
+                <td className="px-2 py-2 text-right text-(--color-text)">
+                  {isGoalkeeper ? (stint.stats.cleanSheets ?? 0) : stint.stats.assists}
+                </td>
               </tr>
             );
           })}

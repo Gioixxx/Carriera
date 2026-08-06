@@ -52,15 +52,49 @@ describe("nationalTournamentWinChance", () => {
 });
 
 describe("rollNationalTrophy", () => {
+  function seqRng(values: number[]) {
+    let i = 0;
+    return () => values[Math.min(i++, values.length - 1)];
+  }
+
   it("dovrebbe restituire null se il giocatore non è convocato", () => {
-    expect(rollNationalTrophy(false, 95, 28, () => 0)).toBeNull();
+    expect(rollNationalTrophy(false, 95, 28, "UEFA", () => 0)).toBeNull();
   });
 
-  it("dovrebbe restituire un trofeo senza club se il roll è favorevole", () => {
-    const trophy = rollNationalTrophy(true, 95, 28, () => 0);
+  it("dovrebbe restituire un trofeo senza club se il roll è favorevole (default UEFA)", () => {
+    const trophy = rollNationalTrophy(true, 95, 28, "UEFA", () => 0);
     expect(trophy).not.toBeNull();
     expect(trophy?.club).toBeUndefined();
     expect(["Mondiale", "Europei"]).toContain(trophy?.competition);
+  });
+
+  it("dovrebbe usare Mondiale/Europei per confederazione UEFA", () => {
+    expect(rollNationalTrophy(true, 95, 28, "UEFA", seqRng([0, 0.9]))?.competition).toBe("Europei");
+    expect(rollNationalTrophy(true, 95, 28, "UEFA", seqRng([0, 0.1]))?.competition).toBe("Mondiale");
+  });
+
+  it("dovrebbe usare Copa América per confederazione CONMEBOL", () => {
+    expect(rollNationalTrophy(true, 95, 28, "CONMEBOL", seqRng([0, 0.9]))?.competition).toBe(
+      "Copa América",
+    );
+  });
+
+  it("dovrebbe usare AFC Asian Cup per confederazione AFC", () => {
+    expect(rollNationalTrophy(true, 95, 28, "AFC", seqRng([0, 0.9]))?.competition).toBe(
+      "AFC Asian Cup",
+    );
+  });
+
+  it("dovrebbe usare Africa Cup of Nations per confederazione CAF", () => {
+    expect(rollNationalTrophy(true, 95, 28, "CAF", seqRng([0, 0.9]))?.competition).toBe(
+      "Africa Cup of Nations",
+    );
+  });
+
+  it("dovrebbe usare CONCACAF Gold Cup per confederazione CONCACAF", () => {
+    expect(rollNationalTrophy(true, 95, 28, "CONCACAF", seqRng([0, 0.9]))?.competition).toBe(
+      "CONCACAF Gold Cup",
+    );
   });
 });
 

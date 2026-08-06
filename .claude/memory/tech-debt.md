@@ -19,15 +19,6 @@ Registro debito tecnico con priorità. Aggiornato da /session-end. Origine spess
 
 ---
 
-### Statistiche portiere non differenziate (APPS/GA/CS vs APPS/GOALS/AST)
-- **Priorità:** Media
-- **Area:** `types/career.ts` (StatLine), `lib/career/progression.ts`, `PlayerCard`/`CareerTable` (fase 6, già costruiti con lo schema unico)
-- **Data:** 2026-08-04
-- **Descrizione:** la ricerca sul gioco originale ha confermato che i portieri tracciano statistiche diverse (presenze / gol subiti / clean sheet) invece di presenze/gol/assist. Il nostro `StatLine` attuale ha un solo schema fisso (apps/goals/assists) usato per tutti i ruoli, portiere incluso (con goals sempre 0 via `ROLE_WEIGHTS.GK`).
-- **Perché rimandato:** non ha bloccato le fasi 1-6; `PlayerCard`/`CareerTable` sono ormai costruiti sullo schema unico, quindi la risoluzione ora tocca anche UI già scritta, non solo il dominio.
-- **Impatto:** un portiere in UI mostra "0 gol / 0 assist" invece di gol subiti/clean sheet — funzionalmente corretto ma meno fedele e meno interessante da giocare con quel ruolo.
-- **Risoluzione suggerita:** union type discriminato per `StatLine` (`OutfieldStats | GoalkeeperStats`) oppure campi opzionali `goalsAgainst`/`cleanSheets` su un tipo esteso; valutare in fase 7/8, comporta ora anche una modifica a `PlayerCard`/`CareerTable`.
-
 ### Soglia di ritiro automatico (40 anni) basata su pochi campioni
 - **Priorità:** Bassa
 - **Area:** `lib/career/engine.ts` (`checkRetirement`)
@@ -64,24 +55,6 @@ Registro debito tecnico con priorità. Aggiornato da /session-end. Origine spess
 - **Impatto:** rischio medio — è UI nuova e non banale (focus trap, coda di overlay multipli, animazioni condizionate), un bug qui sarebbe visibile all'utente ad ogni trofeo/premio vinto.
 - **Risoluzione suggerita:** prima della prossima release, giocare una carriera fino a ottenere almeno un trofeo, un premio e una convocazione in nazionale nella stessa sessione per vedere la coda di overlay in sequenza; testare anche con `prefers-reduced-motion: reduce` attivo nel sistema.
 
-### Eventi narrativi osservati nell'originale ma assenti in `decisions.ts`
-- **Priorità:** Media
-- **Area:** `lib/career/decisions.ts` (pool lifestyle/club-crisis)
-- **Data:** 2026-08-05
-- **Descrizione:** confronto diretto originale-vs-clone (più il piano di ricerca esterno) elenca eventi mai portati nel codice: **"Club priority"** (scegli se lottare per il campionato o la coppa internazionale, nome reale della coppa in card), **"Unexpected prospect"** (mentore vs "look for a way out", doppio effetto deterministico), **"Triumphant return"** (offerta di tornare al primo club a fine carriera), **"Finish high school"**, **"Honesty test"**, **"Controversial post"** (distinto da "Controversial statement", già implementato). Verificato via grep che nessuno di questi id/nomi esiste in `decisions.ts`.
-- **Perché rimandato:** il pool di decisioni attuale copre già tutte le categorie principali (academy, prestito, competizione per il posto, lifestyle, club-crisis) e non ha bloccato le fasi 1-8; questi sono eventi aggiuntivi di varietà, non funzionalità core mancanti.
-- **Impatto:** varietà ridotta rispetto all'originale — un giocatore che gioca molte carriere sul clone incontra un ventaglio di situazioni più stretto.
-- **Risoluzione suggerita:** portare questi eventi in `decisions.ts` seguendo lo stesso pattern `resolveOutcome`/outcome pesati già usato per gli eventi esistenti; basso rischio architetturale, nessuna modifica al motore. "Triumphant return" richiede accesso al primo club della carriera (già disponibile in `clubHistory[0]`).
-
-### Card di decisione probabilistica senza percentuali visibili (a differenza dell'originale)
-- **Priorità:** Bassa
-- **Area:** `components/features/career/DecisionPanel.tsx`
-- **Data:** 2026-08-05 (parzialmente mitigato 2026-08-06)
-- **Descrizione:** l'originale mostra badge percentuale colorati direttamente sulla card prima della scelta (es. "Starter 50%" verde / "Low rotation 50%" rosso) per gli outcome pesati. Verificato via grep che `DecisionPanel.tsx` non stampa alcuna percentuale/peso — la scelta è "al buio" nel clone. **Aggiornamento 2026-08-06:** il commit 46f180a ha aggiunto `DecisionOption.hint` (sottotitolo testuale libero, wired in `DecisionPanel`/`OfferPanel`/`PenaltyShootout`) — dà un indizio qualitativo sul trade-off ma **non** i pesi numerici reali, quindi il gap con l'originale resta, solo attenuato.
-- **Perché rimandato:** non bloccante, differenza di trasparenza/tensione del gameplay più che di funzionalità; scoperta solo in questa sessione di confronto diretto.
-- **Impatto:** basso — il clone resta giocabile, ma il giocatore ha meno informazione numerica su cui basare la scelta rispetto all'originale.
-- **Risoluzione suggerita:** esporre i pesi già presenti su `DecisionOption`/`DecisionOutcome` come badge percentuale sulla card in `DecisionPanel.tsx`; dato dominio già disponibile, tocca solo la UI. Valutare se `hint` è sufficiente per l'obiettivo di gameplay o se serve comunque la percentuale esplicita.
-
 ### Sistema "satisfaction" (Hall of Fame, record personali, milestone OVR, titoli di stagione) non verificato end-to-end nel browser
 - **Priorità:** Media
 - **Area:** `lib/career/satisfaction.ts`, `CareerArchive.tsx`, `CareerSummary.tsx`, `PlayerCard.tsx`, `OutcomeBanner` in `CareerGame.tsx`
@@ -111,9 +84,12 @@ Registro debito tecnico con priorità. Aggiornato da /session-end. Origine spess
 
 ## Priorità
 - **Alta:** —
-- **Media:** statistiche portiere; probabilità trofei/award/nazionale non validate con playtest; momenti celebrativi/timeline non verificati end-to-end; eventi narrativi mancanti rispetto all'originale; sistema "satisfaction" (Hall of Fame/record/milestone/titoli) non verificato end-to-end (vedi sopra)
-- **Bassa:** soglia di ritiro automatico; generatori club-crisis con probabilità uniforme; percentuali outcome non visibili in `DecisionPanel` (parzialmente mitigato da `hint`); evento cambio-nazionalità mai implementato; possibile assenza di finestra anti-ripetizione eventi lifestyle (vedi sopra)
+- **Media:** probabilità trofei/award/nazionale non validate con playtest; momenti celebrativi/timeline non verificati end-to-end; sistema "satisfaction" (Hall of Fame/record/milestone/titoli) non verificato end-to-end (vedi sopra)
+- **Bassa:** soglia di ritiro automatico; generatori club-crisis con probabilità uniforme; evento cambio-nazionalità mai implementato; possibile assenza di finestra anti-ripetizione eventi lifestyle (vedi sopra)
 
 ## Archiviato
 - **Champions League ed Europa League non distinte** — risolto 2026-08-05: i club UEFA di tier 1 assegnano "Champions League" se prestige ≥2, "Europa League" altrimenti (`continentalCompetition` in `data/clubs.ts`), badge Europa League aggiunto in `data/competition-badges.ts`. Test dedicato in `clubs.test.ts`.
 - **Copertura club/campionati limitata a 4 paesi** — risolto 2026-08-05: estesi `data/clubs.ts`/`leagues` con Portogallo (Primeira Liga), Francia (Ligue 1), Germania (Bundesliga), Paesi Bassi (Eredivisie), Argentina (Liga Profesional) — 40 nuovi club reali con crest TheSportsDB verificati, 84→124 totali. Badge campionato/coppa nazionale aggiunti in `competition-badges.ts`. Verificato con test dedicato che `generateAcademyOffer`/`isReturnHomeEligible` funzionino per un giocatore portoghese (prima ripiegavano su club italiani/spagnoli per mancanza di dati).
+- **Statistiche portiere non differenziate** — risolto 2026-08-06: estensione additiva di `StatLine` (`goalsAgainst?`/`cleanSheets?`, valorizzati solo per `Position === "GK"`), formule dedicate in `progression.ts` (`projectGoalkeeperExtras`), propagate in `engine.ts`/`summary.ts` (`sumStats`), `wallet.ts` (`popularityDeltaForCycle` conta i clean sheet come prestazione), `satisfaction.ts` (nuovo titolo di stagione "Muro invalicabile"/`ironWall`, record `bestSeasonCleanSheets`), UI in `PlayerCard`/`CareerTable`/`CareerSummary` (branch su `player.position === "GK"`). Vedi [[decisions]] per il ragionamento sull'approccio additivo invece di un discriminated union.
+- **Card di decisione probabilistica senza percentuali visibili** — risolto 2026-08-06: nuovo `favorableOutcomeWeight()` in `lib/career/decisions.ts` mostra il peso reale dell'outcome più favorevole di un'opzione (quando ce n'è più di uno) accanto all'`hint` testuale, in `DecisionPanel`/`OfferPanel` (generalizza il pattern già introdotto in `PenaltyShootout.tsx`, commit f509fc1). Vedi [[decisions]] per l'euristica di scelta dell'outcome "favorevole".
+- **Eventi narrativi mancanti rispetto all'originale** — risolto 2026-08-06: 6 nuovi generatori in `decisions.ts` — "Club priority"/"Controversial post" (categoria `club-crisis`, `pickClubCrisisDecision` ora filtra per eleggibilità), "Unexpected prospect"/"Triumphant return" (categoria `narrative`, età-gated), "Finish high school" (pool `lifestyle`, unico evento con gate d'età tramite `pickStaticDecision`)/"Honesty test" (pool `lifestyle`, nessun gate). Test dedicati in `decisions.test.ts`/`loop.test.ts`.

@@ -44,6 +44,7 @@ function EmptyShowcase({ children }: { children: string }) {
 }
 
 export function CareerSummary({ player, onRestart, archive = [] }: CareerSummaryProps) {
+  const isGoalkeeper = player.position === "GK";
   const clubs = summarizeClubHistory(player.clubHistory);
   const trophies = [...player.trophies].sort((a, b) => a.age - b.age);
   const awards = [...player.awards].sort((a, b) => a.age - b.age);
@@ -106,15 +107,19 @@ export function CareerSummary({ player, onRestart, archive = [] }: CareerSummary
           </div>
           <div className="flex flex-col items-center justify-center rounded-lg bg-(--color-surface-raised) py-2">
             <p className="font-display text-lg leading-none text-(--color-text)">
-              {player.career.goals}
+              {isGoalkeeper ? (player.career.goalsAgainst ?? 0) : player.career.goals}
             </p>
-            <p className="text-[9px] tracking-wide text-(--color-text-muted) uppercase">Gol</p>
+            <p className="text-[9px] tracking-wide text-(--color-text-muted) uppercase">
+              {isGoalkeeper ? "Gol subiti" : "Gol"}
+            </p>
           </div>
           <div className="flex flex-col items-center justify-center rounded-lg bg-(--color-surface-raised) py-2">
             <p className="font-display text-lg leading-none text-(--color-text)">
-              {player.career.assists}
+              {isGoalkeeper ? (player.career.cleanSheets ?? 0) : player.career.assists}
             </p>
-            <p className="text-[9px] tracking-wide text-(--color-text-muted) uppercase">Ast.</p>
+            <p className="text-[9px] tracking-wide text-(--color-text-muted) uppercase">
+              {isGoalkeeper ? "Clean sheet" : "Ast."}
+            </p>
           </div>
         </div>
 
@@ -236,7 +241,9 @@ export function CareerSummary({ player, onRestart, archive = [] }: CareerSummary
                       </span>
                     </div>
                     <p className="px-1 pl-6 text-[11px] text-(--color-text-muted)">
-                      {c.stats.apps}P · {c.stats.goals}G · {c.stats.assists}A
+                      {isGoalkeeper
+                        ? `${c.stats.apps}P · ${c.stats.goalsAgainst ?? 0}GS · ${c.stats.cleanSheets ?? 0}CS`
+                        : `${c.stats.apps}P · ${c.stats.goals}G · ${c.stats.assists}A`}
                       {c.stintCount > 1 ? ` · ×${c.stintCount}` : ""}
                     </p>
                   </li>
@@ -248,8 +255,8 @@ export function CareerSummary({ player, onRestart, archive = [] }: CareerSummary
                     <th className="px-1.5 py-1.5 font-medium">Club</th>
                     <th className="w-16 px-1.5 py-1.5 font-medium">Età</th>
                     <th className="w-10 px-1.5 py-1.5 text-right font-medium">P</th>
-                    <th className="w-9 px-1.5 py-1.5 text-right font-medium">G</th>
-                    <th className="w-9 px-1.5 py-1.5 text-right font-medium">A</th>
+                    <th className="w-9 px-1.5 py-1.5 text-right font-medium">{isGoalkeeper ? "GS" : "G"}</th>
+                    <th className="w-9 px-1.5 py-1.5 text-right font-medium">{isGoalkeeper ? "CS" : "A"}</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -281,10 +288,10 @@ export function CareerSummary({ player, onRestart, archive = [] }: CareerSummary
                         {c.stats.apps}
                       </td>
                       <td className="px-1.5 py-1.5 text-right text-sm text-(--color-text)">
-                        {c.stats.goals}
+                        {isGoalkeeper ? (c.stats.goalsAgainst ?? 0) : c.stats.goals}
                       </td>
                       <td className="px-1.5 py-1.5 text-right text-sm text-(--color-text)">
-                        {c.stats.assists}
+                        {isGoalkeeper ? (c.stats.cleanSheets ?? 0) : c.stats.assists}
                       </td>
                     </tr>
                   ))}
@@ -313,16 +320,18 @@ export function CareerSummary({ player, onRestart, archive = [] }: CareerSummary
                 </div>
                 <div className="rounded-lg bg-(--color-surface-raised) py-1.5">
                   <p className="font-display text-base text-(--color-text)">
-                    {player.nationalTeam.goals}
+                    {isGoalkeeper ? (player.nationalTeam.goalsAgainst ?? 0) : player.nationalTeam.goals}
                   </p>
-                  <p className="text-[9px] tracking-wide text-(--color-text-muted) uppercase">Gol</p>
+                  <p className="text-[9px] tracking-wide text-(--color-text-muted) uppercase">
+                    {isGoalkeeper ? "Gol subiti" : "Gol"}
+                  </p>
                 </div>
                 <div className="rounded-lg bg-(--color-surface-raised) py-1.5">
                   <p className="font-display text-base text-(--color-text)">
-                    {player.nationalTeam.assists}
+                    {isGoalkeeper ? (player.nationalTeam.cleanSheets ?? 0) : player.nationalTeam.assists}
                   </p>
                   <p className="text-[9px] tracking-wide text-(--color-text-muted) uppercase">
-                    Assist
+                    {isGoalkeeper ? "Clean sheet" : "Assist"}
                   </p>
                 </div>
               </div>

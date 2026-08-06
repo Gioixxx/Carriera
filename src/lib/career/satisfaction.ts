@@ -20,6 +20,7 @@ export const SEASON_TITLE_LABELS: Record<SeasonTitleId, string> = {
   champion: "Campione",
   ballondorSeason: "Stagione da Pallone",
   nationalHero: "Eroe nazionale",
+  ironWall: "Muro invalicabile",
   revelation: "Rivelazione",
   comeback: "Ritorno vincente",
   workhorse: "Inossidabile",
@@ -32,11 +33,12 @@ const TITLE_RANK: Record<SeasonTitleId, number> = {
   champion: 0,
   ballondorSeason: 1,
   nationalHero: 2,
-  revelation: 3,
-  comeback: 4,
-  workhorse: 5,
-  toughYear: 6,
-  steady: 7,
+  ironWall: 3,
+  revelation: 4,
+  comeback: 5,
+  workhorse: 6,
+  toughYear: 7,
+  steady: 8,
 };
 
 export const SEASON_TITLES_CAP = 12;
@@ -45,6 +47,7 @@ export const RECORD_LABELS: Record<keyof PersonalRecords, string> = {
   bestSeasonGoals: "Record gol in una stagione",
   bestSeasonAssists: "Record assist in una stagione",
   bestSeasonApps: "Record presenze in una stagione",
+  bestSeasonCleanSheets: "Record clean sheet in una stagione",
   peakMarketValueEur: "Nuovo picco di valore di mercato",
   firstCallupAge: "Prima convocazione in nazionale",
 };
@@ -54,6 +57,8 @@ export interface SeasonTitleContext {
   goals: number;
   assists: number;
   apps: number;
+  /** Valorizzato solo per i portieri. */
+  cleanSheets?: number;
   trophies: Trophy[];
   award: Award | null;
   newInjury: Injury | null;
@@ -70,6 +75,8 @@ export interface CycleSatisfactionContext {
   goals: number;
   assists: number;
   apps: number;
+  /** Valorizzato solo per i portieri. */
+  cleanSheets?: number;
   trophies: Trophy[];
   award: Award | null;
   newInjury: Injury | null;
@@ -85,6 +92,7 @@ export function emptyPersonalRecords(peakMarketValueEur = 0): PersonalRecords {
     bestSeasonGoals: 0,
     bestSeasonAssists: 0,
     bestSeasonApps: 0,
+    bestSeasonCleanSheets: 0,
     peakMarketValueEur,
     firstCallupAge: null,
   };
@@ -113,9 +121,12 @@ export function evaluateSeasonTitle(ctx: SeasonTitleContext): SeasonTitleEntry {
   return { age: ctx.age, id, label: SEASON_TITLE_LABELS[id] };
 }
 
+const IRON_WALL_CLEAN_SHEETS_THRESHOLD = 15;
+
 function pickSeasonTitleId(ctx: SeasonTitleContext): SeasonTitleId {
   if (ctx.trophies.length > 0) return "champion";
   if (ctx.award || ctx.goals >= 25) return "ballondorSeason";
+  if ((ctx.cleanSheets ?? 0) >= IRON_WALL_CLEAN_SHEETS_THRESHOLD) return "ironWall";
   if (ctx.nationalCallup && ctx.nationalGoals > 0) return "nationalHero";
   if (ctx.age <= 21 && (ctx.ovrDelta >= 3 || ctx.goals >= 12)) return "revelation";
   if (ctx.injuryHealed) return "comeback";
@@ -311,6 +322,10 @@ export function updatePersonalRecords(
     next.bestSeasonApps = ctx.apps;
     broken.push("bestSeasonApps");
   }
+  if (ctx.cleanSheets !== undefined && ctx.cleanSheets > (records.bestSeasonCleanSheets ?? 0)) {
+    next.bestSeasonCleanSheets = ctx.cleanSheets;
+    broken.push("bestSeasonCleanSheets");
+  }
   if (ctx.marketValueEur > records.peakMarketValueEur) {
     next.peakMarketValueEur = ctx.marketValueEur;
     broken.push("peakMarketValueEur");
@@ -337,6 +352,9 @@ export function buildHighlightReel(ctx: CycleSatisfactionContext, rng: Rng = Mat
 
   if (ctx.assists >= 12) pool.push("Regista silenzioso: assist a raffica");
   else if (ctx.assists >= 6) pool.push("Assist decisivo in coppa");
+
+  if ((ctx.cleanSheets ?? 0) >= 15) pool.push("Muro invalicabile: clean sheet a raffica");
+  else if ((ctx.cleanSheets ?? 0) >= 8) pool.push("Serata da titolare: porta blindata");
 
   if (ctx.apps >= 50) pool.push("Mai fuori dal undici titolare");
   else if (ctx.apps >= 35) pool.push("Presenze da maratoneta");

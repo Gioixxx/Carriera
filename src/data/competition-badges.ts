@@ -1,7 +1,8 @@
 /**
  * Hotlink ai badge delle competizioni reali (TheSportsDB, chiave pubblica "123") — mai
  * scaricati/salvati nel repo. Copre solo le stringhe che il dominio produce davvero oggi
- * (Club.competitions.*, "Mondiale"/"Europei" da rollNationalTrophy in lib/career/trophies.ts).
+ * (Club.competitions.*, i nomi torneo confederazione-specifici da rollNationalTrophy in
+ * lib/career/trophies.ts).
  * Serie C non ha un badge unico su TheSportsDB (solo 3 gironi separati): lasciata senza badge,
  * la UI mostra comunque il nome testuale. Vedi .claude/research/team-crests.md per la ricerca.
  */
@@ -23,6 +24,10 @@ export const COMPETITION_BADGES: Record<string, string> = {
   "Copa Libertadores": "https://r2.thesportsdb.com/images/media/league/badge/9shr931685425181.png",
   Mondiale: "https://r2.thesportsdb.com/images/media/league/badge/e7er5g1696521789.png",
   Europei: "https://r2.thesportsdb.com/images/media/league/badge/bivzlu1635869135.png",
+  "Copa América": "https://r2.thesportsdb.com/images/media/league/badge/n78hen1718080720.png",
+  "AFC Asian Cup": "https://r2.thesportsdb.com/images/media/league/badge/0a86rp1710997941.png",
+  "Africa Cup of Nations": "https://r2.thesportsdb.com/images/media/league/badge/rhu61x1738628727.png",
+  "CONCACAF Gold Cup": "https://r2.thesportsdb.com/images/media/league/badge/pfx34h1621878481.png",
   "Primeira Liga": "https://www.thesportsdb.com/images/media/league/badge/3tgdke1782689102.png",
   "Taça de Portugal": "https://r2.thesportsdb.com/images/media/league/badge/hyy7lq1593011553.png",
   "Ligue 1": "https://r2.thesportsdb.com/images/media/league/badge/9f7z9d1742983155.png",

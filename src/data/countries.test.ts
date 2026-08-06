@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { countries } from "./countries";
+import { countries, getCountry } from "./countries";
 
 describe("countries", () => {
   it("dovrebbe avere codici univoci", () => {
@@ -23,5 +23,23 @@ describe("countries", () => {
     expect(names).toEqual(
       expect.arrayContaining(["Italy", "England", "Spain", "Brazil"]),
     );
+  });
+
+  it("ogni paese dovrebbe avere una confederazione valorizzata", () => {
+    const validConfederations = ["UEFA", "CONMEBOL", "CONCACAF", "CAF", "AFC"];
+    for (const country of countries) {
+      expect(validConfederations).toContain(country.confederation);
+    }
+  });
+});
+
+describe("getCountry", () => {
+  it("dovrebbe trovare un paese per nome esatto", () => {
+    expect(getCountry("Brazil")?.confederation).toBe("CONMEBOL");
+    expect(getCountry("Italy")?.confederation).toBe("UEFA");
+  });
+
+  it("dovrebbe restituire undefined per un nome sconosciuto", () => {
+    expect(getCountry("Narnia")).toBeUndefined();
   });
 });

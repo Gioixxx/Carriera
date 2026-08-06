@@ -52,6 +52,23 @@ describe("availableCategories", () => {
     expect(availableCategories(belowThreshold, INITIAL_LOOP_CONTEXT)).not.toContain("sponsor");
     expect(availableCategories(aboveThreshold, INITIAL_LOOP_CONTEXT)).toContain("sponsor");
   });
+
+  it("dovrebbe includere narrative per un giovane in un club a basso prestigio (unexpected-prospect)", () => {
+    const youngLowPrestige = playerAt(getClub("reggiana")!);
+    expect(availableCategories(youngLowPrestige, INITIAL_LOOP_CONTEXT)).toContain("narrative");
+  });
+
+  it("dovrebbe includere narrative per un veterano lontano dal primo club (triumphant-return)", () => {
+    const firstClub = getClub("reggiana")!;
+    const veteran: Player = {
+      ...playerAt(),
+      age: 34,
+      clubHistory: [
+        { club: firstClub, ageFrom: 16, ageTo: 18, type: "permanent", stats: { apps: 0, goals: 0, assists: 0 }, ovr: 55 },
+      ],
+    };
+    expect(availableCategories(veteran, INITIAL_LOOP_CONTEXT)).toContain("narrative");
+  });
 });
 
 describe("shouldTriggerContinentalFinal", () => {

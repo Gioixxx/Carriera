@@ -2,6 +2,7 @@
 
 import type { Decision } from "@/types/career";
 import { cn } from "@/lib/utils";
+import { favorableOutcomeWeight } from "@/lib/career/decisions";
 
 interface DecisionPanelProps {
   decision: Decision;
@@ -19,23 +20,32 @@ export function DecisionPanel({ decision, onChoose }: DecisionPanelProps) {
       </div>
 
       <div className="grid gap-3 sm:grid-cols-2">
-        {decision.options.map((option) => (
-          <button
-            key={option.id}
-            type="button"
-            onClick={() => onChoose(option.id)}
-            className={cn(
-              "flex flex-col items-start gap-1 rounded-lg border border-(--color-border) bg-(--color-surface-raised) p-4 text-left",
-              "transition-all duration-150 hover:-translate-y-0.5 hover:border-(--color-accent) hover:shadow-md",
-              "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-(--color-accent)",
-            )}
-          >
-            <span className="text-sm font-semibold text-(--color-text)">{option.label}</span>
-            {option.hint ? (
-              <span className="text-xs text-(--color-text-muted)">{option.hint}</span>
-            ) : null}
-          </button>
-        ))}
+        {decision.options.map((option) => {
+          const chance = favorableOutcomeWeight(option);
+          return (
+            <button
+              key={option.id}
+              type="button"
+              onClick={() => onChoose(option.id)}
+              className={cn(
+                "flex flex-col items-start gap-1 rounded-lg border border-(--color-border) bg-(--color-surface-raised) p-4 text-left",
+                "transition-all duration-150 hover:-translate-y-0.5 hover:border-(--color-accent) hover:shadow-md",
+                "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-(--color-accent)",
+              )}
+            >
+              <span className="text-sm font-semibold text-(--color-text)">{option.label}</span>
+              {option.hint ? (
+                <span className="text-xs text-(--color-text-muted)">{option.hint}</span>
+              ) : null}
+              {chance !== null ? (
+                <span className="text-xs text-(--color-text-muted)">
+                  Possibilità di andare bene:{" "}
+                  <span className="font-semibold text-(--color-text)">{chance}%</span>
+                </span>
+              ) : null}
+            </button>
+          );
+        })}
       </div>
     </div>
   );

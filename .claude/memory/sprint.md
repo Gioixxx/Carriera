@@ -114,6 +114,27 @@ Stato lavoro in corso. Aggiornato con /sprint. Backlog in [[backlog]], debito in
 - **Esplorazione aggiuntiva 4** sul sito originale (scritta in `piped-bouncing-cocke.md`, fuori dal repo): catene di prestito ancora mai osservate (0/47 cicli aggiuntivi, conclusione: probabilmente non serve modellarle); esito di "Look for a way out" chiarito (trasferimento immediato deterministico, stesso pattern di un'offerta normale accettata); **correzione importante**: l'originale usa sempre nomi di trofeo reali (World Cup, Copa América, Champions League, Europa League, Copa Libertadores, Copa Argentina) mai un placeholder generico "Eurocup" come assunto prima — rilevante per [[backlog]] (nomi confederazione-specifici per trofei nazionale); awards individuali confermati vuoti in 14/14 carriere cumulative anche nel caso più estremo osservato finora (OVR 90, Mondiale + 3x Copa América, 9 trofei di club)
 - **Ricerca immagini premi + coppe nazionali** (estende `.claude/research/team-crests.md`, sezioni 5-6): badge TheSportsDB per 6 tornei di confederazione (Mondiale/Europei/Copa América/Asian Cup/Africa Cup of Nations/Gold Cup) trovati e verificati, non ancora cablati in `COMPETITION_BADGES` (serve prima la logica di confederazione, vedi [[backlog]]); valutazione premi individuali con raccomandazione icona generica (Twemoji) invece di foto reale del trofeo Ballon d'Or — già implementata, vedi sopra e [[decisions]]
 
+- [x] **Chiusura tech-debt "codificabile": statistiche portiere, percentuali decisione, eventi
+  narrativi, trofei confederazione** (2026-08-06, non ancora committato a fine di questa voce):
+  su richiesta esplicita dell'utente ("crea piano per i tech debt", scope limitato ai soli item
+  con codice da scrivere, non verifiche browser). **Statistiche portiere**: `StatLine` guadagna
+  `goalsAgainst?`/`cleanSheets?` opzionali (estensione additiva, non discriminated union — per
+  non toccare le fixture di test esistenti), nuova formula `projectGoalkeeperExtras` in
+  `progression.ts`, nuovo titolo di stagione "Muro invalicabile" (`ironWall`) e record
+  `bestSeasonCleanSheets` in `satisfaction.ts`, UI `PlayerCard`/`CareerTable`/`CareerSummary`
+  aggiornate per `player.position === "GK"`. **Percentuali decisione**: `favorableOutcomeWeight()`
+  generalizza in `DecisionPanel`/`OfferPanel` il pattern già introdotto ad-hoc in
+  `PenaltyShootout.tsx`. **6 eventi narrativi mancanti**: Club priority/Controversial post
+  (`club-crisis`), Unexpected prospect/Triumphant return (`narrative`, età-gated), Finish high
+  school/Honesty test (pool `lifestyle`). **Trofei di nazionale per confederazione**: nuovo campo
+  `confederation` su `Country`, `rollNationalTrophy` sceglie il torneo reale in base alla
+  confederazione invece del fisso Mondiale/Europei. Vedi [[decisions]] per il ragionamento
+  completo. 222 test (era 170), lint/typecheck/build puliti (4 warning `react-hooks/set-state-in-
+  effect` pre-esistenti in `CareerGame.tsx`/`useMotion.ts`, non toccati in questa sessione).
+  **Non verificato manualmente nel browser** (fuori scope per scelta esplicita dell'utente,
+  limitato al codice) — verificato invece via test dedicati in `decisions.test.ts`/
+  `loop.test.ts`/`progression.test.ts`/`wallet.test.ts`/`satisfaction.test.ts`/`countries.test.ts`.
+
 ## Note tecniche emerse in fase 6
 - jsdom 30 + Node 22+ non espone `window.localStorage` di default (ExperimentalWarning nativa) — polyfill minimale in `vitest.setup.ts`, non è un problema di codice applicativo
 - `ClubStint` ora ha un campo `ovr` (OVR del giocatore alla fine di quel ciclo) — necessario per la CareerTable, che deve mostrare l'OVR storico per riga, non quello attuale

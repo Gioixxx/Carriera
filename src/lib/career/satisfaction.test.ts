@@ -92,6 +92,20 @@ describe("evaluateSeasonTitle", () => {
   it("dovrebbe scegliere steady come default", () => {
     expect(evaluateSeasonTitle(baseCtx()).id).toBe("steady");
   });
+
+  it("dovrebbe scegliere ironWall per un portiere con molti clean sheet", () => {
+    const title = evaluateSeasonTitle(baseCtx({ goals: 0, cleanSheets: 18 }));
+    expect(title.id).toBe("ironWall");
+    expect(title.label).toBe("Muro invalicabile");
+  });
+
+  it("ironWall non dovrebbe prevalere su champion", () => {
+    expect(
+      evaluateSeasonTitle(
+        baseCtx({ cleanSheets: 18, trophies: [{ competition: "Serie A", age: 24 }] }),
+      ).id,
+    ).toBe("champion");
+  });
 });
 
 describe("pushSeasonTitle / pickBestCareerTitle", () => {
@@ -183,6 +197,28 @@ describe("updatePersonalRecords", () => {
     expect(records.firstCallupAge).toBe(20);
     expect(broken).toContain("bestSeasonGoals");
     expect(broken).toContain("firstCallupAge");
+  });
+
+  it("dovrebbe segnalare il record di clean sheet per un portiere", () => {
+    const { records, broken } = updatePersonalRecords(emptyPersonalRecords(1_000_000), {
+      age: 20,
+      ovrBefore: 60,
+      ovrAfter: 65,
+      goals: 0,
+      assists: 0,
+      apps: 34,
+      cleanSheets: 12,
+      trophies: [],
+      award: null,
+      newInjury: null,
+      injuryHealed: false,
+      nationalCallup: false,
+      nationalGoals: 0,
+      marketValueEur: 5_000_000,
+      wasAlreadyCalled: false,
+    });
+    expect(records.bestSeasonCleanSheets).toBe(12);
+    expect(broken).toContain("bestSeasonCleanSheets");
   });
 });
 

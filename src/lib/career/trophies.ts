@@ -1,5 +1,14 @@
 import type { Award, AwardType, Club, Player, StatLine, Trophy } from "@/types/career";
+import type { Confederation } from "@/data/countries";
 import { clamp, type Rng } from "./progression";
+
+const CONFEDERATION_TOURNAMENT: Record<Confederation, string> = {
+  UEFA: "Europei",
+  CONMEBOL: "Copa América",
+  CONCACAF: "CONCACAF Gold Cup",
+  CAF: "Africa Cup of Nations",
+  AFC: "AFC Asian Cup",
+};
 
 /**
  * Probabilità di vincere una competizione di club in un ciclo, in base al prestigio del club
@@ -40,11 +49,12 @@ export function rollNationalTrophy(
   called: boolean,
   ovr: number,
   age: number,
+  confederation: Confederation = "UEFA",
   rng: Rng = Math.random,
 ): Trophy | null {
   if (!called) return null;
   if (rng() >= nationalTournamentWinChance(ovr)) return null;
-  const competition = rng() < 0.5 ? "Mondiale" : "Europei";
+  const competition = rng() < 0.5 ? "Mondiale" : CONFEDERATION_TOURNAMENT[confederation];
   return { competition, club: undefined, age };
 }
 
