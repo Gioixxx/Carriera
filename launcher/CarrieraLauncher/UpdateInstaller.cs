@@ -5,6 +5,8 @@ namespace CarrieraLauncher;
 
 internal static class UpdateInstaller
 {
+    private const int MaxDownloadAttempts = 5;
+
     public static async Task DownloadAndApplyAsync(UpdateInfo update, CancellationToken ct = default)
     {
         var currentExe = Environment.ProcessPath ?? Application.ExecutablePath;
@@ -12,43 +14,45 @@ internal static class UpdateInstaller
         Directory.CreateDirectory(tempDir);
         var newExePath = Path.Combine(tempDir, "Carriera.new.exe");
         var scriptPath = Path.Combine(tempDir, "apply-update.bat");
+        var logPath = Path.Combine(tempDir, "update-log.txt");
 
-        // La CDN dei release asset di GitHub parla HTTP/2; HttpClient puo' negoziarlo
-        // automaticamente e, su alcune combinazioni di rete/software di sicurezza, lo stream
-        // HTTP/2 viene interrotto a meta' di un download binario grande senza sollevare
-        // un'eccezione dal lato .NET (osservato: un download da ~58 MB troncato a ~5 MB, nessuna
-        // eccezione, nessun log). Un download diretto con lo stesso URL via un client HTTP/1.1
-        // (es. Invoke-WebRequest) completa invece regolarmente — per questo qui la versione
-        // HTTP viene fissata esplicitamente a 1.1 invece di lasciarla negoziare.
-        long? expectedSize;
-        using (var http = new HttpClient { Timeout = TimeSpan.FromMinutes(5) })
+        // Osservato su rete reale: il download si tronca a punti diversi e imprevedibili a
+        // seconda del tentativo (una volta ~8% del file, un'altra ~64%), senza che HttpClient
+        // sollevi sempre un'eccezione — sintomo di un'interferenza di rete/sicurezza che
+        // interrompe lo stream in modo non deterministico, non di un bug di protocollo fisso.
+        // Un client basato su WinHTTP (Invoke-WebRequest) sulla stessa rete completa invece
+        // regolarmente, probabilmente per la resilienza/retry integrata in WinHTTP che
+        // SocketsHttpHandler non ha di default. Qui quindi il download intero (non solo il
+        // "move" finale) viene ritentato automaticamente invece di arrendersi al primo esito
+        // negativo — l'utente non deve accorgersi di un tentativo fallito né rifare nulla a mano.
+        await LogAsync(logPath, "Avvio download aggiornamento...", ct);
+        Exception? lastError = null;
+        for (var attempt = 1; attempt <= MaxDownloadAttempts; attempt++)
         {
-            http.DefaultRequestHeaders.UserAgent.ParseAdd("CarrieraLauncher");
-            using var request = new HttpRequestMessage(HttpMethod.Get, update.DownloadUrl)
+            try
             {
-                Version = HttpVersion.Version11,
-                VersionPolicy = HttpVersionPolicy.RequestVersionExact,
-            };
-            using var response = await http.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, ct);
-            response.EnsureSuccessStatusCode();
-            expectedSize = response.Content.Headers.ContentLength;
-            await using var fs = File.Create(newExePath);
-            await using var download = await response.Content.ReadAsStreamAsync(ct);
-            await download.CopyToAsync(fs, ct);
+                await DownloadOnceAsync(update.DownloadUrl, newExePath, ct);
+                await LogAsync(logPath, $"Download completato al tentativo {attempt}/{MaxDownloadAttempts}.", ct);
+                lastError = null;
+                break;
+            }
+            catch (Exception ex)
+            {
+                lastError = ex;
+                await LogAsync(logPath, $"Tentativo {attempt}/{MaxDownloadAttempts} fallito: {ex.Message}", ct);
+                if (attempt < MaxDownloadAttempts)
+                {
+                    await Task.Delay(TimeSpan.FromSeconds(2 * attempt), ct);
+                }
+            }
         }
 
-        // Guardia contro un download troncato/corrotto che sostituirebbe un exe funzionante:
-        // se il server ha dichiarato un Content-Length, deve combaciare esattamente col file
-        // scritto su disco (un CopyToAsync che si interrompe a meta' stream, come osservato con
-        // HTTP/2 su questa CDN, non solleva sempre un'eccezione dal lato .NET). Se il server non
-        // dichiara la dimensione, resta la soglia minima (l'exe pubblicato e' sempre dell'ordine
-        // delle decine di MB) come rete di sicurezza meno precisa ma comunque utile.
-        var downloadedSize = new FileInfo(newExePath).Length;
-        if (expectedSize is long size ? downloadedSize != size : downloadedSize < 5 * 1024 * 1024)
+        if (lastError is not null)
         {
+            await LogAsync(logPath, $"Download definitivamente fallito dopo {MaxDownloadAttempts} tentativi.", ct);
             throw new InvalidOperationException(
-                $"Download dell'aggiornamento incompleto: {downloadedSize} byte scaricati"
-                    + (expectedSize is long s ? $", attesi {s}." : " (dimensione attesa sconosciuta, atteso almeno 5 MB)."));
+                $"Download dell'aggiornamento fallito dopo {MaxDownloadAttempts} tentativi: {lastError.Message}",
+                lastError);
         }
 
         // Un exe self-contained single-file non può sovrascrivere se stesso mentre è in
@@ -61,11 +65,10 @@ internal static class UpdateInstaller
         // alcuna traccia del perché. Ora riprova per ~15s e logga ogni esito in un file
         // ispezionabile accanto allo script.
         var pid = Environment.ProcessId;
-        var logPath = Path.Combine(tempDir, "update-log.txt");
         var script = $"""
             @echo off
             setlocal
-            echo [%date% %time%] Attesa chiusura processo {pid}... > "{logPath}"
+            echo [%date% %time%] Attesa chiusura processo {pid}... >> "{logPath}"
             :wait
             tasklist /FI "PID eq {pid}" 2>NUL | find "{pid}" >NUL
             if not errorlevel 1 (
@@ -102,5 +105,51 @@ internal static class UpdateInstaller
         });
 
         Application.Exit();
+    }
+
+    // Un singolo tentativo di download. Fissa la versione HTTP a 1.1 (invece di lasciare che
+    // HttpClient negozi HTTP/2 con la CDN dei release GitHub, dove uno stream interrotto a
+    // meta' non solleva sempre un'eccezione) e verifica la dimensione scaricata contro il
+    // Content-Length dichiarato dal server, cosi' un download troncato viene sempre rilevato
+    // anche quando lo stream si chiude "pulito" senza errori lato .NET.
+    private static async Task DownloadOnceAsync(string url, string destinationPath, CancellationToken ct)
+    {
+        long? expectedSize;
+        using (var http = new HttpClient { Timeout = TimeSpan.FromMinutes(5) })
+        {
+            http.DefaultRequestHeaders.UserAgent.ParseAdd("CarrieraLauncher");
+            using var request = new HttpRequestMessage(HttpMethod.Get, url)
+            {
+                Version = HttpVersion.Version11,
+                VersionPolicy = HttpVersionPolicy.RequestVersionExact,
+            };
+            using var response = await http.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, ct);
+            response.EnsureSuccessStatusCode();
+            expectedSize = response.Content.Headers.ContentLength;
+            await using var fs = File.Create(destinationPath);
+            await using var download = await response.Content.ReadAsStreamAsync(ct);
+            await download.CopyToAsync(fs, ct);
+        }
+
+        var downloadedSize = new FileInfo(destinationPath).Length;
+        if (expectedSize is long size ? downloadedSize != size : downloadedSize < 5 * 1024 * 1024)
+        {
+            throw new InvalidOperationException(
+                $"{downloadedSize} byte scaricati"
+                    + (expectedSize is long s ? $", attesi {s}." : " (dimensione attesa sconosciuta, atteso almeno 5 MB)."));
+        }
+    }
+
+    private static async Task LogAsync(string logPath, string message, CancellationToken ct)
+    {
+        try
+        {
+            await File.AppendAllTextAsync(logPath, $"[{DateTime.Now:yyyy-MM-dd HH:mm:ss}] {message}{Environment.NewLine}", ct);
+        }
+        catch
+        {
+            // Il log e' solo diagnostico: un fallimento nello scriverlo non deve mai interrompere
+            // il flusso di aggiornamento vero e proprio.
+        }
     }
 }

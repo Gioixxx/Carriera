@@ -154,7 +154,10 @@ internal sealed class MainForm : Form
                     // aggiornare — un fallimento del download va segnalato, altrimenti sembra che
                     // l'aggiornamento non abbia fatto nulla senza lasciare alcuna traccia.
                     MessageBox.Show(
-                        $"Download dell'aggiornamento non riuscito, la versione attuale resta invariata.\n\nDettagli: {ex.Message}",
+                        "Download dell'aggiornamento non riuscito nonostante alcuni tentativi automatici, "
+                            + "la versione attuale resta invariata. Riprova più tardi: potrebbe essere una "
+                            + "connessione instabile.\n\nDettagli: "
+                            + $"{ex.Message}\n\nLog completo in %TEMP%\\CarrieraUpdate\\update-log.txt",
                         "Aggiornamento non riuscito",
                         MessageBoxButtons.OK,
                         MessageBoxIcon.Warning);
