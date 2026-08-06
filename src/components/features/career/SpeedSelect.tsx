@@ -30,7 +30,7 @@ export function SpeedSelect({ onSelect }: SpeedSelectProps) {
   return (
     <div className="flex min-w-0 flex-col items-center gap-5 text-center">
       <div>
-        <p className="font-display text-xs tracking-[0.3em] text-(--color-accent)">Passo 1 di 2</p>
+        <p className="font-display text-xs tracking-[0.3em] gold-metal-text">Passo 1 di 2</p>
         <h2 className="font-display text-2xl text-(--color-text)">Scegli il ritmo di carriera</h2>
       </div>
 
@@ -49,14 +49,21 @@ export function SpeedSelect({ onSelect }: SpeedSelectProps) {
               aria-checked={selected}
               onClick={() => setSpeed(option)}
               className={cn(
-                "flex-1 rounded-xl border-2 p-4 text-left transition-[border-color,background-color] duration-150",
-                "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-(--color-accent)",
+                "flex-1 rounded-xl border-2 p-4 text-left transition-all duration-150",
+                "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-(--color-focus-glow)",
                 selected
-                  ? "border-(--color-accent) bg-(--color-surface-raised)"
-                  : "border-(--color-border) bg-(--color-surface) hover:border-(--color-accent)/50",
+                  ? "selection-glow border-(--color-accent) bg-(--color-surface-raised)"
+                  : "border-(--color-border) bg-(--color-background)/50 hover:border-(--color-accent)/50",
               )}
             >
-              <p className="mb-1.5 text-sm font-bold text-(--color-text)">{SPEED_LABELS[option]}</p>
+              <p
+                className={cn(
+                  "mb-1.5 text-sm font-bold",
+                  selected ? "gold-metal-text" : "text-(--color-text)",
+                )}
+              >
+                {SPEED_LABELS[option]}
+              </p>
               <p className="text-xs leading-snug text-(--color-text-muted)">
                 {SPEED_DESCRIPTIONS[option]}
               </p>

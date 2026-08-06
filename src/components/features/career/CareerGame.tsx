@@ -55,7 +55,7 @@ function SeasonBeat({
 }) {
   return (
     <Card className="animate-step-in flex flex-col items-center gap-3 border-(--color-accent)/30 p-6 text-center sm:p-8">
-      <p className="font-display text-xs tracking-[0.35em] text-(--color-accent)">Ciclo in corso</p>
+      <p className="font-display text-xs tracking-[0.35em] gold-metal-text">Ciclo in corso</p>
       <div className="flex items-center gap-2 text-(--color-text-muted)">
         {crestUrl && clubName ? (
           <ClubCrest crestUrl={crestUrl} clubName={clubName} size={22} />
@@ -123,7 +123,7 @@ function OutcomeBanner({
             {outcome.seasonTitle.label}
           </p>
         ) : (
-          <p className="font-display text-xs tracking-[0.3em] text-(--color-accent)">Esito</p>
+          <p className="font-display text-xs tracking-[0.3em] gold-metal-text">Esito</p>
         )}
         <p
           className={cn(
@@ -285,16 +285,18 @@ function OutcomeBanner({
 
 function SetupStepDots({ current }: { current: Step }) {
   return (
-    <div className="flex justify-center gap-2" aria-hidden="true">
+    <div className="mx-auto flex w-28 items-center gap-0" aria-hidden="true">
       <div
         className={cn(
-          "h-1 w-5 rounded-full transition-colors duration-150",
-          current === "speed" ? "bg-(--color-accent)" : "bg-(--color-border)",
+          "h-1 flex-1 rounded-l-full transition-colors duration-150",
+          current === "speed" || current === "identity"
+            ? "bg-(--color-accent)"
+            : "bg-(--color-border)",
         )}
       />
       <div
         className={cn(
-          "h-1 w-5 rounded-full transition-colors duration-150",
+          "h-1 flex-1 rounded-r-full transition-colors duration-150",
           current === "identity" ? "bg-(--color-accent)" : "bg-(--color-border)",
         )}
       />
@@ -474,7 +476,7 @@ export function CareerGame() {
     >
       {showPlaying ? (
         <header className="flex shrink-0 items-center justify-between gap-4">
-          <p className="font-display text-lg tracking-[0.2em] text-(--color-accent)">CARRIERA</p>
+          <p className="font-display text-lg tracking-[0.2em] gold-metal-text">CARRIERA</p>
           <div className="flex items-center gap-3">
             <Button variant="ghost" onClick={handleRestart} className="px-0 text-xs">
               Ricomincia
@@ -488,7 +490,7 @@ export function CareerGame() {
             <ThemeToggle />
           </div>
           <div className="text-center">
-            <p className="font-display text-[10px] tracking-[0.35em] text-(--color-accent)">
+            <p className="font-display text-[10px] tracking-[0.35em] gold-metal-text">
               Carriera
             </p>
             <h1 className="font-display text-2xl text-(--color-text) sm:text-3xl">
@@ -499,7 +501,7 @@ export function CareerGame() {
                   : "Costruisci la tua carriera da calciatore"}
             </h1>
             {isIdentity ? (
-              <p className="mt-0.5 font-display text-xs tracking-[0.3em] text-(--color-accent)">
+              <p className="mt-0.5 font-display text-xs tracking-[0.3em] gold-metal-text">
                 Passo 2 di 2
               </p>
             ) : !isArchive ? (

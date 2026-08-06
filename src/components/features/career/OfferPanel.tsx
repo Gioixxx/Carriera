@@ -46,7 +46,7 @@ export function OfferPanel({ decision, onChoose }: OfferPanelProps) {
   return (
     <div className="animate-step-in flex flex-col gap-4">
       <div>
-        <p className="font-display text-xs tracking-[0.3em] text-(--color-accent)">
+        <p className="font-display text-xs tracking-[0.3em] gold-metal-text">
           {decision.title}
         </p>
         <p className="text-sm text-(--color-text-muted)">{decision.description}</p>
@@ -63,7 +63,7 @@ export function OfferPanel({ decision, onChoose }: OfferPanelProps) {
               className={cn(
                 "flex flex-col items-start gap-1.5 rounded-lg border border-(--color-border) bg-(--color-surface-raised) p-4 text-left",
                 "transition-all duration-150 hover:-translate-y-0.5 hover:border-(--color-accent) hover:shadow-md",
-                "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-(--color-accent)",
+                "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-(--color-focus-glow)",
               )}
             >
               <span className="rounded bg-(--color-surface) px-1.5 py-0.5 text-[10px] font-semibold tracking-wide text-(--color-text-muted) uppercase">

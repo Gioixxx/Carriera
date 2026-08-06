@@ -24,13 +24,13 @@ export function CareerArchive({ entries, onBack }: CareerArchiveProps) {
   return (
     <div className="flex min-w-0 flex-col items-center gap-5 text-center">
       <div>
-        <p className="font-display text-xs tracking-[0.3em] text-(--color-accent)">Archivio</p>
+        <p className="font-display text-xs tracking-[0.3em] gold-metal-text">Archivio</p>
         <h2 className="font-display text-2xl text-(--color-text)">Le mie carriere</h2>
       </div>
 
       {entries.length > 0 ? (
-        <div className="w-full min-w-0 rounded-xl border border-(--color-accent)/30 bg-(--color-surface) p-4 text-left">
-          <p className="font-display mb-3 text-[10px] tracking-[0.25em] text-(--color-accent) uppercase">
+        <div className="w-full min-w-0 chalk-panel rounded-xl p-4 text-left">
+          <p className="font-display mb-3 text-[10px] tracking-[0.25em] gold-metal-text uppercase">
             Hall of Fame
           </p>
           <ul className="grid gap-2 sm:grid-cols-2">
@@ -60,7 +60,7 @@ export function CareerArchive({ entries, onBack }: CareerArchiveProps) {
           <p className="text-sm text-(--color-text-muted)">Nessuna carriera conclusa finora.</p>
         </div>
       ) : (
-        <div className="w-full min-w-0 rounded-xl border border-(--color-border) bg-(--color-surface) text-left shadow-sm">
+        <div className="w-full min-w-0 chalk-panel rounded-xl text-left">
           <ul className="divide-y divide-(--color-border)">
             {entries.map((entry) => {
               const country = countries.find((c) => c.name === entry.nationality);

@@ -9,6 +9,13 @@ Snapshot automatici del lavoro in corso, salvati da `save_context.py` su PreComp
 (feature `enforcementHooks`) e ricaricati all'avvio da `session_start.py`. Gestito automaticamente:
 le entry sotto sono sovrascritte per `sessionId` (rolling, ultime ~10). Vedi [[sprint]] per i task attivi.
 
+<!-- session:af474b59-7400-477d-9d2e-c27de66b0c15 -->
+### trophy-icons-already-implemented — 2026-08-06
+- **Branch:** main · **Quando:** 2026-08-06→2026-08-06
+- **Ultima richiesta:** sì, chiudi il tab
+- **File toccati:** memory/backlog.md, memory/tech-debt.md, memory/decisions.md, plans/hazy-strolling-wilkinson.md
+- **Comandi:** git
+
 <!-- session:dbc41714-e6eb-491f-8aea-41a390d16701 -->
 ### Creare simulatore carriera calcistica testuale — 2026-08-04
 - **Branch:** main · **Quando:** 2026-08-04→2026-08-04

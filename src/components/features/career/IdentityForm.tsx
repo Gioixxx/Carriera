@@ -69,7 +69,7 @@ export function IdentityForm({ onSubmit }: IdentityFormProps) {
                   onChange={(e) => setLastName(e.target.value)}
                   maxLength={15}
                   placeholder="Es. Rossi"
-                  className="rounded-md border border-(--color-border) bg-(--color-surface) px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-(--color-accent)"
+                  className="input-recessed rounded-md px-3 py-2 text-sm"
                 />
               </Field>
               <Field label="Numero" htmlFor="number" error={errors.number}>
@@ -80,7 +80,7 @@ export function IdentityForm({ onSubmit }: IdentityFormProps) {
                   max={99}
                   value={number ?? ""}
                   onChange={(e) => setNumber(e.target.value ? Number(e.target.value) : null)}
-                  className="rounded-md border border-(--color-border) bg-(--color-surface) px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-(--color-accent)"
+                  className="input-recessed rounded-md px-3 py-2 text-sm"
                 />
               </Field>
             </div>
@@ -103,7 +103,7 @@ export function IdentityForm({ onSubmit }: IdentityFormProps) {
             </Field>
           </div>
 
-          <Button onClick={handleSubmit} className="mt-1 self-start lg:mt-0">
+          <Button onClick={handleSubmit} className="mt-1 self-center lg:mt-0 lg:self-start">
             Conferma identità
           </Button>
         </div>

@@ -1,37 +1,39 @@
 /**
- * Palette "Cartellino del giocatore" — verde campo, pergamena, oro (medaglia), inchiostro.
- * 6 colori nominati, deliberatamente distanti dai default (niente cream+serif+terracotta,
- * niente near-black+neon): il tema è il tesseramento ufficiale di un calciatore.
+ * Palette "Lavagna tattica" — verde bosco, oro metallico, gesso, glow cyan.
+ * Dark è il look primario (mockup); light è la stessa lingua in chiave sage/pergamena.
  */
 const primitives = {
-  pitchGreen: "#14352b",
-  pitchGreenLight: "#3f8f5f",
-  parchment: "#f3eedd",
-  sage: "#edf0e6",
+  chalkboard: "#0f1a15",
+  surfaceDark: "#15241c",
+  surfaceRaisedDark: "#1c2e24",
+  chalk: "#e8e4d4",
   ink: "#1b2320",
   gold: "#c9a24b",
   goldBright: "#d4b268",
+  goldDeep: "#a8842e",
+  focusGlow: "#3de0e8",
+  pitchGreen: "#14352b",
+  pitchGreenLight: "#3f8f5f",
+  sage: "#dfe6d8",
+  sageSurface: "#e8efe3",
+  parchment: "#f0ead8",
   crimson: "#b23a3a",
   crimsonLight: "#d9645f",
-  skyNight: "#0b1210",
-  cardNight: "#132019",
   silver: "#8b95a0",
   bronze: "#9c6b3e",
-  white: "#ffffff",
 } as const;
 
 export const tokens = {
   light: {
-    colorPrimary: primitives.pitchGreen,
-    colorPrimaryHover: primitives.pitchGreenLight,
+    colorPrimary: primitives.goldDeep,
+    colorPrimaryHover: primitives.gold,
     colorBackground: primitives.sage,
-    colorSurface: primitives.white,
+    colorSurface: primitives.sageSurface,
     colorSurfaceRaised: primitives.parchment,
-    colorBorder: "#d8d2bd",
+    colorBorder: "#c5cdb8",
     colorText: primitives.ink,
-    colorTextMuted: "#5b6660",
+    colorTextMuted: "#4a564f",
     colorAccent: primitives.gold,
-    /** Verde campo — sempre questo, non segue il tema (un campo da calcio è sempre verde). */
     colorPitch: primitives.pitchGreen,
     colorSuccess: primitives.pitchGreenLight,
     colorWarning: primitives.gold,
@@ -39,16 +41,17 @@ export const tokens = {
     colorOvrBronze: primitives.bronze,
     colorOvrSilver: "#5b6a75",
     colorOvrGold: primitives.gold,
+    colorFocusGlow: primitives.focusGlow,
   },
   dark: {
     colorPrimary: primitives.goldBright,
     colorPrimaryHover: primitives.gold,
-    colorBackground: primitives.skyNight,
-    colorSurface: primitives.cardNight,
-    colorSurfaceRaised: "#1a2921",
-    colorBorder: "#28382f",
-    colorText: primitives.parchment,
-    colorTextMuted: "#93a39a",
+    colorBackground: primitives.chalkboard,
+    colorSurface: primitives.surfaceDark,
+    colorSurfaceRaised: primitives.surfaceRaisedDark,
+    colorBorder: "#2a3d32",
+    colorText: primitives.chalk,
+    colorTextMuted: "#9aada0",
     colorAccent: primitives.goldBright,
     colorPitch: primitives.pitchGreen,
     colorSuccess: primitives.pitchGreenLight,
@@ -57,6 +60,7 @@ export const tokens = {
     colorOvrBronze: "#b48653",
     colorOvrSilver: primitives.silver,
     colorOvrGold: primitives.goldBright,
+    colorFocusGlow: primitives.focusGlow,
   },
 } as const;
 

@@ -47,7 +47,7 @@ export function CareerTable({ player, pendingLabel }: CareerTableProps) {
   }
 
   return (
-    <div className="min-w-0 rounded-xl border border-(--color-border) bg-(--color-surface) shadow-sm">
+    <div className="chalk-panel min-w-0 rounded-xl">
       {/* Mobile: card rows — no horizontal scroll */}
       <ul className="divide-y divide-(--color-border) md:hidden">
         {player.clubHistory.map((stint, index) => {

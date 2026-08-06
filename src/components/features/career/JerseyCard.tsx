@@ -25,8 +25,7 @@ export function JerseyCard({
   return (
     <div
       className={cn(
-        "dossier-perforated flex flex-col items-center rounded-2xl border border-(--color-accent)/40",
-        "bg-(--color-surface-raised) shadow-lg shadow-black/5",
+        "dossier-perforated chalk-panel flex flex-col items-center rounded-2xl gold-metal-border",
         compact
           ? "gap-2 px-4 py-3"
           : "gap-2 px-4 py-3 lg:gap-4 lg:px-6 lg:pt-5 lg:pb-6",
@@ -35,7 +34,7 @@ export function JerseyCard({
     >
       <span
         className={cn(
-          "font-display tracking-[0.25em] text-(--color-accent)",
+          "font-display tracking-[0.25em] gold-metal-text",
           compact ? "text-[10px]" : "text-[10px] lg:text-xs",
         )}
       >
@@ -43,11 +42,28 @@ export function JerseyCard({
       </span>
 
       {compact ? (
-        <JerseyBadge number={displayNumber} country={country} size="md" />
+        <JerseyBadge
+          number={displayNumber}
+          lastName={lastName}
+          country={country}
+          size="md"
+        />
       ) : (
         <>
-          <JerseyBadge number={displayNumber} country={country} size="md" className="lg:hidden" />
-          <JerseyBadge number={displayNumber} country={country} size="lg" className="hidden lg:flex" />
+          <JerseyBadge
+            number={displayNumber}
+            lastName={lastName}
+            country={country}
+            size="md"
+            className="lg:hidden"
+          />
+          <JerseyBadge
+            number={displayNumber}
+            lastName={lastName}
+            country={country}
+            size="lg"
+            className="hidden lg:flex"
+          />
         </>
       )}
 

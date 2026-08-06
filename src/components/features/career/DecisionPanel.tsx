@@ -13,7 +13,7 @@ export function DecisionPanel({ decision, onChoose }: DecisionPanelProps) {
   return (
     <div className="animate-step-in flex flex-col gap-4">
       <div>
-        <p className="font-display text-xs tracking-[0.3em] text-(--color-accent)">
+        <p className="font-display text-xs tracking-[0.3em] gold-metal-text">
           {decision.title}
         </p>
         <p className="text-sm text-(--color-text-muted)">{decision.description}</p>
@@ -30,7 +30,7 @@ export function DecisionPanel({ decision, onChoose }: DecisionPanelProps) {
               className={cn(
                 "flex flex-col items-start gap-1 rounded-lg border border-(--color-border) bg-(--color-surface-raised) p-4 text-left",
                 "transition-all duration-150 hover:-translate-y-0.5 hover:border-(--color-accent) hover:shadow-md",
-                "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-(--color-accent)",
+                "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-(--color-focus-glow)",
               )}
             >
               <span className="text-sm font-semibold text-(--color-text)">{option.label}</span>

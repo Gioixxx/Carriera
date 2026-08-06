@@ -68,12 +68,17 @@ export function PlayerCard({ player, compact = false, flashRecords }: PlayerCard
   return (
     <div
       className={cn(
-        "dossier-perforated flex flex-col rounded-2xl border border-(--color-accent)/30 bg-(--color-surface-raised) shadow-lg shadow-black/5",
+        "dossier-perforated chalk-panel flex flex-col rounded-2xl gold-metal-border",
         compact ? "gap-2.5 p-3 sm:p-4" : "gap-4 p-5",
       )}
     >
       <div className="flex items-center gap-3 sm:gap-4">
-        <JerseyBadge number={player.number} country={country} size="sm" />
+        <JerseyBadge
+          number={player.number}
+          lastName={player.lastName}
+          country={country}
+          size="sm"
+        />
         <div className="min-w-0 flex-1">
           <span className="rounded bg-(--color-surface) px-1.5 py-0.5 text-[10px] font-semibold tracking-wide text-(--color-text-muted) uppercase">
             {player.position}

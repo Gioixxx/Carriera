@@ -7,7 +7,7 @@ interface OvrBadgeProps {
 }
 
 function tierClasses(ovr: number): string {
-  if (ovr >= 80) return "bg-(--color-ovr-gold) text-[#1b2320]";
+  if (ovr >= 80) return "bg-(--color-ovr-gold) text-(--color-on-gold)";
   if (ovr >= 65) return "bg-(--color-ovr-silver) text-white";
   return "bg-(--color-ovr-bronze) text-white";
 }

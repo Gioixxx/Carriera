@@ -32,9 +32,9 @@ export function ThemeToggle({ className }: ThemeToggleProps) {
       onClick={() => setTheme(isDark ? "light" : "dark")}
       aria-label={isDark ? "Passa al tema chiaro" : "Passa al tema scuro"}
       className={cn(
-        "flex h-9 w-9 items-center justify-center rounded-full border border-(--color-border) bg-(--color-surface)",
-        "text-(--color-text-muted) transition-colors duration-150 hover:border-(--color-accent) hover:text-(--color-text)",
-        "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-(--color-accent) focus-visible:ring-offset-2 focus-visible:ring-offset-(--color-background)",
+        "flex h-9 w-9 items-center justify-center rounded-full border border-(--color-border) bg-(--color-surface-raised)",
+        "text-(--color-text-muted) transition-colors duration-150 hover:border-(--color-accent) hover:text-(--color-accent)",
+        "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-(--color-focus-glow) focus-visible:ring-offset-2 focus-visible:ring-offset-(--color-background)",
         className,
       )}
     >

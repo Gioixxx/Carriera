@@ -45,8 +45,7 @@ export function NationalitySelect({ value, onChange, id }: NationalitySelectProp
         aria-haspopup="listbox"
         aria-expanded={open}
         className={cn(
-          "flex w-full items-center justify-between rounded-md border border-(--color-border) bg-(--color-surface) px-3 py-2 text-sm",
-          "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-(--color-accent)",
+          "input-recessed flex w-full items-center justify-between rounded-md px-3 py-2 text-sm",
         )}
       >
         {selected ? (
@@ -68,7 +67,7 @@ export function NationalitySelect({ value, onChange, id }: NationalitySelectProp
       </button>
 
       {open ? (
-        <div className="absolute z-20 mt-1 w-full overflow-hidden rounded-md border border-(--color-border) bg-(--color-surface) shadow-lg">
+        <div className="absolute z-20 mt-1 w-full overflow-hidden rounded-md chalk-panel shadow-lg">
           <input
             autoFocus
             value={query}
@@ -76,7 +75,7 @@ export function NationalitySelect({ value, onChange, id }: NationalitySelectProp
             onKeyDown={(e) => e.key === "Escape" && setOpen(false)}
             placeholder="Cerca…"
             aria-label="Cerca nazionalità"
-            className="w-full border-b border-(--color-border) px-3 py-2 text-sm outline-none"
+            className="input-recessed w-full rounded-none border-0 border-b border-(--color-border) px-3 py-2 text-sm outline-none"
           />
           <ul role="listbox" className="max-h-56 overflow-y-auto py-1">
             {filtered.length === 0 ? (
@@ -95,7 +94,7 @@ export function NationalitySelect({ value, onChange, id }: NationalitySelectProp
                     }}
                     className={cn(
                       "flex w-full items-center gap-2 px-3 py-1.5 text-left text-sm hover:bg-(--color-surface-raised)",
-                      "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-(--color-accent)",
+                      "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-(--color-focus-glow)",
                       c.name === value && "bg-(--color-surface-raised) font-semibold",
                     )}
                   >

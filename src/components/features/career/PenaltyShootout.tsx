@@ -21,7 +21,7 @@ export function PenaltyShootout({ decision, onChoose }: PenaltyShootoutProps) {
   return (
     <div className="animate-step-in flex flex-col items-center gap-5 text-center">
       <div>
-        <p className="font-display text-xs tracking-[0.3em] text-(--color-accent)">
+        <p className="font-display text-xs tracking-[0.3em] gold-metal-text">
           {decision.title}
         </p>
         <h3 className="font-display text-2xl text-(--color-text)">{decision.description}</h3>
@@ -49,7 +49,7 @@ export function PenaltyShootout({ decision, onChoose }: PenaltyShootoutProps) {
             className={cn(
               "rounded-lg border border-(--color-border) bg-(--color-surface-raised) px-8 py-3 text-sm font-semibold text-(--color-text)",
               "transition-colors duration-150 hover:border-(--color-accent) disabled:cursor-not-allowed disabled:opacity-50",
-              "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-(--color-accent)",
+              "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-(--color-focus-glow)",
             )}
           >
             {option.label}

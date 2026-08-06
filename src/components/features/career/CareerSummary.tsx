@@ -82,7 +82,7 @@ export function CareerSummary({ player, onRestart, archive = [] }: CareerSummary
       {/* Hero — compact, no wasted space */}
       <Card className="flex shrink-0 flex-col gap-3 p-4 sm:flex-row sm:items-center sm:gap-5 sm:p-5">
         <div className="min-w-0 flex-1 text-center sm:text-left">
-          <p className="font-display text-[10px] tracking-[0.35em] text-(--color-accent)">
+          <p className="font-display text-[10px] tracking-[0.35em] gold-metal-text">
             Carriera conclusa
           </p>
           <h2 className="font-display text-2xl leading-tight text-(--color-text) sm:text-3xl">
@@ -143,7 +143,7 @@ export function CareerSummary({ player, onRestart, archive = [] }: CareerSummary
 
       {hofWins.length > 0 ? (
         <div className="flex shrink-0 flex-wrap items-center gap-2">
-          <span className="font-display text-[10px] tracking-[0.2em] text-(--color-accent) uppercase">
+          <span className="font-display text-[10px] tracking-[0.2em] gold-metal-text uppercase">
             Hall of Fame
           </span>
           {hofWins.map((win) => (
