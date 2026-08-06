@@ -373,9 +373,9 @@ describe("nationalCallupChance e rollNationalCallup", () => {
     expect(nationalCallupChance(70)).toBe(0);
   });
 
-  it("dovrebbe crescere con l'OVR e restare limitata a 0.9", () => {
-    expect(nationalCallupChance(115)).toBe(0.9);
-    expect(nationalCallupChance(95)).toBeGreaterThan(nationalCallupChance(80));
+  it("dovrebbe crescere con l'OVR e restare limitata a 0.45", () => {
+    expect(nationalCallupChance(115)).toBe(0.45);
+    expect(nationalCallupChance(95)).toBeGreaterThan(nationalCallupChance(85));
   });
 
   it("rollNationalCallup dovrebbe restituire false se il giocatore è già stato convocato", () => {
@@ -384,7 +384,7 @@ describe("nationalCallupChance e rollNationalCallup", () => {
   });
 
   it("rollNationalCallup dovrebbe rispettare la probabilità calcolata", () => {
-    const player = { ...playerAt(), ovr: 90 }; // chance = 0.375
+    const player = { ...playerAt(), ovr: 90 }; // chance ≈ 0.314
     expect(rollNationalCallup(player, () => 0.1)).toBe(true);
     expect(rollNationalCallup(player, () => 0.9)).toBe(false);
   });

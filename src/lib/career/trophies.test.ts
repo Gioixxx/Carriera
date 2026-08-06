@@ -108,8 +108,8 @@ describe("rollNationalTrophies", () => {
 });
 
 describe("awardChance", () => {
-  it("dovrebbe essere zero sotto la soglia OVR 85", () => {
-    expect(awardChance(84)).toBe(0);
+  it("dovrebbe essere zero sotto la soglia OVR 84", () => {
+    expect(awardChance(83)).toBe(0);
   });
 
   it("dovrebbe crescere con l'OVR sopra la soglia", () => {

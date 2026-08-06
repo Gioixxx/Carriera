@@ -14,6 +14,8 @@ export interface SimulatedCareerResult {
   injuryCount: number;
   /** Numero di cicli in cui è stata scelta ciascuna categoria — usato per ribilanciare i pesi. */
   categoryPicks: Partial<Record<DecisionCategory, number>>;
+  /** OVR massimo raggiunto durante la carriera — il finale non basta, il declino di fine carriera lo abbassa. */
+  peakOvr: number;
 }
 
 /**
@@ -44,6 +46,7 @@ export function simulateCareer(
   let recentCategories: DecisionCategory[] = [];
   let cyclesPlayed = 0;
   let injuryCount = 0;
+  let peakOvr = player.ovr;
   const categoryPicks: Partial<Record<DecisionCategory, number>> = {};
 
   while (decision && !player.retired && cyclesPlayed < MAX_SIMULATED_CYCLES) {
@@ -55,6 +58,7 @@ export function simulateCareer(
     context = result.context;
     cyclesPlayed += 1;
     if (result.newInjury) injuryCount += 1;
+    if (player.ovr > peakOvr) peakOvr = player.ovr;
 
     if (player.retired) break;
 
@@ -65,5 +69,5 @@ export function simulateCareer(
     context = next.context;
   }
 
-  return { player, cyclesPlayed, injuryCount, categoryPicks };
+  return { player, cyclesPlayed, injuryCount, categoryPicks, peakOvr };
 }

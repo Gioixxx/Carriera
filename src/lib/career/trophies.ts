@@ -50,8 +50,8 @@ export function rollClubTrophies(
   return trophies;
 }
 
-const NATIONAL_TOURNAMENT_OVR_BASELINE = 78;
-const NATIONAL_TOURNAMENT_OVR_DIVISOR = 150;
+const NATIONAL_TOURNAMENT_OVR_BASELINE = 80;
+const NATIONAL_TOURNAMENT_OVR_DIVISOR = 70;
 const NATIONAL_TOURNAMENT_CHANCE_CAP = 0.2;
 
 /** Probabilità di vincere il torneo internazionale con la nazionale in un ciclo da convocato. */
@@ -96,8 +96,8 @@ const BALLON_DOR_OVR_THRESHOLD = 90;
  * dove restano irraggiungibili anche a OVR 88 con carriera leggendaria e titoli internazionali
  * (osservato su ~14 playthrough, vedi piano, esplorazione aggiuntiva 3).
  */
-const AWARD_OVR_BASELINE = 85;
-const AWARD_OVR_DIVISOR = 30;
+const AWARD_OVR_BASELINE = 84;
+const AWARD_OVR_DIVISOR = 20;
 const AWARD_CHANCE_CAP = 0.6;
 
 export function awardChance(ovr: number): number {

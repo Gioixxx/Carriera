@@ -14,9 +14,9 @@ import { clamp, type Rng } from "./progression";
 // ---------- Helper di selezione club ----------
 
 function targetPrestige(ovr: number): number {
-  if (ovr >= 85) return 3;
-  if (ovr >= 75) return 2;
-  if (ovr >= 60) return 1;
+  if (ovr >= 92) return 3;
+  if (ovr >= 84) return 2;
+  if (ovr >= 68) return 1;
   return 0;
 }
 
@@ -724,10 +724,18 @@ export function generateNationalitySwitch(player: Player, rng: Rng = Math.random
 
 // ---------- Convocazione in nazionale ----------
 
+const NATIONAL_CALLUP_OVR_BASELINE = 79;
+const NATIONAL_CALLUP_OVR_DIVISOR = 35;
+const NATIONAL_CALLUP_CHANCE_CAP = 0.45;
+
 /** Probabilità di convocazione per ciclo — soglia più generosa dell'originale (vedi piano). */
 export function nationalCallupChance(ovr: number): number {
-  if (ovr < 75) return 0;
-  return clamp((ovr - 75) / 40, 0, 0.9);
+  if (ovr < NATIONAL_CALLUP_OVR_BASELINE) return 0;
+  return clamp(
+    (ovr - NATIONAL_CALLUP_OVR_BASELINE) / NATIONAL_CALLUP_OVR_DIVISOR,
+    0,
+    NATIONAL_CALLUP_CHANCE_CAP,
+  );
 }
 
 export function rollNationalCallup(player: Player, rng: Rng = Math.random): boolean {

@@ -46,13 +46,27 @@ it("simula molte carriere e stampa le frequenze osservate", () => {
   const retirementAges: Record<number, number> = {};
   const categoryTotals: Partial<Record<DecisionCategory, number>> = {};
   let totalCyclesPlayed = 0;
+  let totalPeakOvr = 0;
+  const peakOvrBuckets: Record<string, number> = {
+    "<70": 0,
+    "70-79": 0,
+    "80-84": 0,
+    "85-89": 0,
+    "90+": 0,
+  };
 
-  for (const { player, categoryPicks, cyclesPlayed } of results) {
+  for (const { player, categoryPicks, cyclesPlayed, peakOvr } of results) {
     totalTrophies += player.trophies.length;
     totalAwards += player.awards.length;
     for (const award of player.awards) awardCounts[award.type] += 1;
     retirementAges[player.age] = (retirementAges[player.age] ?? 0) + 1;
     totalCyclesPlayed += cyclesPlayed;
+    totalPeakOvr += peakOvr;
+    if (peakOvr < 70) peakOvrBuckets["<70"] += 1;
+    else if (peakOvr < 80) peakOvrBuckets["70-79"] += 1;
+    else if (peakOvr < 85) peakOvrBuckets["80-84"] += 1;
+    else if (peakOvr < 90) peakOvrBuckets["85-89"] += 1;
+    else peakOvrBuckets["90+"] += 1;
     for (const [cat, count] of Object.entries(categoryPicks)) {
       const key = cat as DecisionCategory;
       categoryTotals[key] = (categoryTotals[key] ?? 0) + (count ?? 0);
@@ -66,6 +80,11 @@ it("simula molte carriere e stampa le frequenze osservate", () => {
   console.log(`Almeno 1 infortunio:           ${pct(withInjury, CAREER_COUNT)}`);
   console.log(`Trofei medi per carriera:      ${(totalTrophies / CAREER_COUNT).toFixed(2)}`);
   console.log(`Award medi per carriera:       ${(totalAwards / CAREER_COUNT).toFixed(2)}`);
+  console.log(`OVR di picco medio:            ${(totalPeakOvr / CAREER_COUNT).toFixed(1)}`);
+  console.log(`\n--- Distribuzione OVR di picco ---`);
+  for (const [bucket, count] of Object.entries(peakOvrBuckets)) {
+    console.log(`  ${bucket}: ${pct(count, CAREER_COUNT)}`);
+  }
   console.log(`\n--- Award per tipo (carriere con almeno 1) ---`);
   for (const [type, count] of Object.entries(awardCounts)) {
     console.log(`  ${type}: ${pct(count, CAREER_COUNT)}`);

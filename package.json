@@ -9,7 +9,7 @@
     "lint": "eslint",
     "test": "vitest run",
     "test:watch": "vitest",
-    "simulate": "vitest run --config vitest.simulate.config.mts --reporter=basic"
+    "simulate": "vitest run --config vitest.simulate.config.mts --reporter=verbose"
   },
   "dependencies": {
     "clsx": "^2.1.1",

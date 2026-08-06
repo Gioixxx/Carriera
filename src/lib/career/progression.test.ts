@@ -30,11 +30,11 @@ describe("clamp", () => {
 
 describe("ovrDeltaForAge", () => {
   it("dovrebbe restituire una crescita alta se il giocatore è giovane", () => {
-    expect(ovrDeltaForAge(YOUNG_AGE)).toBe(2.5);
+    expect(ovrDeltaForAge(YOUNG_AGE)).toBe(3.5);
   });
 
   it("dovrebbe restituire un plateau vicino allo zero nel picco di carriera", () => {
-    expect(ovrDeltaForAge(PLATEAU_AGE)).toBe(0.3);
+    expect(ovrDeltaForAge(PLATEAU_AGE)).toBe(0.8);
   });
 
   it("dovrebbe restituire un declino marcato se il giocatore supera i 37 anni", () => {
@@ -45,7 +45,7 @@ describe("ovrDeltaForAge", () => {
 describe("projectOvr", () => {
   it("dovrebbe crescere se il giocatore è giovane e non c'è rumore casuale", () => {
     const result = projectOvr(50, YOUNG_AGE, 1, NO_NOISE_RNG);
-    expect(result).toBe(53); // 50 + 2.5 arrotondato per eccesso
+    expect(result).toBe(54); // 50 + 3.5 arrotondato per eccesso
   });
 
   it("non dovrebbe mai superare il tetto massimo di 99", () => {

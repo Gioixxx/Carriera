@@ -8,9 +8,9 @@ export function clamp(value: number, min: number, max: number): number {
 
 /** Crescita/declino atteso dell'OVR per singola stagione, in base all'età. */
 const GROWTH_STAGES: { maxAge: number; deltaPerSeason: number }[] = [
-  { maxAge: 21, deltaPerSeason: 2.5 },
-  { maxAge: 27, deltaPerSeason: 1.4 },
-  { maxAge: 31, deltaPerSeason: 0.3 },
+  { maxAge: 21, deltaPerSeason: 3.5 },
+  { maxAge: 27, deltaPerSeason: 2.0 },
+  { maxAge: 31, deltaPerSeason: 0.8 },
   { maxAge: 34, deltaPerSeason: -0.6 },
   { maxAge: 37, deltaPerSeason: -1.6 },
   { maxAge: Infinity, deltaPerSeason: -3 },
