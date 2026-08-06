@@ -18,10 +18,26 @@ Funzionalità e idee a lungo termine. Prioritizzato pre-sprint → confluisce in
 
 ---
 
+### Promozione/retrocessione estesa oltre i 4 paesi multi-tier attuali
+- **Priorità:** Bassa
+- **Tipo:** Feature
+- **Area:** `data/clubs.ts`, `lib/career/club-progression.ts`
+- **Descrizione:** la meccanica di promozione/retrocessione (2026-08-06, vedi [[decisions]]) è già generica (`leagueForTier`, no-op silenzioso se manca il tier), ma solo Italia/Inghilterra/Spagna/Brasile hanno più di un livello di campionato modellato in `data/clubs.ts` — gli altri 6 paesi non possono mai retrocedere/promuovere. Servirebbe nuovo dato campionati/club (secondo livello + crest verificati) per i restanti paesi.
+- **Criteri accettazione:** almeno un secondo tier con crest verificati per uno o più dei paesi attualmente a tier singolo, verificato con un test dedicato che il club possa effettivamente muoversi di categoria.
+- **Stima:** Media (ricerca crest + dati campionato, nessuna nuova logica di dominio).
+
+### Trofeo di club continentale assegnabile anche "offscreen"
+- **Priorità:** Bassa
+- **Tipo:** Miglioramento
+- **Area:** `lib/career/trophies.ts` (`rollClubTrophies`), `lib/career/loop.ts`
+- **Descrizione:** oggi Champions/Europa League/Copa Libertadores si vincono solo tramite l'evento "finale continentale" (mini-gioco del rigore, 15% di probabilità per ciclo sopra OVR 78). Il piano di ricerca esterno sul gioco originale suggerisce che nell'originale il trofeo continentale di club può capitare anche senza passare dal mini-gioco esplicito. Non implementato in questa sessione (focus sui trofei di nazionale, vedi [[decisions]] "Mondiale e coppa continentale indipendenti").
+- **Criteri accettazione:** `rollClubTrophies` (o una funzione dedicata) può assegnare il trofeo continentale senza richiedere che sia scattato l'evento "finale continentale" nello stesso ciclo, con probabilità coerente col resto del sistema.
+- **Stima:** Piccola — riuso di `clubTrophyChance`-style formula, nessun nuovo modello dati.
+
 ## Priorità
 - **Alta:** —
 - **Media:** —
-- **Bassa:** —
+- **Bassa:** promozione/retrocessione estesa oltre i 4 paesi attuali; trofeo continentale di club assegnabile offscreen
 
 ## Archiviato
 - **Icone trofeo/premio inline sulla riga della tabella carriera** — già implementata (non un nuovo item): osservata nell'originale durante un playtest dal vivo il 2026-08-06 e inizialmente registrata per errore come backlog aperto, senza verificare lo stato attuale del codice. `CareerTable.tsx` (`TrophyChip`/`AwardChip`, righe 12-36) mostra già icone trofeo/premio per riga, aggregate per `stint.ageTo` — introdotto nel commit `28d5b6f` (2026-08-06) ma non documentato esplicitamente all'epoca (stesso pattern già visto con "Momenti di carriera celebrativi", vedi [[decisions]]). Corretto durante la verifica pre-implementazione di questo stesso item.

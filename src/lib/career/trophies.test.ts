@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import type { Club } from "@/types/career";
 import { getClub } from "@/data/clubs";
-import { awardChance, clubTrophyChance, nationalTournamentWinChance, rollAward, rollClubTrophies, rollNationalTrophy } from "./trophies";
+import { awardChance, clubTrophyChance, nationalTournamentWinChance, rollAward, rollClubTrophies, rollNationalTrophies } from "./trophies";
 
 const JUVENTUS = getClub("juventus")!; // prestige 3, competitions: Serie A / Coppa Italia / Champions League
 const LOW_PRESTIGE_CLUB = getClub("reggiana")!; // prestige 0, no continental
@@ -51,48 +51,57 @@ describe("nationalTournamentWinChance", () => {
   });
 });
 
-describe("rollNationalTrophy", () => {
+describe("rollNationalTrophies", () => {
   function seqRng(values: number[]) {
     let i = 0;
     return () => values[Math.min(i++, values.length - 1)];
   }
 
-  it("dovrebbe restituire null se il giocatore non è convocato", () => {
-    expect(rollNationalTrophy(false, 95, 28, "UEFA", () => 0)).toBeNull();
+  it("dovrebbe restituire un array vuoto se il giocatore non è convocato", () => {
+    expect(rollNationalTrophies(false, 95, 28, "UEFA", () => 0)).toEqual([]);
   });
 
-  it("dovrebbe restituire un trofeo senza club se il roll è favorevole (default UEFA)", () => {
-    const trophy = rollNationalTrophy(true, 95, 28, "UEFA", () => 0);
-    expect(trophy).not.toBeNull();
-    expect(trophy?.club).toBeUndefined();
-    expect(["Mondiale", "Europei"]).toContain(trophy?.competition);
+  it("dovrebbe restituire un array vuoto se entrambi i roll sono sfavorevoli", () => {
+    expect(rollNationalTrophies(true, 95, 28, "UEFA", () => 0.999)).toEqual([]);
   });
 
-  it("dovrebbe usare Mondiale/Europei per confederazione UEFA", () => {
-    expect(rollNationalTrophy(true, 95, 28, "UEFA", seqRng([0, 0.9]))?.competition).toBe("Europei");
-    expect(rollNationalTrophy(true, 95, 28, "UEFA", seqRng([0, 0.1]))?.competition).toBe("Mondiale");
+  it("dovrebbe poter vincere Mondiale e coppa di confederazione nello stesso ciclo (indipendenti)", () => {
+    const trophies = rollNationalTrophies(true, 95, 28, "UEFA", () => 0);
+    expect(trophies).toHaveLength(2);
+    expect(trophies[0]).toEqual({ competition: "Mondiale", club: undefined, age: 28 });
+    expect(trophies[1]).toEqual({ competition: "Europei", club: undefined, age: 28 });
+  });
+
+  it("dovrebbe vincere solo il Mondiale se il secondo roll è sfavorevole", () => {
+    const trophies = rollNationalTrophies(true, 95, 28, "UEFA", seqRng([0, 0.999]));
+    expect(trophies).toEqual([{ competition: "Mondiale", club: undefined, age: 28 }]);
+  });
+
+  it("dovrebbe vincere solo la coppa di confederazione se il primo roll è sfavorevole", () => {
+    const trophies = rollNationalTrophies(true, 95, 28, "UEFA", seqRng([0.999, 0]));
+    expect(trophies).toEqual([{ competition: "Europei", club: undefined, age: 28 }]);
   });
 
   it("dovrebbe usare Copa América per confederazione CONMEBOL", () => {
-    expect(rollNationalTrophy(true, 95, 28, "CONMEBOL", seqRng([0, 0.9]))?.competition).toBe(
+    expect(rollNationalTrophies(true, 95, 28, "CONMEBOL", seqRng([0.999, 0]))[0]?.competition).toBe(
       "Copa América",
     );
   });
 
   it("dovrebbe usare AFC Asian Cup per confederazione AFC", () => {
-    expect(rollNationalTrophy(true, 95, 28, "AFC", seqRng([0, 0.9]))?.competition).toBe(
+    expect(rollNationalTrophies(true, 95, 28, "AFC", seqRng([0.999, 0]))[0]?.competition).toBe(
       "AFC Asian Cup",
     );
   });
 
   it("dovrebbe usare Africa Cup of Nations per confederazione CAF", () => {
-    expect(rollNationalTrophy(true, 95, 28, "CAF", seqRng([0, 0.9]))?.competition).toBe(
+    expect(rollNationalTrophies(true, 95, 28, "CAF", seqRng([0.999, 0]))[0]?.competition).toBe(
       "Africa Cup of Nations",
     );
   });
 
   it("dovrebbe usare CONCACAF Gold Cup per confederazione CONCACAF", () => {
-    expect(rollNationalTrophy(true, 95, 28, "CONCACAF", seqRng([0, 0.9]))?.competition).toBe(
+    expect(rollNationalTrophies(true, 95, 28, "CONCACAF", seqRng([0.999, 0]))[0]?.competition).toBe(
       "CONCACAF Gold Cup",
     );
   });

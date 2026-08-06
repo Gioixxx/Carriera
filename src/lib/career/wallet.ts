@@ -1,10 +1,16 @@
 import type { Wallet } from "@/types/career";
 import { clamp } from "./progression";
 
+const SALARY_BASE_EUR = 30_000;
+const SALARY_OVR_BASELINE = 45;
+const SALARY_OVR_EXPONENT = 2.4;
+const SALARY_OVR_SCALAR = 40;
+const SALARY_PRESTIGE_MULTIPLIER = 0.6;
+
 /** Stipendio per ciclo in EUR, in base a OVR e prestigio del club — cresce super-lineare con l'OVR. */
 export function computeSalaryEur(ovr: number, prestige: number): number {
-  const base = 30_000 + Math.pow(Math.max(ovr - 45, 1), 2.4) * 40;
-  return Math.round((base * (1 + prestige * 0.6)) / 1000) * 1000;
+  const base = SALARY_BASE_EUR + Math.pow(Math.max(ovr - SALARY_OVR_BASELINE, 1), SALARY_OVR_EXPONENT) * SALARY_OVR_SCALAR;
+  return Math.round((base * (1 + prestige * SALARY_PRESTIGE_MULTIPLIER)) / 1000) * 1000;
 }
 
 /** Accumula lo stipendio maturato in N stagioni nei risparmi del portafoglio. */

@@ -91,20 +91,15 @@ export function useCareerGame(): UseCareerGame {
 
     const saved = loadGame();
     if (saved && !saved.player.retired) {
-      const { decision, category } = pickNextDecision(
-        saved.player,
-        saved.context,
-        saved.recentCategories,
-        Math.random,
-      );
+      const next = pickNextDecision(saved.player, saved.context, saved.recentCategories, Math.random);
       // eslint-disable-next-line react-hooks/set-state-in-effect -- vedi commento sopra l'effect
       setState({
         player: saved.player,
         speed: saved.speed,
-        context: saved.context,
+        context: next.context,
         recentCategories: saved.recentCategories,
-        currentDecision: decision,
-        currentCategory: category,
+        currentDecision: next.decision,
+        currentCategory: next.category,
         lastOutcome: null,
         retired: false,
       });
@@ -186,20 +181,15 @@ export function useCareerGame(): UseCareerGame {
       }
 
       const nextRecentCategories = pushRecentCategory(prev.recentCategories, prev.currentCategory);
-      const { decision, category } = pickNextDecision(
-        result.player,
-        result.context,
-        nextRecentCategories,
-        Math.random,
-      );
+      const next = pickNextDecision(result.player, result.context, nextRecentCategories, Math.random);
 
       return {
         ...prev,
         player: result.player,
-        context: result.context,
+        context: next.context,
         recentCategories: nextRecentCategories,
-        currentDecision: decision,
-        currentCategory: category,
+        currentDecision: next.decision,
+        currentCategory: next.category,
         lastOutcome: outcomeSummary,
         retired: false,
       };

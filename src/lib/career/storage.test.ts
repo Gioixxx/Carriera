@@ -69,7 +69,7 @@ describe("saveGame / loadGame", () => {
     );
 
     const loaded = loadGame();
-    expect(loaded?.version).toBe(3);
+    expect(loaded?.version).toBe(4);
     expect(loaded?.player.injury).toBeNull();
     expect(loaded?.player.wallet).toEqual({ salaryEurPerCycle: 0, savingsEur: 0 });
     expect(loaded?.player.popularity).toBe(15);
@@ -77,6 +77,7 @@ describe("saveGame / loadGame", () => {
     expect(loaded?.player.seasonTitles).toEqual([]);
     expect(loaded?.player.currentObjective).toBeNull();
     expect(loaded?.player.records.bestSeasonGoals).toBe(0);
+    expect(loaded?.player.hasSwitchedNationality).toBe(false);
   });
 
   it("dovrebbe migrare un save v2 privo dei campi soddisfazione aggiungendo i default", () => {
@@ -97,10 +98,30 @@ describe("saveGame / loadGame", () => {
     );
 
     const loaded = loadGame();
-    expect(loaded?.version).toBe(3);
+    expect(loaded?.version).toBe(4);
     expect(loaded?.player.milestonesReached).toEqual([]);
     expect(loaded?.player.currentObjective).toBeNull();
     expect(loaded?.player.records.peakMarketValueEur).toBe(samplePlayer().marketValueEur);
+    expect(loaded?.player.hasSwitchedNationality).toBe(false);
+  });
+
+  it("dovrebbe migrare un save v3 privo del flag hasSwitchedNationality aggiungendo il default", () => {
+    const legacyPlayer = samplePlayer() as unknown as Record<string, unknown>;
+    delete legacyPlayer.hasSwitchedNationality;
+    window.localStorage.setItem(
+      "carriera:save",
+      JSON.stringify({
+        version: 3,
+        player: legacyPlayer,
+        speed: "normal",
+        context: INITIAL_LOOP_CONTEXT,
+        recentCategories: [],
+      }),
+    );
+
+    const loaded = loadGame();
+    expect(loaded?.version).toBe(4);
+    expect(loaded?.player.hasSwitchedNationality).toBe(false);
   });
 });
 

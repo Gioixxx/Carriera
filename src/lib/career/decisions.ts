@@ -8,6 +8,7 @@ import type {
   Player,
 } from "@/types/career";
 import { clubs, clubsByCountry } from "@/data/clubs";
+import { countries } from "@/data/countries";
 import { clamp, type Rng } from "./progression";
 
 // ---------- Helper di selezione club ----------
@@ -678,6 +679,49 @@ export function generateTriumphantReturn(player: Player): Decision {
   };
 }
 
+// ---------- Cambio nazionalità ("nonno di un altro paese") ----------
+
+const NATIONALITY_SWITCH_MIN_AGE = 18;
+const NATIONALITY_SWITCH_MAX_AGE = 26;
+
+/**
+ * Eleggibile solo prima della prima convocazione: una volta rappresentata una nazionale
+ * maggiore, le regole FIFA reali non permettono più di cambiare — evita così di dover decidere
+ * cosa fare di trofei/statistiche di nazionale già accumulati, perché a quel punto non esistono.
+ */
+export function isNationalitySwitchEligible(player: Player): boolean {
+  return (
+    !player.nationalTeam.called &&
+    !player.hasSwitchedNationality &&
+    player.age >= NATIONALITY_SWITCH_MIN_AGE &&
+    player.age <= NATIONALITY_SWITCH_MAX_AGE
+  );
+}
+
+export function generateNationalitySwitch(player: Player, rng: Rng = Math.random): Decision {
+  const alternatives = countries.filter((c) => c.name !== player.nationality);
+  const newCountryName = shuffle(alternatives, rng)[0]?.name ?? player.nationality;
+  return {
+    id: `nationality-switch-${player.age}`,
+    category: "narrative",
+    title: "Un nonno di un altro paese",
+    description: `Scopri di avere un nonno ${newCountryName}: potresti essere eleggibile per giocare con quella nazionale invece che con la tua.`,
+    options: [
+      {
+        id: "stay",
+        label: "Resta fedele alla tua nazionalità",
+        outcomes: [outcome(100, "Decidi di restare fedele alla nazionalità di sempre.")],
+      },
+      {
+        id: "switch",
+        label: `Scegli la nazionalità ${newCountryName}`,
+        newNationality: newCountryName,
+        outcomes: [outcome(100, `Cambi nazionalità sportiva: da oggi rappresenti ${newCountryName}.`)],
+      },
+    ],
+  };
+}
+
 // ---------- Convocazione in nazionale ----------
 
 /** Probabilità di convocazione per ciclo — soglia più generosa dell'originale (vedi piano). */
@@ -697,23 +741,72 @@ export function penaltyScoreChance(ovr: number): number {
   return clamp(0.55 + (ovr - 70) / 200, 0.4, 0.85);
 }
 
+interface ContinentalFinalTemplate {
+  id: string;
+  title: string;
+  description: (competition: string) => string;
+  winText: (competition: string) => string;
+  loseText: (competition: string) => string;
+  labelA: string;
+  labelB: string;
+}
+
+/**
+ * Varianti narrative dello stesso momento (finale decisa da un'unica azione, esito binario) —
+ * gli `id` delle opzioni restano sempre "left"/"right": PenaltyShootout.tsx li usa per
+ * l'animazione, quindi nessuna modifica UI è necessaria cambiando solo testo/label qui.
+ */
+const CONTINENTAL_FINAL_TEMPLATES: ContinentalFinalTemplate[] = [
+  {
+    id: "penalty",
+    title: "Rigore decisivo",
+    description: (c) => `Devi decidere la finale di ${c} dal dischetto.`,
+    winText: (c) => `Gol! Vinci la finale di ${c}.`,
+    loseText: (c) => `Il portiere para il rigore. Perdi la finale di ${c}.`,
+    labelA: "Sinistra",
+    labelB: "Destra",
+  },
+  {
+    id: "header-90",
+    title: "Colpo di testa al 90'",
+    description: (c) => `Un cross arriva in area nell'ultimo minuto della finale di ${c}: hai una sola occasione.`,
+    winText: (c) => `Stacchi più in alto di tutti: gol! Vinci la finale di ${c}.`,
+    loseText: (c) => `Il pallone esce di un soffio. Perdi la finale di ${c}.`,
+    labelA: "Anticipa in tuffo",
+    labelB: "Stacca di forza",
+  },
+  {
+    id: "shootout-last-kick",
+    title: "Ultimo rigore della serie",
+    description: (c) => `Serie di rigori sul 5-5: dal tuo tiro dipende la finale di ${c}.`,
+    winText: (c) => `Angolo perfetto, portiere spiazzato: vinci la finale di ${c}!`,
+    loseText: (c) => `Il portiere intuisce l'angolo. Perdi la finale di ${c}.`,
+    labelA: "Angolo basso",
+    labelB: "Angolo alto",
+  },
+];
+
 export function generateContinentalFinalDecision(
   player: Player,
   competition: string,
+  rng: Rng = Math.random,
 ): Decision {
+  const template =
+    CONTINENTAL_FINAL_TEMPLATES[Math.floor(rng() * CONTINENTAL_FINAL_TEMPLATES.length)] ??
+    CONTINENTAL_FINAL_TEMPLATES[0];
   const scoreChance = Math.round(penaltyScoreChance(player.ovr) * 100);
   const outcomes = (): DecisionOutcome[] => [
-    { ...outcome(scoreChance, `Gol! Vinci la finale di ${competition}.`), continentalWin: true },
-    outcome(100 - scoreChance, `Il portiere para il rigore. Perdi la finale di ${competition}.`, -1),
+    { ...outcome(scoreChance, template.winText(competition)), continentalWin: true },
+    outcome(100 - scoreChance, template.loseText(competition), -1),
   ];
   return {
-    id: `continental-final-${player.age}`,
+    id: `continental-final-${template.id}-${player.age}`,
     category: "continental-final",
-    title: "Rigore decisivo",
-    description: `Devi decidere la finale di ${competition}.`,
+    title: template.title,
+    description: template.description(competition),
     options: [
-      { id: "left", label: "Sinistra", hint: "Vittoria continentale · rischio delusione", outcomes: outcomes() },
-      { id: "right", label: "Destra", hint: "Vittoria continentale · rischio delusione", outcomes: outcomes() },
+      { id: "left", label: template.labelA, hint: "Vittoria continentale · rischio delusione", outcomes: outcomes() },
+      { id: "right", label: template.labelB, hint: "Vittoria continentale · rischio delusione", outcomes: outcomes() },
     ],
   };
 }
@@ -759,6 +852,18 @@ const SPONSOR_DEAL_TEMPLATES: SponsorDealTemplate[] = [
     title: "Ambasciatore di un marchio di orologi",
     description: "Un marchio di orologi di lusso ti propone di diventarne ambasciatore.",
     savingsGain: 220_000,
+  },
+  {
+    id: "streaming-platform",
+    title: "Serie documentario su una piattaforma streaming",
+    description: "Una piattaforma di streaming vuole produrre un documentario sulla tua carriera.",
+    savingsGain: 180_000,
+  },
+  {
+    id: "video-game-cover",
+    title: "Copertina di un videogioco di calcio",
+    description: "Un editore di videogiochi ti propone la copertina del prossimo capitolo della serie.",
+    savingsGain: 130_000,
   },
 ];
 
@@ -806,8 +911,12 @@ const BASE_CATEGORY_WEIGHTS: Partial<Record<DecisionCategory, number>> = {
   "position-change": 8,
   "club-crisis": 12,
   "end-of-cycle": 10,
-  lifestyle: 20,
-  narrative: 5,
+  lifestyle: 18,
+  // Nonostante 5 generatori (4 + cambio nazionalità), ognuno resta filtrato individualmente per
+  // eleggibilità: un peso più alto qui non li fa scattare troppo spesso, solo li rende visibili
+  // quando sono davvero disponibili — valore provvisorio, da confermare con l'harness (npm run
+  // simulate) osservando la frequenza per categoria.
+  narrative: 12,
   sponsor: 10,
 };
 

@@ -37,15 +37,17 @@ Registro debito tecnico con priorità. Aggiornato da /session-end. Origine spess
 - **Impatto:** rischio diretto sull'obiettivo esplicito dato dall'utente ("dobbiamo prevedere tutte queste situazioni raggiungibili") — se le soglie risultassero comunque troppo rare in pratica, il clone erediterebbe lo stesso difetto osservato nell'originale che si voleva evitare.
 - **Risoluzione suggerita:** dopo la fase 7 (CareerSummary), giocare/simulare un numero significativo di carriere complete nel nostro clone (anche via test statistici su `resolveCycle` con RNG reale) per verificare empiricamente le frequenze osservate di trofei/award/nazionale.
 - **Aggiornamento 2026-08-06:** playtest dal vivo dell'utente sull'originale (carriera Rossi, Brasile, ST, fino a 38 anni/OVR 90) ha mostrato per la prima volta un award individuale **effettivamente vinto** (icona premio non vuota nel riepilogo finale) — diverso dalle 14+ carriere di ricerca precedenti documentate nel piano esterno, dove restavano sempre vuoti anche a OVR 90. Non risolve il dubbio sul bilanciamento, ma indebolisce l'assunzione che siano sistematicamente irraggiungibili nell'originale — un data point in più da tenere presente quando si affronterà la risoluzione suggerita sopra.
+- **Aggiornamento 2026-08-06 (2):** costruito l'harness richiesto dalla risoluzione suggerita — `lib/career/simulation.ts` + `scripts/simulate-careers.ts` (`npm run simulate`), gira 2000 carriere con RNG reale e stampa le frequenze osservate. Baseline catturato: trofeo di club ~78-80%, trofeo nazionale ~0.1%, convocazione ~1.5%, infortunio ~84%, award 0% (mai osservato). **Limite noto dell'harness**: il giocatore simulato sceglie le opzioni uniformemente a caso (`pickUniformOption`), non ottimizza le decisioni come farebbe un giocatore reale — di conseguenza l'OVR medio resta basso e le frequenze di award/convocazione (che richiedono OVR 75-85+) sono probabilmente **sottostimate** rispetto a una carriera giocata con intento. L'harness resta quindi utile per intercettare regressioni a zero (il suo scopo primario, vedi [[decisions]]) ma non sostituisce un playtest umano reale per validare il bilanciamento fine — la risoluzione originale resta aperta.
 
-### Generatori club-crisis scelti con probabilità uniforme, non pesata
+### Generatori club-crisis scelti con probabilità uniforme tra loro, non pesata
 - **Priorità:** Bassa
-- **Area:** `lib/career/loop.ts` (`pickClubCrisisDecision`, `CLUB_CRISIS_GENERATORS`)
+- **Area:** `lib/career/loop.ts` (`pickClubCrisisDecision`)
 - **Data:** 2026-08-04
-- **Descrizione:** i tre generatori della categoria `club-crisis` (`generateClubCrisis`, `generateCompetitionForSpot`, `generateControversialStatement`) sono scelti con probabilità uniforme (1/3 ciascuno) in `pickClubCrisisDecision`. La ricerca sul gioco originale non ha misurato se questi tre eventi abbiano frequenza relativa uguale o diversa tra loro.
-- **Perché rimandato:** informazione non disponibile dalla ricerca; una scelta uniforme è un default ragionevole in assenza di dati.
+- **Descrizione:** i generatori della categoria `club-crisis` sono scelti con probabilità uniforme tra loro (a parità di "recenza") in `pickClubCrisisDecision`. La ricerca sul gioco originale non ha misurato se questi eventi abbiano frequenza relativa uguale o diversa tra loro.
+- **Perché rimandato:** informazione non disponibile dalla ricerca; una scelta uniforme resta un default ragionevole in assenza di dati.
 - **Impatto:** minimo — al più una leggera differenza di "sapore" nella varietà degli eventi rispetto all'originale, nessun impatto funzionale.
 - **Risoluzione suggerita:** nessuna azione necessaria a meno che una ricerca futura non fornisca dati sulla frequenza relativa osservata nell'originale.
+- **Aggiornamento 2026-08-06:** aggiunta anti-ripetizione **a livello di singolo evento** (non solo di categoria) in `loop.ts`/`decisions.ts` — vedi [[decisions]] e l'item "Possibile assenza di finestra anti-ripetizione" ora archiviato. Risolve un problema adiacente (evitare ripetizioni ravvicinate dello stesso evento) ma **non** questo item: i pesi di base tra i diversi generatori `club-crisis` restano uguali tra loro in assenza di dati sulla frequenza relativa reale.
 
 ### Momenti celebrativi/timeline/animazioni non verificati end-to-end nel browser
 - **Priorità:** Media
@@ -65,30 +67,14 @@ Registro debito tecnico con priorità. Aggiornato da /session-end. Origine spess
 - **Impatto:** rischio medio — logica di selezione (rank titoli, Hall of Fame su 4 categorie, cap 12 titoli) non banale, un bug qui sarebbe visibile solo dopo diverse carriere giocate/archiviate, quindi difficile da notare per caso.
 - **Risoluzione suggerita:** giocare/archiviare almeno 2-3 carriere con profili diversi (una con OVR alto, una con tanti trofei, una con alta popolarità) per vedere la Hall of Fame popolarsi correttamente in `CareerArchive`; forzare un ciclo con più record infranti insieme per verificare la lista nel banner.
 
-### Evento "Grandfather from another country" (switch nazionalità) mai implementato
-- **Priorità:** Bassa
-- **Area:** `lib/career/decisions.ts`, `types/career.ts` (`Player.nationality`)
-- **Data:** 2026-08-05
-- **Descrizione:** durante il confronto è emerso per la prima volta (mai osservato nelle 14 carriere di ricerca precedenti) un evento sull'originale in cui si scopre un nonno di un altro paese, con scelta esplicita tra due nazionali per cui si diventa eleggibili. Il nostro dominio ha `Player.nationality` come campo immutabile per tutta la carriera — implementarlo richiede rendere la nazionalità mutabile e propagare l'effetto su nazionale/convocazioni/trofei nazionali già maturati.
-- **Perché rimandato:** singola osservazione (1 carriera), impatto sul modello di dominio non banale (nazionalità oggi assunta fissa in più punti: `trophies.ts`, futuro `rollNationalTrophy` per confederazione — vedi [[backlog]]); da valutare a parte prima di decidere se vale la complessità.
-- **Impatto:** basso nel breve termine (evento raro anche nell'originale, 1/15 carriere osservate finora) ma alto se implementato male, dato che tocca l'identità del giocatore in un punto usato in più moduli.
-- **Risoluzione suggerita:** raccogliere altre osservazioni prima di procedere (frequenza reale, se l'effetto è retroattivo su trofei/convocazioni nazionali già ottenuti); solo dopo valutare se rendere `Player.nationality` mutabile.
-
-### Possibile assenza di finestra anti-ripetizione per eventi lifestyle/club-crisis
-- **Priorità:** Bassa
-- **Area:** `lib/career/loop.ts` (`pickClubCrisisDecision` e pool lifestyle)
-- **Data:** 2026-08-05
-- **Descrizione:** in una carriera di confronto, "Dichiarazione controversa" è comparsa due volte in 3 cicli consecutivi (età 18 e 22) sul clone — singolo data point, non ancora confermato come pattern sistematico né confrontato con la frequenza di ripetizione osservata sull'originale.
-- **Perché rimandato:** un solo campione non giustifica un intervento; serve più playtest prima di trattarlo come bug.
-- **Impatto:** se confermato sistematico, minore varietà percepita — lo stesso evento che ricompare troppo presto rompe l'illusione di eventi diversi ad ogni ciclo.
-- **Risoluzione suggerita:** in una sessione futura, loggare la sequenza di categorie/generatori scelti su più carriere simulate (RNG reale) e verificare se esiste già una finestra anti-ripetizione in `pickClubCrisisDecision`; se assente, valutare di aggiungerne una semplice (es. non ripetere lo stesso generatore per N cicli).
-
 ## Priorità
 - **Alta:** —
-- **Media:** probabilità trofei/award/nazionale non validate con playtest; momenti celebrativi/timeline non verificati end-to-end; sistema "satisfaction" (Hall of Fame/record/milestone/titoli) non verificato end-to-end (vedi sopra)
-- **Bassa:** soglia di ritiro automatico; generatori club-crisis con probabilità uniforme; evento cambio-nazionalità mai implementato; possibile assenza di finestra anti-ripetizione eventi lifestyle (vedi sopra)
+- **Media:** probabilità trofei/award/nazionale non validate con playtest umano reale (harness statistico costruito, vedi sopra); momenti celebrativi/timeline non verificati end-to-end; sistema "satisfaction" (Hall of Fame/record/milestone/titoli) non verificato end-to-end (vedi sopra)
+- **Bassa:** soglia di ritiro automatico; generatori club-crisis con pesi di base uniformi tra loro (vedi sopra)
 
 ## Archiviato
+- **Evento "Grandfather from another country" (switch nazionalità) mai implementato** — risolto 2026-08-06: `isNationalitySwitchEligible`/`generateNationalitySwitch` in `decisions.ts`, `switchNationality` in `engine.ts`, eleggibile solo prima della prima convocazione (`!player.nationalTeam.called`, età 18-26) — scelta esplicita dell'utente che evita del tutto la domanda sulla retroattività di trofei/statistiche nazionali già accumulati, perché a quel punto non ce n'è ancora nessuno. `STORAGE_VERSION` 3→4 con migrazione. Vedi [[decisions]] per il ragionamento completo.
+- **Possibile assenza di finestra anti-ripetizione per eventi lifestyle/club-crisis** — risolto 2026-08-06: nuova anti-ripetizione a livello di singolo evento (`LoopContext.recentDecisionIds?`, penalità di peso invece di esclusione, stesso principio di `recentCategories`/`REPEAT_PENALTY` già esistente a livello di categoria) in `loop.ts`, wired in `pickClubCrisisDecision`/`pickStaticDecision`/`pickNarrativeDecision`. Test statistico dedicato in `loop.test.ts` con PRNG seedato. Vedi [[decisions]].
 - **Champions League ed Europa League non distinte** — risolto 2026-08-05: i club UEFA di tier 1 assegnano "Champions League" se prestige ≥2, "Europa League" altrimenti (`continentalCompetition` in `data/clubs.ts`), badge Europa League aggiunto in `data/competition-badges.ts`. Test dedicato in `clubs.test.ts`.
 - **Copertura club/campionati limitata a 4 paesi** — risolto 2026-08-05: estesi `data/clubs.ts`/`leagues` con Portogallo (Primeira Liga), Francia (Ligue 1), Germania (Bundesliga), Paesi Bassi (Eredivisie), Argentina (Liga Profesional) — 40 nuovi club reali con crest TheSportsDB verificati, 84→124 totali. Badge campionato/coppa nazionale aggiunti in `competition-badges.ts`. Verificato con test dedicato che `generateAcademyOffer`/`isReturnHomeEligible` funzionino per un giocatore portoghese (prima ripiegavano su club italiani/spagnoli per mancanza di dati).
 - **Statistiche portiere non differenziate** — risolto 2026-08-06: estensione additiva di `StatLine` (`goalsAgainst?`/`cleanSheets?`, valorizzati solo per `Position === "GK"`), formule dedicate in `progression.ts` (`projectGoalkeeperExtras`), propagate in `engine.ts`/`summary.ts` (`sumStats`), `wallet.ts` (`popularityDeltaForCycle` conta i clean sheet come prestazione), `satisfaction.ts` (nuovo titolo di stagione "Muro invalicabile"/`ironWall`, record `bestSeasonCleanSheets`), UI in `PlayerCard`/`CareerTable`/`CareerSummary` (branch su `player.position === "GK"`). Vedi [[decisions]] per il ragionamento sull'approccio additivo invece di un discriminated union.

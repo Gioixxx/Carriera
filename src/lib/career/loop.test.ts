@@ -23,6 +23,7 @@ const IDENTITY: PlayerIdentity = {
 
 const JUVENTUS = getClub("juventus")!;
 const SEVILLA = getClub("sevilla")!;
+const SAMPDORIA = getClub("sampdoria")!; // Serie B, prestige 1
 const FIXED_RNG = () => 0.5;
 
 function playerAt(club = JUVENTUS): Player {
@@ -117,6 +118,46 @@ describe("pickNextDecision", () => {
     const player = playerAt();
     expect(() => pickNextDecision(player, INITIAL_LOOP_CONTEXT, [], () => 0.999)).not.toThrow();
   });
+
+  it("aggiorna context.recentDecisionIds con il kind dell'evento scelto (club-crisis)", () => {
+    const player = playerAt();
+    const next = pickNextDecision(player, INITIAL_LOOP_CONTEXT, [], () => 0.5);
+    if (next.category === "club-crisis" || next.category === "lifestyle" || next.category === "narrative") {
+      expect(next.context.recentDecisionIds?.length).toBeGreaterThan(0);
+    }
+  });
+
+  it("penalizza un generatore club-crisis scelto di recente rispetto a uno non scelto di recente", () => {
+    // PRNG deterministico (mulberry32): stessa sequenza ad ogni run, statistico su molte prove.
+    function mulberry32(seed: number) {
+      let a = seed;
+      return () => {
+        a |= 0;
+        a = (a + 0x6d2b79f5) | 0;
+        let t = Math.imul(a ^ (a >>> 15), 1 | a);
+        t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+        return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+      };
+    }
+
+    const rng = mulberry32(123);
+    const player = playerAt();
+    // "club-crisis" (il kind, non la categoria) è penalizzato; "controversial-post" è un altro
+    // generatore sempre disponibile della stessa categoria, mai penalizzato in questo scenario.
+    const biasedContext: LoopContext = { loanParentClub: null, recentDecisionIds: ["club-crisis"] };
+
+    let biasedKindCount = 0;
+    let freshKindCount = 0;
+    for (let i = 0; i < 4000; i++) {
+      const next = pickNextDecision(player, biasedContext, [], rng);
+      if (next.category !== "club-crisis") continue;
+      if (next.decision.id === `club-crisis-${player.age}`) biasedKindCount += 1;
+      if (next.decision.id === `controversial-post-${player.age}`) freshKindCount += 1;
+    }
+
+    expect(biasedKindCount).toBeGreaterThan(0);
+    expect(freshKindCount).toBeGreaterThan(biasedKindCount * 2);
+  });
 });
 
 describe("nextLoopContext", () => {
@@ -206,6 +247,43 @@ describe("resolveCycle", () => {
     const result = resolveCycle(player, INITIAL_LOOP_CONTEXT, "continental-final", option, "normal", () => 0);
 
     expect(result.newTrophies.some((t) => t.competition === JUVENTUS.competitions.continental)).toBe(false);
+  });
+
+  it("dovrebbe promuovere il club se il campionato del tier corrente è vinto", () => {
+    const player = playerAt(SAMPDORIA);
+    const option = { id: "stay", label: "Resta", outcomes: [{ weight: 100, effect: {}, resultText: "Resti." }] };
+    const result = resolveCycle(player, INITIAL_LOOP_CONTEXT, "lifestyle", option, "normal", () => 0);
+
+    expect(result.clubTierChange).toBe("promoted");
+    expect(result.player.club?.tier).toBe(1);
+    expect(result.player.club?.competitions.league).toBe("Serie A");
+  });
+
+  it("dovrebbe retrocedere il club se il campionato non è vinto e il roll è sfavorevole", () => {
+    // Prestige 0 mantiene la probabilità di vincere il campionato esattamente a 0 (chance di
+    // trofeo di club = prestige*0.08 + bonus OVR, che resta 0 finché l'OVR non supera 60),
+    // isolando così il roll di retrocessione dal roll di trofeo pur usando lo stesso rng.
+    const player = playerAt({ ...JUVENTUS, prestige: 0 });
+    const option = { id: "stay", label: "Resta", outcomes: [{ weight: 100, effect: {}, resultText: "Resti." }] };
+    const result = resolveCycle(player, INITIAL_LOOP_CONTEXT, "lifestyle", option, "normal", () => 0);
+
+    expect(result.clubTierChange).toBe("relegated");
+    expect(result.player.club?.tier).toBe(2);
+    expect(result.player.club?.competitions.league).toBe("Serie B");
+  });
+
+  it("dovrebbe cambiare la nazionalità del giocatore se l'opzione ha newNationality", () => {
+    const player = playerAt();
+    const option = {
+      id: "switch",
+      label: "Scegli la nazionalità Brazil",
+      newNationality: "Brazil",
+      outcomes: [{ weight: 100, effect: {}, resultText: "Cambi nazionalità sportiva." }],
+    };
+    const result = resolveCycle(player, INITIAL_LOOP_CONTEXT, "narrative", option, "normal", () => 0.5);
+
+    expect(result.player.nationality).toBe("Brazil");
+    expect(result.player.hasSwitchedNationality).toBe(true);
   });
 });
 

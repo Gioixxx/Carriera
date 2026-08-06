@@ -1,13 +1,12 @@
 ---
 type: sprint
 tags: [memory, sprint]
-updated: [2026-08-05]
+updated: [2026-08-06]
 ---
-> Aggiornato da /sprint — sessione 2026-08-05 (post-build iniziale): 4 nuove feature di gameplay
-> (infortuni, economia/popolarità/sponsor, hardening trofeo continentale, archivio carriere) +
-> branding del launcher desktop (icona/sfondo/finestra massimizzata) + prima release versionata
-> pubblicata su GitHub (v0.2.0). Dettaglio nelle ultime voci di "Ricerca completata (agenti
-> background)" più sotto.
+> Aggiornato da /sprint — sessione 2026-08-06: miglioria del motore di gioco su 4 assi (harness
+> di simulazione statistica, meccaniche mancanti fedeli all'originale — trofei nazionali
+> indipendenti/promozione-retrocessione/cambio nazionalità —, varietà e ritmo degli eventi,
+> pulizia tecnica). Vedi voce dedicata più sotto e [[decisions]] per il dettaglio completo.
 
 # Sprint Corrente
 Stato lavoro in corso. Aggiornato con /sprint. Backlog in [[backlog]], debito in [[tech-debt]].
@@ -134,6 +133,29 @@ Stato lavoro in corso. Aggiornato con /sprint. Backlog in [[backlog]], debito in
   **Non verificato manualmente nel browser** (fuori scope per scelta esplicita dell'utente,
   limitato al codice) — verificato invece via test dedicati in `decisions.test.ts`/
   `loop.test.ts`/`progression.test.ts`/`wallet.test.ts`/`satisfaction.test.ts`/`countries.test.ts`.
+
+- [x] **Miglioria del motore di gioco su 4 assi** (2026-08-06): su richiesta esplicita dell'utente
+  ("rendere il motore di gioco migliore sotto ogni aspetto possibile"), 4 aree scelte via
+  `AskUserQuestion` tra quelle proposte dopo un'analisi con agenti di ricerca in background.
+  **Harness di simulazione** (`lib/career/simulation.ts`, `scripts/simulate-careers.ts` →
+  `npm run simulate`, `simulation.test.ts`): gira migliaia di carriere con RNG reale/seedato e
+  misura le frequenze empiriche di trofei/award/callup/infortuni/ritiro — baseline catturato
+  prima e dopo le modifiche (trofeo di club ~78→80%, convocazione ~1.8→1.5%, `narrative` come
+  frequenza di categoria raddoppiata da ~4.3% a ~8.7% dopo il ribilanciamento pesi, nessuna
+  frequenza crollata a zero). **Meccaniche mancanti**: Mondiale e coppa continentale ora trofei
+  indipendenti (`rollNationalTrophies`, non più coin-flip alternativo); nuova promozione/
+  retrocessione di campionato (`lib/career/club-progression.ts`, costruita da zero — verificato
+  che non esisteva già nonostante un commento la desse per scontata); nuovo evento cambio
+  nazionalità ("nonno di un altro paese"), eleggibile solo prima della prima convocazione
+  (`STORAGE_VERSION` 3→4). **Varietà eventi**: 3 template per la finale continentale (prima solo
+  il rigore), 2 nuovi contratti sponsor, anti-ripetizione anche a livello di singolo evento (non
+  solo di categoria) dentro club-crisis/lifestyle/narrative. **Pulizia tecnica**: magic number
+  centralizzati in costanti nominate, JSDoc duplicato e riferimenti a un `decisions.md` mai
+  esistito sistemati, copertura test rinforzata su `market.ts`/`wallet.ts`/`injuries.ts`. Vedi
+  [[decisions]] per il ragionamento completo. 269 test (era 250), `tsc`/eslint puliti sui file
+  toccati. **Non verificato manualmente nel browser** (sessione focalizzata sul motore, coerente
+  con le sessioni "codice puro" precedenti) — verificato invece via test dedicati e via
+  `npm run simulate` prima/dopo per confermare che nessuna frequenza sia collassata a zero.
 
 ## Note tecniche emerse in fase 6
 - jsdom 30 + Node 22+ non espone `window.localStorage` di default (ExperimentalWarning nativa) — polyfill minimale in `vitest.setup.ts`, non è un problema di codice applicativo

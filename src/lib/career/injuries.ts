@@ -10,13 +10,33 @@ const INJURY_LABELS = [
   "Affaticamento fisico",
 ];
 
+const INJURY_AGE_RISK_START = 30;
+const INJURY_AGE_DIVISOR = 25;
+const INJURY_AGE_FACTOR_CAP = 0.22;
+const INJURY_AGE_FACTOR_BASELINE = 0.03;
+const INJURY_HIGH_RISK_ROLE_FACTOR = 0.05;
+const INJURY_LOW_RISK_ROLE_FACTOR = 0.02;
+const INJURY_LOAD_FACTOR_PER_SEASON = 0.03;
+const INJURY_LOAD_FACTOR_CAP = 0.09;
+const INJURY_CHANCE_CAP = 0.35;
+
 /** Probabilità di infortunio in un ciclo, in base a età, ruolo e carico (stagioni del ciclo). */
 export function injuryChance(age: number, position: Position, seasons: number): number {
-  const ageFactor = age >= 30 ? clamp((age - 30) / 25, 0, 0.22) : 0.03;
-  const roleFactor = HIGH_RISK_POSITIONS.has(position) ? 0.05 : 0.02;
-  const loadFactor = clamp((seasons - 1) * 0.03, 0, 0.09);
-  return clamp(ageFactor + roleFactor + loadFactor, 0, 0.35);
+  const ageFactor =
+    age >= INJURY_AGE_RISK_START
+      ? clamp((age - INJURY_AGE_RISK_START) / INJURY_AGE_DIVISOR, 0, INJURY_AGE_FACTOR_CAP)
+      : INJURY_AGE_FACTOR_BASELINE;
+  const roleFactor = HIGH_RISK_POSITIONS.has(position)
+    ? INJURY_HIGH_RISK_ROLE_FACTOR
+    : INJURY_LOW_RISK_ROLE_FACTOR;
+  const loadFactor = clamp((seasons - 1) * INJURY_LOAD_FACTOR_PER_SEASON, 0, INJURY_LOAD_FACTOR_CAP);
+  return clamp(ageFactor + roleFactor + loadFactor, 0, INJURY_CHANCE_CAP);
 }
+
+const INJURY_SEVERITY_SHORT_THRESHOLD = 0.6;
+const INJURY_SEVERITY_MEDIUM_THRESHOLD = 0.9;
+const INJURY_OVR_PENALTY_BASE = 2;
+const INJURY_OVR_PENALTY_SCALAR = 6;
 
 /** Estrae un infortunio per il ciclo, o null se il giocatore resta integro. */
 export function rollInjury(
@@ -28,8 +48,9 @@ export function rollInjury(
   if (rng() >= injuryChance(age, position, seasons)) return null;
 
   const severity = rng();
-  const turnsRemaining = severity < 0.6 ? 1 : severity < 0.9 ? 2 : 3;
-  const ovrPenalty = Math.round(2 + severity * 6);
+  const turnsRemaining =
+    severity < INJURY_SEVERITY_SHORT_THRESHOLD ? 1 : severity < INJURY_SEVERITY_MEDIUM_THRESHOLD ? 2 : 3;
+  const ovrPenalty = Math.round(INJURY_OVR_PENALTY_BASE + severity * INJURY_OVR_PENALTY_SCALAR);
   const label = INJURY_LABELS[Math.floor(rng() * INJURY_LABELS.length)];
   return { label, turnsRemaining, ovrPenalty };
 }

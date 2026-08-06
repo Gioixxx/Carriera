@@ -4,7 +4,7 @@ import { emptyPersonalRecords, pickBestCareerTitle } from "./satisfaction";
 import { peakOvr } from "./summary";
 
 const STORAGE_KEY = "carriera:save";
-const STORAGE_VERSION = 3;
+const STORAGE_VERSION = 4;
 
 export interface SavedGame {
   version: number;
@@ -26,12 +26,20 @@ function migratePlayerV1(raw: Player): Player {
 
 /** Arricchisce un save v2 (privo dei campi soddisfazione) con i default. */
 function migratePlayerV2(raw: Player): Player {
-  return {
+  return migratePlayerV3({
     ...raw,
     milestonesReached: raw.milestonesReached ?? [],
     records: raw.records ?? emptyPersonalRecords(raw.marketValueEur ?? 0),
     seasonTitles: raw.seasonTitles ?? [],
     currentObjective: raw.currentObjective ?? null,
+  });
+}
+
+/** Arricchisce un save v3 (privo del flag di cambio nazionalità) con il default. */
+function migratePlayerV3(raw: Player): Player {
+  return {
+    ...raw,
+    hasSwitchedNationality: raw.hasSwitchedNationality ?? false,
   };
 }
 
@@ -53,6 +61,9 @@ export function loadGame(): SavedGame | null {
     }
     if (parsed.version === 2) {
       return { ...parsed, version: STORAGE_VERSION, player: migratePlayerV2(parsed.player) };
+    }
+    if (parsed.version === 3) {
+      return { ...parsed, version: STORAGE_VERSION, player: migratePlayerV3(parsed.player) };
     }
     if (parsed.version !== STORAGE_VERSION) return null;
     return parsed;

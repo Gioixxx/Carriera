@@ -23,7 +23,7 @@ const UEFA_EUROPA_LEAGUE = "Europa League";
 const UEFA_CHAMPIONS_LEAGUE_PRESTIGE_THRESHOLD = 2;
 
 /** Coppa continentale per un club di tier 1: UEFA distingue Champions/Europa League in base al prestige. */
-function continentalCompetition(league: League, prestige: Club["prestige"]): string | undefined {
+export function continentalCompetition(league: League, prestige: Club["prestige"]): string | undefined {
   if (league.tier !== 1) return undefined;
   if (league.confederation === "UEFA") {
     return prestige >= UEFA_CHAMPIONS_LEAGUE_PRESTIGE_THRESHOLD
@@ -248,4 +248,9 @@ export function clubsByCountry(country: string): Club[] {
 
 export function clubsByTier(country: string, tier: number): Club[] {
   return clubs.filter((c) => c.country === country && c.tier === tier);
+}
+
+/** La lega di un dato paese/tier, se esiste — usato per promozione/retrocessione. */
+export function leagueForTier(country: string, tier: number): League | undefined {
+  return leagues.find((l) => l.country === country && l.tier === tier);
 }

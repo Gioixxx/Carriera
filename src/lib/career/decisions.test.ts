@@ -14,6 +14,7 @@ import {
   generateEndOfCycle,
   generateLoanOffer,
   generateLoanReturn,
+  generateNationalitySwitch,
   generateReturnHome,
   generateSponsorDeal,
   generateTaxTrouble,
@@ -21,6 +22,7 @@ import {
   generateTriumphantReturn,
   generateUnexpectedProspect,
   isClubPriorityEligible,
+  isNationalitySwitchEligible,
   isReturnHomeEligible,
   isSponsorEligible,
   isTaxTroubleEligible,
@@ -266,6 +268,43 @@ describe("isTriumphantReturnEligible e generateTriumphantReturn", () => {
   });
 });
 
+describe("isNationalitySwitchEligible e generateNationalitySwitch", () => {
+  function eligiblePlayer(): Player {
+    return { ...playerAt(), age: 20 };
+  }
+
+  it("dovrebbe essere vero per un giocatore 18-26 mai convocato e mai switchato", () => {
+    expect(isNationalitySwitchEligible(eligiblePlayer())).toBe(true);
+  });
+
+  it("dovrebbe essere falso se il giocatore è già stato convocato", () => {
+    const player = { ...eligiblePlayer(), nationalTeam: { ...eligiblePlayer().nationalTeam, called: true } };
+    expect(isNationalitySwitchEligible(player)).toBe(false);
+  });
+
+  it("dovrebbe essere falso se il giocatore ha già cambiato nazionalità", () => {
+    expect(isNationalitySwitchEligible({ ...eligiblePlayer(), hasSwitchedNationality: true })).toBe(false);
+  });
+
+  it("dovrebbe essere falso fuori dalla finestra 18-26", () => {
+    expect(isNationalitySwitchEligible({ ...eligiblePlayer(), age: 17 })).toBe(false);
+    expect(isNationalitySwitchEligible({ ...eligiblePlayer(), age: 27 })).toBe(false);
+  });
+
+  it("dovrebbe proporre una nazionalità diversa da quella attuale", () => {
+    const decision = generateNationalitySwitch(eligiblePlayer(), FIXED_RNG);
+    const switchOption = decision.options.find((o) => o.id === "switch");
+    expect(switchOption?.newNationality).toBeDefined();
+    expect(switchOption?.newNationality).not.toBe(eligiblePlayer().nationality);
+  });
+
+  it("l'opzione 'resta' non deve avere newNationality", () => {
+    const decision = generateNationalitySwitch(eligiblePlayer(), FIXED_RNG);
+    const stayOption = decision.options.find((o) => o.id === "stay");
+    expect(stayOption?.newNationality).toBeUndefined();
+  });
+});
+
 describe("LIFESTYLE_DECISIONS — nuovi eventi", () => {
   it("finish-high-school e honesty-test dovrebbero essere nel pool lifestyle", () => {
     const ids = LIFESTYLE_DECISIONS.map((d) => d.id);
@@ -387,6 +426,22 @@ describe("generateContinentalFinalDecision", () => {
       expect(winOutcome.continentalWin).toBe(true);
       expect(loseOutcome.continentalWin).toBeUndefined();
     }
+  });
+
+  it("gli id delle opzioni restano sempre left/right qualunque sia il template scelto (vincolo UI)", () => {
+    const player = playerAt();
+    for (const rngValue of [0, 0.4, 0.9]) {
+      const decision = generateContinentalFinalDecision(player, "Champions League", () => rngValue);
+      expect(decision.options.map((o) => o.id)).toEqual(["left", "right"]);
+    }
+  });
+
+  it("dovrebbe variare titolo/descrizione in base al template scelto", () => {
+    const player = playerAt();
+    const titles = new Set(
+      [0, 0.4, 0.9].map((rngValue) => generateContinentalFinalDecision(player, "Champions League", () => rngValue).title),
+    );
+    expect(titles.size).toBeGreaterThan(1);
   });
 });
 

@@ -165,6 +165,8 @@ export interface Player extends PlayerIdentity {
   /** Ultimi titoli di stagione (cap applicato nel dominio). */
   seasonTitles: SeasonTitleEntry[];
   currentObjective: CycleObjective | null;
+  /** true se il giocatore ha già cambiato nazionalità una volta (evento non ripetibile). */
+  hasSwitchedNationality?: boolean;
 }
 
 /** Effetto applicabile al giocatore da un outcome di decisione. */
@@ -207,6 +209,8 @@ export interface DecisionOption {
   club?: Club;
   /** Se true, selezionare questa opzione termina la carriera (es. "Retire" in end-of-cycle). */
   retire?: boolean;
+  /** Se presente, selezionare questa opzione cambia la nazionalità del giocatore. */
+  newNationality?: string;
   /** Un solo outcome (peso 100) = esito deterministico. Più outcome = esito probabilistico. */
   outcomes: DecisionOutcome[];
 }

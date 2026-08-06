@@ -1,7 +1,7 @@
 /**
  * Hotlink ai badge delle competizioni reali (TheSportsDB, chiave pubblica "123") — mai
  * scaricati/salvati nel repo. Copre solo le stringhe che il dominio produce davvero oggi
- * (Club.competitions.*, i nomi torneo confederazione-specifici da rollNationalTrophy in
+ * (Club.competitions.*, i nomi torneo confederazione-specifici da rollNationalTrophies in
  * lib/career/trophies.ts).
  * Serie C non ha un badge unico su TheSportsDB (solo 3 gironi separati): lasciata senza badge,
  * la UI mostra comunque il nome testuale. Vedi .claude/research/team-crests.md per la ricerca.

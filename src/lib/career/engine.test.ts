@@ -8,6 +8,7 @@ import {
   resolveOutcome,
   retire,
   signWithClub,
+  switchNationality,
   STARTING_AGE,
   STARTING_OVR,
 } from "./engine";
@@ -65,6 +66,25 @@ describe("signWithClub", () => {
     const signed = signWithClub(player, TEST_CLUB);
 
     expect(signed.wallet.salaryEurPerCycle).toBeGreaterThan(0);
+  });
+});
+
+describe("switchNationality", () => {
+  it("dovrebbe aggiornare la nazionalità e impostare hasSwitchedNationality", () => {
+    const player = createPlayer(IDENTITY);
+    const switched = switchNationality(player, "Brazil");
+
+    expect(switched.nationality).toBe("Brazil");
+    expect(switched.hasSwitchedNationality).toBe(true);
+  });
+
+  it("non dovrebbe modificare altri campi del giocatore", () => {
+    const player = createPlayer(IDENTITY);
+    const switched = switchNationality(player, "Brazil");
+
+    expect(switched.age).toBe(player.age);
+    expect(switched.ovr).toBe(player.ovr);
+    expect(switched.lastName).toBe(player.lastName);
   });
 });
 

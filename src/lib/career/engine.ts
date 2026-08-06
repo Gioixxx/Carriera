@@ -27,6 +27,12 @@ export const SEASONS_PER_CYCLE: Record<GameSpeed, number> = {
 /** Popolarità iniziale di un giovane sconosciuto al debutto. */
 export const STARTING_POPULARITY = 15;
 
+/** Sotto questa età il ritiro non è mai possibile. */
+const RETIREMENT_RISK_START_AGE = 34;
+/** Da questa età il ritiro è automatico — soglia allineata a 3 osservazioni concordanti sul
+ * gioco originale (vedi piano, esplorazione aggiuntiva 3). */
+const RETIREMENT_AUTOMATIC_AGE = 40;
+
 export function createPlayer(identity: PlayerIdentity): Player {
   return {
     ...identity,
@@ -59,6 +65,11 @@ export function createPlayer(identity: PlayerIdentity): Player {
 /** Firma per un nuovo club (academy offer, transfer window, prestito): aggiorna anche lo stipendio. */
 export function signWithClub(player: Player, club: Club): Player {
   return { ...player, club, wallet: resignSalary(player.wallet, player.ovr, club.prestige) };
+}
+
+/** Cambia la nazionalità del giocatore (evento "nonno di un altro paese", non ripetibile). */
+export function switchNationality(player: Player, nationality: string): Player {
+  return { ...player, nationality, hasSwitchedNationality: true };
 }
 
 function sumStats(a: StatLine, b: StatLine): StatLine {
@@ -160,15 +171,13 @@ export function resolveOutcome(
   return outcomes[outcomes.length - 1];
 }
 
-/** Probabilità di ritiro crescente tra i 34 e i 41 anni; automatico da 41 in su. */
-/**
- * Ritiro probabilistico crescente dai 34 anni, automatico da 40 — soglia allineata a 3
- * osservazioni concordanti sul gioco originale (vedi piano, esplorazione aggiuntiva 3).
- */
+/** Ritiro probabilistico crescente dai 34 anni, automatico da 40 (vedi costanti sopra). */
 export function checkRetirement(player: Player, rng: Rng = Math.random): boolean {
-  if (player.age < 34) return false;
-  if (player.age >= 40) return true;
-  const progress = (player.age - 34) / (40 - 34);
+  if (player.age < RETIREMENT_RISK_START_AGE) return false;
+  if (player.age >= RETIREMENT_AUTOMATIC_AGE) return true;
+  const progress =
+    (player.age - RETIREMENT_RISK_START_AGE) /
+    (RETIREMENT_AUTOMATIC_AGE - RETIREMENT_RISK_START_AGE);
   const chance = clamp(progress * progress, 0, 1);
   return rng() < chance;
 }

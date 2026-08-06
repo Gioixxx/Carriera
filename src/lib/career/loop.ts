@@ -17,6 +17,7 @@ import {
   resolveOutcome,
   retire,
   signWithClub,
+  switchNationality,
   SEASONS_PER_CYCLE,
 } from "./engine";
 import { rollInjury, tickInjury } from "./injuries";
@@ -44,6 +45,7 @@ import {
   generateEndOfCycle,
   generateLoanOffer,
   generateLoanReturn,
+  generateNationalitySwitch,
   generateReturnHome,
   generateSponsorDeal,
   generateTaxTrouble,
@@ -51,6 +53,7 @@ import {
   generateTriumphantReturn,
   generateUnexpectedProspect,
   isClubPriorityEligible,
+  isNationalitySwitchEligible,
   isReturnHomeEligible,
   isSponsorEligible,
   isTaxTroubleEligible,
@@ -60,18 +63,54 @@ import {
   pickDecisionCategory,
   rollNationalCallup,
 } from "./decisions";
-import { rollAward, rollClubTrophies, rollNationalTrophy } from "./trophies";
+import { rollAward, rollClubTrophies, rollNationalTrophies } from "./trophies";
+import { applyClubTierMovement } from "./club-progression";
 import { getCountry } from "@/data/countries";
 
 export interface LoopContext {
   /** Club "di appartenenza" mentre si è in prestito altrove; null se non in prestito. */
   loanParentClub: Club | null;
+  /** Ultimi "kind" di evento scelti dentro club-crisis/lifestyle/narrative (anti-ripetizione). */
+  recentDecisionIds?: string[];
 }
 
 export const INITIAL_LOOP_CONTEXT: LoopContext = { loanParentClub: null };
 
 const MIN_CONTINENTAL_FINAL_OVR = 78;
 const CONTINENTAL_FINAL_CHANCE = 0.15;
+
+const RECENT_DECISIONS_WINDOW = 4;
+const EVENT_REPEAT_PENALTY = 0.2;
+
+interface KindedGenerator {
+  kind: string;
+  build: () => Decision;
+}
+
+interface PickedDecision {
+  decision: Decision;
+  kind: string;
+}
+
+/** Sceglie tra generatori penalizzando (non escludendo) quelli scelti di recente — stesso principio di pickDecisionCategory, applicato al singolo evento invece che alla categoria. */
+function pickWeightedByKind(items: KindedGenerator[], recentDecisionIds: string[], rng: Rng): PickedDecision {
+  const weighted = items.map((item) => ({
+    item,
+    weight: recentDecisionIds.includes(item.kind) ? EVENT_REPEAT_PENALTY : 1,
+  }));
+  const totalWeight = weighted.reduce((sum, w) => sum + w.weight, 0);
+  let roll = rng() * totalWeight;
+  for (const w of weighted) {
+    roll -= w.weight;
+    if (roll < 0) return { decision: w.item.build(), kind: w.item.kind };
+  }
+  const last = weighted[weighted.length - 1].item;
+  return { decision: last.build(), kind: last.kind };
+}
+
+function pushRecentDecisionId(recentDecisionIds: string[], kind: string): string[] {
+  return [...recentDecisionIds, kind].slice(-RECENT_DECISIONS_WINDOW);
+}
 
 /** Categorie disponibili in un dato ciclo, in base allo stato del giocatore. */
 export function availableCategories(player: Player, context: LoopContext): DecisionCategory[] {
@@ -93,7 +132,8 @@ export function availableCategories(player: Player, context: LoopContext): Decis
     isTaxTroubleEligible(player) ||
     isReturnHomeEligible(player) ||
     isUnexpectedProspectEligible(player) ||
-    isTriumphantReturnEligible(player)
+    isTriumphantReturnEligible(player) ||
+    isNationalitySwitchEligible(player)
   ) {
     categories.push("narrative");
   }
@@ -115,50 +155,61 @@ export function shouldTriggerContinentalFinal(
 }
 
 /** "Finish high school" ha senso solo a inizio carriera — unico evento del pool con un gate d'età. */
-function pickStaticDecision(category: DecisionCategory, player: Player, rng: Rng): Decision {
+function pickStaticDecision(
+  category: DecisionCategory,
+  player: Player,
+  recentDecisionIds: string[],
+  rng: Rng,
+): PickedDecision {
   const pool = LIFESTYLE_DECISIONS.filter((d) => {
     if (d.category !== category) return false;
     if (d.id === "finish-high-school" && player.age > 17) return false;
     return true;
   });
-  const index = Math.min(Math.floor(rng() * pool.length), pool.length - 1);
-  return pool[index];
+  const items: KindedGenerator[] = pool.map((d) => ({ kind: d.id, build: () => d }));
+  return pickWeightedByKind(items, recentDecisionIds, rng);
 }
 
-function pickClubCrisisDecision(player: Player, rng: Rng): Decision {
-  const generators: Array<() => Decision> = [
-    () => generateClubCrisis(player, rng),
-    () => generateCompetitionForSpot(player, rng),
-    () => generateControversialStatement(player, rng),
-    () => generateControversialPost(player, rng),
+function pickClubCrisisDecision(player: Player, recentDecisionIds: string[], rng: Rng): PickedDecision {
+  const generators: KindedGenerator[] = [
+    { kind: "club-crisis", build: () => generateClubCrisis(player, rng) },
+    { kind: "competition-for-spot", build: () => generateCompetitionForSpot(player, rng) },
+    { kind: "controversial-statement", build: () => generateControversialStatement(player, rng) },
+    { kind: "controversial-post", build: () => generateControversialPost(player, rng) },
   ];
   if (isClubPriorityEligible(player)) {
-    generators.push(() => generateClubPriority(player));
+    generators.push({ kind: "club-priority", build: () => generateClubPriority(player) });
   }
-  const index = Math.min(Math.floor(rng() * generators.length), generators.length - 1);
-  return generators[index]();
+  return pickWeightedByKind(generators, recentDecisionIds, rng);
 }
 
-function pickNarrativeDecision(player: Player, rng: Rng): Decision {
-  const generators: Array<() => Decision> = [];
-  if (isTaxTroubleEligible(player)) generators.push(() => generateTaxTrouble(player, rng));
-  if (isReturnHomeEligible(player)) generators.push(() => generateReturnHome(player, rng));
+function pickNarrativeDecision(player: Player, recentDecisionIds: string[], rng: Rng): PickedDecision {
+  const generators: KindedGenerator[] = [];
+  if (isTaxTroubleEligible(player)) {
+    generators.push({ kind: "tax-trouble", build: () => generateTaxTrouble(player, rng) });
+  }
+  if (isReturnHomeEligible(player)) {
+    generators.push({ kind: "return-home", build: () => generateReturnHome(player, rng) });
+  }
   if (isUnexpectedProspectEligible(player)) {
-    generators.push(() => generateUnexpectedProspect(player, rng));
+    generators.push({ kind: "unexpected-prospect", build: () => generateUnexpectedProspect(player, rng) });
   }
   if (isTriumphantReturnEligible(player)) {
-    generators.push(() => generateTriumphantReturn(player));
+    generators.push({ kind: "triumphant-return", build: () => generateTriumphantReturn(player) });
+  }
+  if (isNationalitySwitchEligible(player)) {
+    generators.push({ kind: "nationality-switch", build: () => generateNationalitySwitch(player, rng) });
   }
   if (generators.length === 0) {
     throw new Error("Nessun evento narrativo disponibile per questo giocatore");
   }
-  const index = Math.min(Math.floor(rng() * generators.length), generators.length - 1);
-  return generators[index]();
+  return pickWeightedByKind(generators, recentDecisionIds, rng);
 }
 
 export interface NextDecision {
   decision: Decision;
   category: DecisionCategory;
+  context: LoopContext;
 }
 
 /** Sceglie la prossima decisione del ciclo, gestendo eventi speciali (coppa continentale) e categorie ordinarie. */
@@ -170,36 +221,56 @@ export function pickNextDecision(
 ): NextDecision {
   if (shouldTriggerContinentalFinal(player, context, rng)) {
     return {
-      decision: generateContinentalFinalDecision(player, player.club!.competitions.continental!),
+      decision: generateContinentalFinalDecision(player, player.club!.competitions.continental!, rng),
       category: "continental-final",
+      context,
     };
   }
 
   const categories = availableCategories(player, context);
   const category = pickDecisionCategory(categories, recentCategories, rng);
+  const recentDecisionIds = context.recentDecisionIds ?? [];
 
   switch (category) {
     case "transfer":
-      return { decision: generateTransferWindow(player, rng), category };
+      return { decision: generateTransferWindow(player, rng), category, context };
     case "loan":
-      return { decision: generateLoanOffer(player, rng), category };
+      return { decision: generateLoanOffer(player, rng), category, context };
     case "loan-return": {
       if (!context.loanParentClub) {
         throw new Error("loan-return richiede un club di appartenenza nel contesto");
       }
-      return { decision: generateLoanReturn(player, context.loanParentClub, rng), category };
+      return { decision: generateLoanReturn(player, context.loanParentClub, rng), category, context };
     }
-    case "club-crisis":
-      return { decision: pickClubCrisisDecision(player, rng), category };
+    case "club-crisis": {
+      const picked = pickClubCrisisDecision(player, recentDecisionIds, rng);
+      return {
+        decision: picked.decision,
+        category,
+        context: { ...context, recentDecisionIds: pushRecentDecisionId(recentDecisionIds, picked.kind) },
+      };
+    }
     case "end-of-cycle":
-      return { decision: generateEndOfCycle(player, rng), category };
+      return { decision: generateEndOfCycle(player, rng), category, context };
     case "lifestyle":
-    case "position-change":
-      return { decision: pickStaticDecision(category, player, rng), category };
-    case "narrative":
-      return { decision: pickNarrativeDecision(player, rng), category };
+    case "position-change": {
+      const picked = pickStaticDecision(category, player, recentDecisionIds, rng);
+      return {
+        decision: picked.decision,
+        category,
+        context: { ...context, recentDecisionIds: pushRecentDecisionId(recentDecisionIds, picked.kind) },
+      };
+    }
+    case "narrative": {
+      const picked = pickNarrativeDecision(player, recentDecisionIds, rng);
+      return {
+        decision: picked.decision,
+        category,
+        context: { ...context, recentDecisionIds: pushRecentDecisionId(recentDecisionIds, picked.kind) },
+      };
+    }
     case "sponsor":
-      return { decision: generateSponsorDeal(player, rng), category };
+      return { decision: generateSponsorDeal(player, rng), category, context };
     default:
       throw new Error(`Categoria di decisione non gestita nel loop: ${category}`);
   }
@@ -243,6 +314,7 @@ export interface CycleResult {
   objectiveResult: { label: string; met: boolean } | null;
   brokenRecords: string[];
   highlights: string[];
+  clubTierChange: "promoted" | "relegated" | null;
 }
 
 function emptySatisfactionFields(): Pick<
@@ -328,12 +400,17 @@ export function resolveCycle(
       nationalCallup: false,
       newInjury: null,
       injuryHealed: false,
+      clubTierChange: null,
       ...emptySatisfactionFields(),
     };
   }
 
   if (option.club) {
     nextPlayer = signWithClub(nextPlayer, option.club);
+  }
+
+  if (option.newNationality) {
+    nextPlayer = switchNationality(nextPlayer, option.newNationality);
   }
 
   const nextContext = nextLoopContext(category, option, player, context);
@@ -356,6 +433,18 @@ export function resolveCycle(
         club: nextPlayer.club,
         age: nextPlayer.age,
       });
+    }
+  }
+
+  let clubTierChange: "promoted" | "relegated" | null = null;
+  if (nextPlayer.club) {
+    const wonLeagueTitle = newTrophies.some(
+      (t) => t.competition === nextPlayer.club!.competitions.league,
+    );
+    const movement = applyClubTierMovement(nextPlayer.club, wonLeagueTitle, rng);
+    if (movement.change) {
+      nextPlayer = { ...nextPlayer, club: movement.club };
+      clubTierChange = movement.change;
     }
   }
 
@@ -385,8 +474,7 @@ export function resolveCycle(
       },
     };
     const confederation = getCountry(nextPlayer.nationality)?.confederation ?? "UEFA";
-    const nationalTrophy = rollNationalTrophy(true, nextPlayer.ovr, nextPlayer.age, confederation, rng);
-    if (nationalTrophy) newTrophies.push(nationalTrophy);
+    newTrophies.push(...rollNationalTrophies(true, nextPlayer.ovr, nextPlayer.age, confederation, rng));
   }
 
   if (newTrophies.length > 0) {
@@ -501,6 +589,7 @@ export function resolveCycle(
     objectiveResult,
     brokenRecords,
     highlights,
+    clubTierChange,
   };
 }
 

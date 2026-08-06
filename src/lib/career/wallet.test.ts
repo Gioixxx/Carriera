@@ -15,6 +15,17 @@ describe("computeSalaryEur", () => {
   it("dovrebbe crescere con il prestigio del club", () => {
     expect(computeSalaryEur(70, 3)).toBeGreaterThan(computeSalaryEur(70, 0));
   });
+
+  it("dovrebbe restituire un valore esatto a OVR/prestigio fissi (regressione su esponente/scalare)", () => {
+    expect(computeSalaryEur(70, 2)).toBe(265_000);
+  });
+
+  it("dovrebbe crescere in modo monotono su uno spettro di valori OVR", () => {
+    const values = [50, 60, 70, 80, 90, 99].map((ovr) => computeSalaryEur(ovr, 2));
+    for (let i = 1; i < values.length; i++) {
+      expect(values[i]).toBeGreaterThan(values[i - 1]);
+    }
+  });
 });
 
 describe("accrueSalary", () => {
@@ -61,5 +72,13 @@ describe("applyPopularityDelta", () => {
   it("dovrebbe fare clamp a 0-100", () => {
     expect(applyPopularityDelta(95, 50)).toBe(100);
     expect(applyPopularityDelta(5, -50)).toBe(0);
+  });
+
+  it("dovrebbe restare esattamente a 100 se già al massimo e il delta è positivo", () => {
+    expect(applyPopularityDelta(100, 1)).toBe(100);
+  });
+
+  it("dovrebbe restare esattamente a 0 se già al minimo e il delta è negativo", () => {
+    expect(applyPopularityDelta(0, -1)).toBe(0);
   });
 });
