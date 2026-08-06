@@ -200,6 +200,22 @@ Stato lavoro in corso. Aggiornato con /sprint. Backlog in [[backlog]], debito in
   registrato come nuovo item di tech-debt a priorità bassa, non corretto in questa sessione
   perché fuori dallo scope segnalato dall'utente.
 
+- [x] **Fix auto-updater launcher + release v0.3.1 pubblicata** (2026-08-06, commit b775cf5,
+  ae2f1b4, b572f1b, 20eabe7 + tag v0.3.1): su segnalazione diretta dell'utente ("non funziona
+  l'aggiornamento, spunta l'alert ma anche confermando si avvia la vecchia versione, nemmeno
+  riavviandolo"), diagnosticato che `UpdateInstaller.cs` generava uno script `.bat` con un
+  singolo `move /y` senza gestione errori: un lock transitorio (Defender che scansiona il file
+  appena scaricato, Controlled Folder Access) faceva fallire il move in silenzio, lo script
+  rilanciava comunque il vecchio exe invariato e si autocancellava senza lasciare traccia. Fix:
+  retry fino a ~15s con log in `%TEMP%\CarrieraUpdate\update-log.txt`, controllo di sanità sulla
+  dimensione del download prima di sostituire l'exe installato, `MessageBox` esplicito se il
+  download fallisce (il controllo periodico di versione resta silenzioso by design). Bundle nello
+  stesso rilascio: bump `package.json`/`package-lock.json` 0.3.0→0.3.1 (patch, fix+ribilanciamento
+  non nuove feature), `dist/Carriera.exe` rigenerato (FileVersion 0.3.1.0 verificato) e allegato
+  alla [release GitHub v0.3.1](https://github.com/Gioixxx/Carriera/releases/tag/v0.3.1). 274 test
+  verdi, `tsc` pulito. **Il flusso di aggiornamento non è stato riverificato end-to-end** (serve
+  installare la v0.3.0 e testare l'update verso questa v0.3.1 dal vivo) — vedi [[tech-debt]].
+
 ## Note tecniche emerse in fase 6
 - jsdom 30 + Node 22+ non espone `window.localStorage` di default (ExperimentalWarning nativa) — polyfill minimale in `vitest.setup.ts`, non è un problema di codice applicativo
 - `ClubStint` ora ha un campo `ovr` (OVR del giocatore alla fine di quel ciclo) — necessario per la CareerTable, che deve mostrare l'OVR storico per riga, non quello attuale

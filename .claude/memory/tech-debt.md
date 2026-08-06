@@ -83,9 +83,18 @@ Registro debito tecnico con priorità. Aggiornato da /session-end. Origine spess
 - **Impatto:** rischio medio — se l'evento non si comporta come documentato (es. differenze di versione del runtime WebView2), il bottone "Chiudi" risulterebbe silenziosamente rotto solo nella build desktop, l'unico posto dove ha un effetto reale.
 - **Risoluzione suggerita:** prima della prossima release, rigenerare l'exe con `scripts/build-launcher.ps1` e verificare manualmente che il bottone "Chiudi" chiuda davvero la finestra dell'app.
 
+### Fix auto-updater launcher (v0.3.1) non riverificato end-to-end con un aggiornamento reale
+- **Priorità:** Media
+- **Area:** `launcher/CarrieraLauncher/UpdateInstaller.cs`, `MainForm.cs`
+- **Data:** 2026-08-06
+- **Descrizione:** il fix al flusso di auto-update (retry sul `move`, log, controllo dimensione download, `MessageBox` su fallimento) è stato verificato solo con `dotnet build` (compila) e lettura del codice, diagnosticando la causa più probabile del bug segnalato (lock transitorio sul `move`, mai loggato prima). **Non è stato riprodotto un aggiornamento reale** (installare v0.3.0, lasciare che rilevi v0.3.1, confermare, verificare che l'exe venga davvero sostituito) per confermare che il fix risolva il problema riportato dall'utente, né che il file di log si popoli come previsto.
+- **Perché rimandato:** richiede un exe v0.3.0 già installato altrove e un giro completo di download (~58 MB) per riprodurre lo scenario originale; non eseguito in questa sessione per rilasciare rapidamente il fix.
+- **Impatto:** rischio medio — se la causa reale fosse diversa da quella diagnosticata (es. Controlled Folder Access che blocca la scrittura in modo permanente, non transitorio), il retry non risolverebbe nulla; il log aggiunto renderebbe però il problema diagnosticabile al prossimo tentativo, invece di restare invisibile come prima.
+- **Risoluzione suggerita:** alla prossima occasione, lasciare un'installazione v0.3.0 attiva, forzare il check aggiornamenti e confermare che l'update a v0.3.1 vada a buon fine; se fallisce ancora, ispezionare `%TEMP%\CarrieraUpdate\update-log.txt` per la causa esatta.
+
 ## Priorità
 - **Alta:** —
-- **Media:** momenti celebrativi/timeline non verificati end-to-end; sistema "satisfaction" (Hall of Fame/record/milestone/titoli) non verificato end-to-end; bottone "Chiudi" non verificato nell'exe; ricalibrazione OVR/soglie "grande momento" non verificata end-to-end (vedi sopra)
+- **Media:** momenti celebrativi/timeline non verificati end-to-end; sistema "satisfaction" (Hall of Fame/record/milestone/titoli) non verificato end-to-end; bottone "Chiudi" non verificato nell'exe; ricalibrazione OVR/soglie "grande momento" non verificata end-to-end; fix auto-updater v0.3.1 non riverificato con un aggiornamento reale (vedi sopra)
 - **Bassa:** soglia di ritiro automatico; generatori club-crisis con pesi di base uniformi tra loro; trofeo di club forse troppo comune dopo la ricalibrazione OVR (vedi sopra)
 
 ## Archiviato
