@@ -180,6 +180,26 @@ Stato lavoro in corso. Aggiornato con /sprint. Backlog in [[backlog]], debito in
   → "Giocatore singolo" → flusso esistente invariato). **Non verificato nell'eseguibile
   desktop** (exe non rigenerato in questa sessione) — vedi [[tech-debt]].
 
+- [x] **Ricalibrata curva OVR e soglie "grande momento"** (2026-08-06, non ancora committato a
+  fine di questa voce): su segnalazione diretta dell'utente dopo diverse partite giocate (OVR
+  quasi mai sopra 80, mai in nazionale, mai vinto un trofeo/coppa continentale), diagnosticato
+  che la curva di crescita OVR (`progression.ts`) produceva un tetto naturale troppo basso
+  rispetto alle soglie che sbloccano convocazione/trofeo nazionale/award/offerte dai top club
+  (tarate nella sessione 2026-08-04 assumendo un tetto più alto). Interpellato l'utente
+  (`AskUserQuestion`), che ha scelto di intervenire su **entrambi** gli assi: curva OVR riscalata
+  (fasi di crescita/plateau, non il declino) + soglie ritarate in 3 giri di misurazione con
+  `npm run simulate` (harness esistente, non a tavolino — il picco OVR *reale* misurato,~81.9,
+  è ~4 punti sotto quello teorico per via di infortuni/eventi negativi). Risultato (2000 carriere
+  simulate): convocazione 1.5%→~22%, trofeo di nazionale 0.1%→~5%, award 0%→~7% (Ballon d'Or
+  ~0.3%, resta il più raro). Aggiunta diagnostica permanente `peakOvr` all'harness
+  (`simulation.ts`/`scripts/simulate-careers.ts`) e corretto lo script `npm run simulate`
+  (reporter rotto). Vedi [[decisions]] per il dettaglio numerico completo. 274 test invariati (3
+  asserzioni aggiornate ai nuovi valori), `tsc`/eslint/build puliti. **Non verificato manualmente
+  nel browser** (sessione di bilanciamento numerico, verificata via test + harness) — vedi
+  [[tech-debt]]. Effetto collaterale non richiesto: trofeo di club salito a ~91% (era ~78-80%),
+  registrato come nuovo item di tech-debt a priorità bassa, non corretto in questa sessione
+  perché fuori dallo scope segnalato dall'utente.
+
 ## Note tecniche emerse in fase 6
 - jsdom 30 + Node 22+ non espone `window.localStorage` di default (ExperimentalWarning nativa) — polyfill minimale in `vitest.setup.ts`, non è un problema di codice applicativo
 - `ClubStint` ora ha un campo `ovr` (OVR del giocatore alla fine di quel ciclo) — necessario per la CareerTable, che deve mostrare l'OVR storico per riga, non quello attuale
