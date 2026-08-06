@@ -12,8 +12,6 @@
 
 Carriera è un gioco browser/desktop in cui guidi la carriera di un calciatore attraverso scelte narrative, statistiche, trasferimenti, trofei e convocazioni in nazionale. Tutto in italiano, con nomi reali di club, leghe e competizioni. Nessun backend: i salvataggi restano nel browser o nell'eseguibile locale.
 
-Ispirato al simulatore testuale [Copero — Simulador de carrera](https://copero.com.ar/juegos/simulador-carrera) (progetto indipendente, senza copia di testi o asset proprietari).
-
 ### Come giocare
 
 | Percorso | Istruzioni |
@@ -96,8 +94,6 @@ Documentazione completa su packaging, WebView2 e aggiornamenti automatici: [`lau
 ### What is Carriera
 
 Carriera is a browser/desktop game where you guide a footballer's career through narrative choices, stats, transfers, trophies, and national team call-ups. Fully in Italian, with real club, league, and competition names. No backend: saves stay in the browser or local executable.
-
-Inspired by the text-based simulator [Copero — Simulador de carrera](https://copero.com.ar/juegos/simulador-carrera) (independent project, no copying of proprietary text or assets).
 
 ### How to play
 
