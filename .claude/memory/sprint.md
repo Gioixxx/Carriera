@@ -109,6 +109,15 @@ Stato lavoro in corso. Aggiornato con /sprint. Backlog in [[backlog]], debito in
   battuto un record. Vedi [[decisions]] per il perché (un ciclo può rompere più record insieme,
   l'overlay "solo il primo" ne nascondeva altri).
 
+- [x] **Release v0.3.0 pubblicata** (2026-08-06, commit aa218f7 + tag v0.3.0): bump
+  `package.json`/`package-lock.json` 0.2.0→0.3.0 (minor, dato il volume di feature accumulate
+  dalla v0.2.0: motore su 4 assi, sistema satisfaction/Hall of Fame, statistiche portiere,
+  percentuali decisione, trofei per confederazione, Champions/Europa League, estensione a 124
+  club, menu principale + musica). 274 test verdi prima del tag. `dist/Carriera.exe` rigenerato
+  via `scripts/build-launcher.ps1` (FileVersion 0.3.0.0 verificato) e allegato alla [release
+  GitHub v0.3.0](https://github.com/Gioixxx/Carriera/releases/tag/v0.3.0) con note che
+  riassumono tutte le novità dalla v0.2.0.
+
 ## Ricerca completata (agenti background, 2026-08-05)
 - **Esplorazione aggiuntiva 4** sul sito originale (scritta in `piped-bouncing-cocke.md`, fuori dal repo): catene di prestito ancora mai osservate (0/47 cicli aggiuntivi, conclusione: probabilmente non serve modellarle); esito di "Look for a way out" chiarito (trasferimento immediato deterministico, stesso pattern di un'offerta normale accettata); **correzione importante**: l'originale usa sempre nomi di trofeo reali (World Cup, Copa América, Champions League, Europa League, Copa Libertadores, Copa Argentina) mai un placeholder generico "Eurocup" come assunto prima — rilevante per [[backlog]] (nomi confederazione-specifici per trofei nazionale); awards individuali confermati vuoti in 14/14 carriere cumulative anche nel caso più estremo osservato finora (OVR 90, Mondiale + 3x Copa América, 9 trofei di club)
 - **Ricerca immagini premi + coppe nazionali** (estende `.claude/research/team-crests.md`, sezioni 5-6): badge TheSportsDB per 6 tornei di confederazione (Mondiale/Europei/Copa América/Asian Cup/Africa Cup of Nations/Gold Cup) trovati e verificati, non ancora cablati in `COMPETITION_BADGES` (serve prima la logica di confederazione, vedi [[backlog]]); valutazione premi individuali con raccomandazione icona generica (Twemoji) invece di foto reale del trofeo Ballon d'Or — già implementata, vedi sopra e [[decisions]]
