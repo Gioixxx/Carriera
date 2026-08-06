@@ -34,10 +34,26 @@ Funzionalità e idee a lungo termine. Prioritizzato pre-sprint → confluisce in
 - **Criteri accettazione:** `rollClubTrophies` (o una funzione dedicata) può assegnare il trofeo continentale senza richiedere che sia scattato l'evento "finale continentale" nello stesso ciclo, con probabilità coerente col resto del sistema.
 - **Stima:** Piccola — riuso di `clubTrophyChance`-style formula, nessun nuovo modello dati.
 
+### Nuovo evento lifestyle: "Sostanza misteriosa" (doping)
+- **Priorità:** Bassa
+- **Tipo:** Feature
+- **Area:** `lib/career/decisions.ts` (`LIFESTYLE_DECISIONS`)
+- **Descrizione:** evento osservato nell'originale ("Esplorazione aggiuntiva 5", 2026-08-06) e verificato assente nel clone: "Il medico del club offre un integratore di dubbia origine" → "Prendilo" (+5 OVR 75% / squalifica 25%) vs "Rifiuta" (nessun cambiamento). Stesso pattern già usato per `nutrition-plan`/`giant-tattoo` (opzione rischiosa con outcome pesati + opzione sicura deterministica).
+- **Criteri accettazione:** nuovo generatore in `LIFESTYLE_DECISIONS` con le stesse proporzioni osservate (75%/25%), copy in italiano, test dedicato in `decisions.test.ts`.
+- **Stima:** Piccola — stesso pattern di eventi lifestyle già esistenti, nessuna nuova infrastruttura.
+
+### Nuovo evento: "Fan backlash" (contraccolpo dei tifosi)
+- **Priorità:** Bassa
+- **Tipo:** Feature
+- **Area:** `lib/career/decisions.ts`
+- **Descrizione:** evento nominato ma non ancora documentato in dettaglio da "Esplorazione aggiuntiva 5" (testo esatto delle opzioni non catturato in questa sessione di ricerca) — verificato assente nel clone sotto qualunque nome.
+- **Criteri accettazione:** prima ricercare il testo esatto/le opzioni sul sito originale, poi implementare con lo stesso pattern degli altri generatori di categoria club-crisis/lifestyle.
+- **Stima:** Piccola, ma richiede prima un giro di ricerca dedicato (testo non ancora noto).
+
 ## Priorità
 - **Alta:** —
 - **Media:** —
-- **Bassa:** promozione/retrocessione estesa oltre i 4 paesi attuali; trofeo continentale di club assegnabile offscreen
+- **Bassa:** promozione/retrocessione estesa oltre i 4 paesi attuali; trofeo continentale di club assegnabile offscreen; nuovo evento "Sostanza misteriosa" (doping); nuovo evento "Fan backlash" (da ricercare)
 
 ## Archiviato
 - **Icone trofeo/premio inline sulla riga della tabella carriera** — già implementata (non un nuovo item): osservata nell'originale durante un playtest dal vivo il 2026-08-06 e inizialmente registrata per errore come backlog aperto, senza verificare lo stato attuale del codice. `CareerTable.tsx` (`TrophyChip`/`AwardChip`, righe 12-36) mostra già icone trofeo/premio per riga, aggregate per `stint.ageTo` — introdotto nel commit `28d5b6f` (2026-08-06) ma non documentato esplicitamente all'epoca (stesso pattern già visto con "Momenti di carriera celebrativi", vedi [[decisions]]). Corretto durante la verifica pre-implementazione di questo stesso item.

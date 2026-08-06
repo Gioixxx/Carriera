@@ -282,6 +282,31 @@ Stato lavoro in corso. Aggiornato con /sprint. Backlog in [[backlog]], debito in
   un exe di test pinnato a v0.1.0: barra di progresso visibile e funzionante, menu non
   interagibile durante l'update.
 
+- [x] **Ricerca su larga scala sull'originale: 23 carriere, 3 agenti browser paralleli**
+  (2026-08-06, solo ricerca — nessuna modifica al codice del clone): su richiesta esplicita
+  dell'utente di raccogliere più dati sul bilanciamento (crescita OVR, premi, trofei), 3 agenti
+  hanno giocato Copero con strategie diverse (OVR massimizzato, scelte varie, verifica mirata
+  promozione/retrocessione/infortuni/portiere/Mondiale-coppa continentale). Confermato: award
+  individuale 0/18 anche nel caso più estremo, trofeo di nazionale aggregato ~5.6% (vicino al ~5%
+  ricalibrato), statistiche portiere presenti ovunque nell'originale. **Corretta una nota di
+  memoria sbagliata**: le card decisione dell'originale MOSTRANO percentuali esplicite per gli
+  eventi lifestyle/allenamento a esito probabilistico (es. "Train hard": 65%/35%), non le
+  nascondono sempre come concluso in precedenza da un singolo playtest. Aperti 2 item di
+  tech-debt a bassa priorità (finestra di ritiro probabilistico forse più ampia di 34-40,
+  promozione mai osservata in UI nell'originale) e 2 idee di backlog (evento doping "Sostanza
+  misteriosa", evento "Fan backlash" da ricercare meglio). Dettaglio completo in [[decisions]] e
+  nel piano esterno `piped-bouncing-cocke.md`, sezione "Esplorazione aggiuntiva 5".
+
+- [x] **Follow-up dalla ricerca: evento doping + finestra di ritiro allargata** (2026-08-06, non
+  ancora committato a fine di questa voce; piano in `wondrous-popping-knuth.md`): implementato
+  l'evento lifestyle `mysterious-substance` ("Sostanza misteriosa") e allargata
+  `RETIREMENT_RISK_START_AGE` da 34 a 31 in `engine.ts`, con la formula di `checkRetirement`
+  passata da quadratica a cubica dopo verifica con `npm run simulate` (l'esponente invariato
+  spostava troppo peso verso i ritiri anticipati). 275 test verdi (era 274), `tsc`/eslint puliti.
+  Vedi [[decisions]] per il dettaglio numerico prima/dopo harness. **Resta da fare**: un giro di
+  ricerca browser mirato per il testo esatto di "Fan backlash" e la verifica UI della promozione
+  di campionato (Step 4 del piano, non ancora lanciato).
+
 ## Note tecniche emerse in fase 6
 - jsdom 30 + Node 22+ non espone `window.localStorage` di default (ExperimentalWarning nativa) — polyfill minimale in `vitest.setup.ts`, non è un problema di codice applicativo
 - `ClubStint` ora ha un campo `ovr` (OVR del giocatore alla fine di quel ciclo) — necessario per la CareerTable, che deve mostrare l'OVR storico per riga, non quello attuale
