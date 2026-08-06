@@ -242,6 +242,26 @@ Stato lavoro in corso. Aggiornato con /sprint. Backlog in [[backlog]], debito in
   quel flag non esiste). 274 test invariati, `tsc`/`dotnet build` puliti. **Verificato dall'utente**
   eseguendo l'exe rigenerato: musica avviata da sola col menu, senza click.
 
+- [x] **Download update ancora inaffidabile dopo v0.3.2/v0.3.3, retry automatico + release
+  v0.3.4** (2026-08-06, commit eb7718d, 7693194 + tag v0.3.4): l'utente ha aggiornato dalla v0.3.2
+  ma "oltre all'alert non spunta nulla" — verificato ispezionando di nuovo `%TEMP%\CarrieraUpdate\`
+  sulla sua macchina: `Carriera.new.exe` troncato a **~36.6 MB (63.7%)** dei ~58 MB attesi, punto di
+  troncamento diverso dal precedente episodio (~8%, v0.3.1→v0.3.2) — non un bug di protocollo fisso
+  come l'HTTP/2 risolto in v0.3.2, ma un'interferenza di rete/sicurezza che interrompe lo stream in
+  modo non deterministico a seconda del tentativo. Fix: il download intero (non solo il "move"
+  finale, già con retry) viene ritentato automaticamente fino a 5 volte con backoff crescente
+  prima di arrendersi; ogni tentativo (successo/fallimento + motivo) è loggato fin da subito in
+  `%TEMP%\CarrieraUpdate\update-log.txt`, non solo se si arriva allo script di sostituzione.
+  **Limite noto e comunicato all'utente**: il fix vive nel downloader della versione *già
+  installata* — un'installazione v0.3.2/v0.3.3 (senza retry) continuerà a fare un solo tentativo
+  per ogni check periodico, quindi potrebbe comunque riuscire solo "per fortuna" quando il
+  tentativo singolo non viene interrotto. Solo da v0.3.4 in poi gli aggiornamenti *successivi*
+  saranno automaticamente resilienti. Per sbloccare l'installazione bloccata su questa stessa
+  macchina, `dist/Carriera.exe` è stato rigenerato localmente e consegnato per l'esecuzione diretta
+  (bypassa del tutto il download flaky, dato che siamo sulla stessa macchina). 274 test invariati,
+  `tsc`/`dotnet build` puliti. **Non ancora riverificato dall'utente** con un nuovo tentativo di
+  update reale — vedi [[tech-debt]].
+
 ## Note tecniche emerse in fase 6
 - jsdom 30 + Node 22+ non espone `window.localStorage` di default (ExperimentalWarning nativa) — polyfill minimale in `vitest.setup.ts`, non è un problema di codice applicativo
 - `ClubStint` ora ha un campo `ovr` (OVR del giocatore alla fine di quel ciclo) — necessario per la CareerTable, che deve mostrare l'OVR storico per riga, non quello attuale

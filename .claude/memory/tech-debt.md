@@ -83,9 +83,18 @@ Registro debito tecnico con priorità. Aggiornato da /session-end. Origine spess
 - **Impatto:** rischio medio — se l'evento non si comporta come documentato (es. differenze di versione del runtime WebView2), il bottone "Chiudi" risulterebbe silenziosamente rotto solo nella build desktop, l'unico posto dove ha un effetto reale.
 - **Risoluzione suggerita:** prima della prossima release, rigenerare l'exe con `scripts/build-launcher.ps1` e verificare manualmente che il bottone "Chiudi" chiuda davvero la finestra dell'app.
 
+### Retry automatico del download update (v0.3.4) non riverificato con un aggiornamento reale
+- **Priorità:** Media
+- **Area:** `launcher/CarrieraLauncher/UpdateInstaller.cs`
+- **Data:** 2026-08-06
+- **Descrizione:** dopo che il fix HTTP/1.1 (v0.3.2) non ha risolto il problema per l'utente (download troncato al 63.7% invece che 8%, punto diverso ad ogni tentativo), è stato aggiunto un retry automatico dell'intero download (fino a 5 tentativi con backoff). Verificato solo con `dotnet build` (compila) — **non è stato osservato un aggiornamento reale con questo fix** che effettivamente completi dopo uno o più retry su questa stessa rete/macchina dove il problema si manifesta.
+- **Perché rimandato:** rilasciato rapidamente per sbloccare l'utente; per la macchina di sviluppo il blocco immediato è stato aggirato consegnando `dist/Carriera.exe` per esecuzione diretta (bypassa il download).
+- **Impatto:** rischio medio — se l'interferenza di rete blocca *sistematicamente* ogni tentativo (non solo in modo intermittente), 5 retry con backoff non basterebbero e l'utente vedrebbe comunque fallire l'update, solo dopo un'attesa più lunga; inoltre nessuna installazione precedente alla v0.3.4 beneficia del fix finché non viene aggiornata manualmente una volta (limite noto, vedi [[decisions]]).
+- **Risoluzione suggerita:** alla prossima occasione, forzare un check aggiornamenti da una v0.3.4 già installata e osservare `%TEMP%\CarrieraUpdate\update-log.txt` per contare quanti tentativi servono realmente prima del successo (o se falliscono tutti e 5); se il pattern persiste, valutare di aumentare `MaxDownloadAttempts` o investigare più a fondo la causa dell'interferenza di rete (es. disabilitare temporaneamente l'antivirus per isolare la causa).
+
 ## Priorità
 - **Alta:** —
-- **Media:** momenti celebrativi/timeline non verificati end-to-end; sistema "satisfaction" (Hall of Fame/record/milestone/titoli) non verificato end-to-end; bottone "Chiudi" non verificato nell'exe; ricalibrazione OVR/soglie "grande momento" non verificata end-to-end (vedi sopra)
+- **Media:** momenti celebrativi/timeline non verificati end-to-end; sistema "satisfaction" (Hall of Fame/record/milestone/titoli) non verificato end-to-end; bottone "Chiudi" non verificato nell'exe; ricalibrazione OVR/soglie "grande momento" non verificata end-to-end; retry automatico download update (v0.3.4) non riverificato con un aggiornamento reale (vedi sopra)
 - **Bassa:** soglia di ritiro automatico; generatori club-crisis con pesi di base uniformi tra loro; trofeo di club forse troppo comune dopo la ricalibrazione OVR (vedi sopra)
 
 ## Archiviato
