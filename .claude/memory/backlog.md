@@ -50,10 +50,18 @@ Funzionalità e idee a lungo termine. Prioritizzato pre-sprint → confluisce in
 - **Criteri accettazione:** prima ricercare il testo esatto/le opzioni sul sito originale, poi implementare con lo stesso pattern degli altri generatori di categoria club-crisis/lifestyle.
 - **Stima:** Piccola, ma richiede prima un giro di ricerca dedicato (testo non ancora noto).
 
+### Club per Arabia Saudita e Qatar (completare l'espansione mondo AFC)
+- **Priorità:** Bassa
+- **Tipo:** Feature
+- **Area:** `data/clubs.ts`, `.claude/research/team-crests.md`
+- **Descrizione:** l'espansione mondo del 2026-08-06 (vedi [[decisions]]) ha coperto 12 dei 14 paesi originariamente pianificati — Arabia Saudita e Qatar sono stati interrotti su richiesta esplicita dell'utente a metà ricerca. Stato lasciato dalla ricerca (non trascritto in `clubs.ts`, solo nel transcript di sessione): Arabia Saudita aveva 4/8 club verificati ma mancavano proprio i big (Al-Hilal/Al-Ittihad/Al-Ahli/Al-Shabab, gli slot di prestige 3/2, serve una query disambiguata per "Al-Ittihad" che altrimenti matcha un club libico omonimo); Qatar aveva 7/8 club trovati via API ma **nessun crestUrl verificato live** (solo letto dal JSON, mai richiesto direttamente) e mancava "Al Arabi".
+- **Criteri accettazione:** 8 club reali per ciascun paese con `crestUrl` verificato HTTP 200 individualmente (mai il payload JSON da solo), prestige 3/3/2/2/1/1/0/0, lega/coppa nazionale (Saudi Pro League/Saudi King Cup idLeague 4668/5649, Qatar Stars League/Emir of Qatar Cup idLeague 4663/4971 — già confermati, badge non ancora fetchati) aggiunte a `leagues`/`competition-badges.ts`.
+- **Stima:** Piccola — stesso pattern già usato per gli altri 12 paesi, serve solo completare la ricerca crest interrotta.
+
 ## Priorità
 - **Alta:** —
 - **Media:** —
-- **Bassa:** promozione/retrocessione estesa oltre i 4 paesi attuali; trofeo continentale di club assegnabile offscreen; nuovo evento "Sostanza misteriosa" (doping); nuovo evento "Fan backlash" (da ricercare)
+- **Bassa:** promozione/retrocessione estesa oltre i 4 paesi attuali; trofeo continentale di club assegnabile offscreen; nuovo evento "Sostanza misteriosa" (doping); nuovo evento "Fan backlash" (da ricercare); club per Arabia Saudita e Qatar (completare l'espansione mondo)
 
 ## Archiviato
 - **Icone trofeo/premio inline sulla riga della tabella carriera** — già implementata (non un nuovo item): osservata nell'originale durante un playtest dal vivo il 2026-08-06 e inizialmente registrata per errore come backlog aperto, senza verificare lo stato attuale del codice. `CareerTable.tsx` (`TrophyChip`/`AwardChip`, righe 12-36) mostra già icone trofeo/premio per riga, aggregate per `stint.ageTo` — introdotto nel commit `28d5b6f` (2026-08-06) ma non documentato esplicitamente all'epoca (stesso pattern già visto con "Momenti di carriera celebrativi", vedi [[decisions]]). Corretto durante la verifica pre-implementazione di questo stesso item.

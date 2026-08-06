@@ -93,10 +93,28 @@ Registro debito tecnico con priorità. Aggiornato da /session-end. Origine spess
 - **Impatto:** rischio medio — se l'evento non si comporta come documentato (es. differenze di versione del runtime WebView2), il bottone "Chiudi" risulterebbe silenziosamente rotto solo nella build desktop, l'unico posto dove ha un effetto reale.
 - **Risoluzione suggerita:** prima della prossima release, rigenerare l'exe con `scripts/build-launcher.ps1` e verificare manualmente che il bottone "Chiudi" chiuda davvero la finestra dell'app.
 
+### Espansione mondo (12 nuovi paesi) e meccanica Giant Killer non verificate end-to-end nel browser
+- **Priorità:** Media
+- **Area:** `data/clubs.ts`, `data/competition-badges.ts`, `lib/career/decisions.ts`/`loop.ts`/`satisfaction.ts`, UI `PenaltyShootout`/`CareerGame`
+- **Data:** 2026-08-06
+- **Descrizione:** sessione interamente di codice/dati — 96 nuovi club verificati via test automatici (297 verdi) + `npm run simulate` (trigger cup-upset 7.1% dei cicli, win rate 23.7%, nessuna frequenza esistente crollata a zero) e crest/badge verificati individualmente via richieste HTTP dirette (non solo letti dal payload JSON), ma nessuna carriera è stata giocata a mano nel browser. Non verificato a vista: che gli stemmi dei 12 nuovi paesi si vedano correttamente in UI (offerte/club corrente/storico), che l'evento "sorpresa di coppa" (Giant Killer) si inneschi e mostri correttamente `PenaltyShootout` col nuovo flavor testuale, che il titolo "Ammazzagigante" compaia nel riepilogo di fine carriera.
+- **Perché rimandato:** stessa convenzione già stabilita nel progetto per le sessioni di questo tipo (es. "miglioria motore su 4 assi", "ricalibrazione OVR") — verificato via test + harness, non manualmente.
+- **Impatto:** rischio medio — è UI/dati nuovi non banali (96 club, 12 leghe, un nuovo evento con mini-gioco), un bug di rendering (es. un `crestUrl` che punta a un'immagine sbagliata nonostante l'HTTP 200, o un problema di layout con nomi club più lunghi del solito) sarebbe visibile solo giocando.
+- **Risoluzione suggerita:** giocare/simulare una carriera con nazionalità in uno dei 12 nuovi paesi (es. Messico/Giappone/Egitto) fino a vedere l'offerta settore giovanile con gli stemmi corretti; giocare una carriera con un club di prestigio 0-1 fino a innescare la sorpresa di coppa.
+
+### `sync-league-rosters.ts` non copre tutte le leghe esistenti (limiti noti dell'API gratuita)
+- **Priorità:** Bassa
+- **Area:** `scripts/sync-league-rosters.ts`
+- **Data:** 2026-08-06
+- **Descrizione:** lo script diagnostico (nuovo, `npm run sync-rosters`) risolve correttamente 11/14 leghe pre-esistenti verso il nome esatto TheSportsDB (via una mappa di override verificata a mano + una scoperta dinamica di fallback). Restano non risolte: Serie C (nessuna lega TSDB singola, 3 gironi — comportamento voluto, non un bug), e **Liga Profesional (Argentina)** — la scoperta dinamica trova solo "Argentinian Copa de la Liga Profesional" che non restituisce un roster. Inoltre confermato in pratica che `search_all_teams.php` con la chiave gratuita **tronca sempre a 10 squadre per risposta**, quindi la lista "in clubs.ts ma non nel roster live" dello script è strutturalmente rumorosa per leghe da più di 10 club reali (documentato nell'header del file).
+- **Perché rimandato:** lo script è comunque utile così com'è (11/14 leghe con report utilizzabile) — non blocca l'uso, la ricerca del nome TSDB esatto per l'Argentina richiede solo un giro di verifica manuale in più.
+- **Impatto:** minimo — lo script è uno strumento diagnostico manuale, non parte del gioco.
+- **Risoluzione suggerita:** trovare e verificare il nome `strLeague` esatto per "Liga Profesional" argentina (probabilmente legato al formato del torneo corrente, che cambia più spesso in Argentina rispetto ad altri paesi) e aggiungerlo a `TSDB_LEAGUE_NAME_OVERRIDES`.
+
 ## Priorità
 - **Alta:** —
-- **Media:** momenti celebrativi/timeline non verificati end-to-end; sistema "satisfaction" (Hall of Fame/record/milestone/titoli) non verificato end-to-end; bottone "Chiudi" non verificato nell'exe; ricalibrazione OVR/soglie "grande momento" non verificata end-to-end (vedi sopra)
-- **Bassa:** soglia di ritiro automatico; generatori club-crisis con pesi di base uniformi tra loro; trofeo di club forse troppo comune dopo la ricalibrazione OVR (vedi sopra); promozione di campionato mai osservata esplicitamente nell'originale (vedi sopra)
+- **Media:** momenti celebrativi/timeline non verificati end-to-end; sistema "satisfaction" (Hall of Fame/record/milestone/titoli) non verificato end-to-end; bottone "Chiudi" non verificato nell'exe; ricalibrazione OVR/soglie "grande momento" non verificata end-to-end; espansione mondo/Giant Killer non verificate end-to-end (vedi sopra)
+- **Bassa:** soglia di ritiro automatico; generatori club-crisis con pesi di base uniformi tra loro; trofeo di club forse troppo comune dopo la ricalibrazione OVR (vedi sopra); promozione di campionato mai osservata esplicitamente nell'originale (vedi sopra); copertura parziale di `sync-league-rosters.ts` (vedi sopra)
 
 ## Archiviato
 - **Finestra di ritiro probabilistico forse più ampia di 34-40** — risolto 2026-08-06: `RETIREMENT_RISK_START_AGE` in `engine.ts` abbassata da 34 a 31, formula passata da quadratica a cubica dopo aver verificato con `npm run simulate` che il solo allargamento con esponente invariato spostava troppo peso verso i ritiri anticipati (auto-cap a 40 anni sceso dal 49.5% al 22.2%, contro un ~50% osservato nella ricerca). Con la cubica l'auto-cap torna al 43.8%, con solo una coda minoritaria di ritiri a 32-34 anni (3.5%+0.1%). Vedi [[decisions]] per il dettaglio numerico completo.

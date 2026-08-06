@@ -3,10 +3,10 @@ type: sprint
 tags: [memory, sprint]
 updated: [2026-08-06]
 ---
-> Aggiornato da /sprint — sessione 2026-08-06: miglioria del motore di gioco su 4 assi (harness
-> di simulazione statistica, meccaniche mancanti fedeli all'originale — trofei nazionali
-> indipendenti/promozione-retrocessione/cambio nazionalità —, varietà e ritmo degli eventi,
-> pulizia tecnica). Vedi voce dedicata più sotto e [[decisions]] per il dettaglio completo.
+> Aggiornato da /sprint — sessione 2026-08-06: espansione mondo (12 nuovi paesi, 96 club reali su
+> CONCACAF/CAF/AFC) + nuova meccanica "Giant Killer" (sorpresa di coppa) + strumento diagnostico
+> `sync-league-rosters.ts`. Arabia Saudita e Qatar interrotti su richiesta esplicita dell'utente,
+> vedi [[backlog]]. Vedi voce dedicata più sotto e [[decisions]] per il dettaglio completo.
 
 # Sprint Corrente
 Stato lavoro in corso. Aggiornato con /sprint. Backlog in [[backlog]], debito in [[tech-debt]].
@@ -313,6 +313,24 @@ Stato lavoro in corso. Aggiornato con /sprint. Backlog in [[backlog]], debito in
   non un bundle di feature grande). `dist/Carriera.exe` rigenerato via `scripts/build-launcher.ps1`
   (FileVersion 0.3.6.0 verificato) e allegato alla [release GitHub
   v0.3.6](https://github.com/Gioixxx/Carriera/releases/tag/v0.3.6). 275 test verdi.
+
+- [x] **Espansione mondo (12 nuovi paesi, 96 club) + meccanica "Giant Killer" + sync-rosters**
+  (2026-08-06, non ancora committato a fine di questa voce): su richiesta esplicita dell'utente di
+  brainstormare nuove meccaniche, scelta la direzione "espansione mondo" tra 4 proposte. Messico/
+  USA/Canada (CONCACAF), Marocco/Senegal/Nigeria/Ghana/Egitto/Costa d'Avorio (CAF), Giappone/Corea
+  del Sud/Australia (AFC) — 12 dei 14 paesi pianificati, ricerca delegata a 3 agenti in background
+  (uno per confederazione), Arabia Saudita e Qatar interrotti a metà su richiesta esplicita
+  dell'utente (dati parziali/non verificati, non trascritti — vedi [[backlog]]). Nuova meccanica
+  "Giant Killer" (sorpresa di coppa, categoria `"cup-upset"`): un club di prestigio ≤1 sfida una
+  corazzata in coppa nazionale, stesso mini-gioco `PenaltyShootout` della finale continentale ma
+  win rate sempre sotto il 50%. Nuovo strumento diagnostico `scripts/sync-league-rosters.ts`
+  (`npm run sync-rosters`) per confrontare periodicamente i roster reali con `clubs.ts` — ha
+  richiesto 2 iterazioni di design dopo aver scoperto in pratica limiti non documentati dell'API
+  gratuita TheSportsDB (troncamento a 10 squadre/lega, scoperta dinamica del nome lega spesso
+  inaffidabile). Vedi [[decisions]] per il dettaglio completo. 297 test verdi (era 275), `tsc`/
+  eslint/`npm run build` puliti, ogni URL nuovo (stemmi/badge) verificato con una richiesta HTTP
+  diretta prima di committarlo. **Non verificato manualmente nel browser** (sessione di codice/
+  dati) — vedi [[tech-debt]].
 
 ## Note tecniche emerse in fase 6
 - jsdom 30 + Node 22+ non espone `window.localStorage` di default (ExperimentalWarning nativa) — polyfill minimale in `vitest.setup.ts`, non è un problema di codice applicativo
