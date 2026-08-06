@@ -2,9 +2,11 @@ import type { ArchivedCareer, DecisionCategory, GameSpeed, Player } from "@/type
 import type { LoopContext } from "./loop";
 import { emptyPersonalRecords, pickBestCareerTitle } from "./satisfaction";
 import { peakOvr } from "./summary";
+import { NEUTRAL_TRAITS, deriveArchetype } from "./traits";
+import { deriveShadowTitle } from "./shadow";
 
 const STORAGE_KEY = "carriera:save";
-const STORAGE_VERSION = 4;
+const STORAGE_VERSION = 5;
 
 export interface SavedGame {
   version: number;
@@ -37,9 +39,19 @@ function migratePlayerV2(raw: Player): Player {
 
 /** Arricchisce un save v3 (privo del flag di cambio nazionalità) con il default. */
 function migratePlayerV3(raw: Player): Player {
-  return {
+  return migratePlayerV4({
     ...raw,
     hasSwitchedNationality: raw.hasSwitchedNationality ?? false,
+  });
+}
+
+/** Arricchisce un save v4 (privo di traits/shadow) con i default neutri. */
+function migratePlayerV4(raw: Player): Player {
+  return {
+    ...raw,
+    traits: raw.traits ?? NEUTRAL_TRAITS,
+    shadow: raw.shadow ?? 0,
+    shadowFlags: raw.shadowFlags ?? {},
   };
 }
 
@@ -64,6 +76,9 @@ export function loadGame(): SavedGame | null {
     }
     if (parsed.version === 3) {
       return { ...parsed, version: STORAGE_VERSION, player: migratePlayerV3(parsed.player) };
+    }
+    if (parsed.version === 4) {
+      return { ...parsed, version: STORAGE_VERSION, player: migratePlayerV4(parsed.player) };
     }
     if (parsed.version !== STORAGE_VERSION) return null;
     return parsed;
@@ -110,6 +125,8 @@ export function buildArchiveEntry(player: Player): ArchivedCareer {
     finalSavingsEur: player.wallet.savingsEur,
     finalPopularity: player.popularity,
     careerTitle: pickBestCareerTitle(player.seasonTitles),
+    archetypeId: deriveArchetype(player.traits, player.shadow).primary ?? undefined,
+    shadowTitle: deriveShadowTitle(player.shadow, player.shadowFlags?.redeemed ?? false),
   };
 }
 

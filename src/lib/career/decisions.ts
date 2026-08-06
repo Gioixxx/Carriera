@@ -6,10 +6,12 @@ import type {
   DecisionOutcome,
   Injury,
   Player,
+  PlayerDelta,
 } from "@/types/career";
 import { clubs, clubsByCountry } from "@/data/clubs";
 import { countries } from "@/data/countries";
 import { clamp, type Rng } from "./progression";
+import { isNationalTeamBanned, shadowMultiplier } from "./shadow";
 
 // ---------- Helper di selezione club ----------
 
@@ -42,17 +44,33 @@ function pickClubs(pool: Club[], count: number, rng: Rng): Club[] {
 
 // ---------- Helper per costruire decisioni/opzioni ----------
 
-function outcome(weight: number, resultText: string, ovrDelta = 0): DecisionOutcome {
-  return { weight, effect: ovrDelta ? { ovrDelta } : {}, resultText };
+function outcome(
+  weight: number,
+  resultText: string,
+  ovrDelta = 0,
+  extra?: Partial<PlayerDelta>,
+): DecisionOutcome {
+  return { weight, effect: { ...(ovrDelta ? { ovrDelta } : {}), ...extra }, resultText };
 }
 
 /** Outcome che infortuna il giocatore invece di applicare solo un malus OVR testuale. */
-function injuryOutcome(weight: number, resultText: string, injury: Injury): DecisionOutcome {
-  return { weight, effect: { injury }, resultText };
+function injuryOutcome(
+  weight: number,
+  resultText: string,
+  injury: Injury,
+  extra?: Partial<PlayerDelta>,
+): DecisionOutcome {
+  return { weight, effect: { injury, ...extra }, resultText };
 }
 
-function signOption(id: string, label: string, club: Club, resultText: string): DecisionOption {
-  return { id, label, club, outcomes: [outcome(100, resultText)] };
+function signOption(
+  id: string,
+  label: string,
+  club: Club,
+  resultText: string,
+  extra?: Partial<PlayerDelta>,
+): DecisionOption {
+  return { id, label, club, outcomes: [outcome(100, resultText, 0, extra)] };
 }
 
 function withHint(option: DecisionOption, hint: string): DecisionOption {
@@ -117,15 +135,19 @@ export const LIFESTYLE_DECISIONS: Decision[] = [
         label: "Segui il piano",
         hint: "Possibile crescita OVR · rischio di calo",
         outcomes: [
-          outcome(60, "Il nuovo regime alimentare ti dà una marcia in più.", 3),
-          outcome(40, "Il cambio di dieta ti destabilizza in campo.", -2),
+          outcome(60, "Il nuovo regime alimentare ti dà una marcia in più.", 3, {
+            traitsDelta: { discipline: -1 },
+          }),
+          outcome(40, "Il cambio di dieta ti destabilizza in campo.", -2, {
+            traitsDelta: { discipline: -3 },
+          }),
         ],
       },
       {
         id: "keep-diet",
         label: "Mantieni la tua dieta",
         hint: "Nessun rischio",
-        outcomes: [outcome(100, "Nessun cambiamento.")],
+        outcomes: [outcome(100, "Nessun cambiamento.", 0, { traitsDelta: { discipline: 4 } })],
       },
     ],
   },
@@ -140,15 +162,17 @@ export const LIFESTYLE_DECISIONS: Decision[] = [
         label: "Accetta",
         hint: "Piccolo boost · rischio di stop",
         outcomes: [
-          outcome(70, "Ti senti più sicuro di te in campo.", 1),
-          outcome(30, "Il tatuaggio si infetta e ti costringe a fermarti.", -2),
+          outcome(70, "Ti senti più sicuro di te in campo.", 1, { traitsDelta: { discipline: -1 } }),
+          outcome(30, "Il tatuaggio si infetta e ti costringe a fermarti.", -2, {
+            traitsDelta: { discipline: -3 },
+          }),
         ],
       },
       {
         id: "reject-tattoo",
         label: "Rifiuta",
         hint: "Nessun rischio",
-        outcomes: [outcome(100, "Nulla succede.")],
+        outcomes: [outcome(100, "Nulla succede.", 0, { traitsDelta: { discipline: 4 } })],
       },
     ],
   },
@@ -163,19 +187,29 @@ export const LIFESTYLE_DECISIONS: Decision[] = [
         label: "Prendilo",
         hint: "Forte crescita OVR · rischio squalifica",
         outcomes: [
-          outcome(75, "L'integratore funziona, ti senti molto più forte.", 5),
-          injuryOutcome(25, "Risulti positivo ai controlli antidoping e vieni squalificato.", {
-            label: "Squalifica per doping",
-            turnsRemaining: 2,
-            ovrPenalty: 4,
+          outcome(75, "L'integratore funziona, ti senti molto più forte.", 5, {
+            traitsDelta: { discipline: -4 },
+            shadowDelta: 15,
+            shadowFlags: { doped: true },
           }),
+          injuryOutcome(
+            25,
+            "Risulti positivo ai controlli antidoping e vieni squalificato.",
+            { label: "Squalifica per doping", turnsRemaining: 2, ovrPenalty: 4 },
+            { traitsDelta: { discipline: -4 }, shadowDelta: 25, shadowFlags: { doped: true } },
+          ),
         ],
       },
       {
         id: "reject-it",
         label: "Rifiuta",
         hint: "Nessun rischio",
-        outcomes: [outcome(100, "Nessun cambiamento.")],
+        outcomes: [
+          outcome(100, "Nessun cambiamento.", 0, {
+            traitsDelta: { discipline: 6 },
+            shadowDelta: -5,
+          }),
+        ],
       },
     ],
   },
@@ -287,15 +321,26 @@ export const LIFESTYLE_DECISIONS: Decision[] = [
         id: "report-it",
         label: "Segnala tutto allo staff",
         hint: "Rispetto dello spogliatoio · nessun vantaggio",
-        outcomes: [outcome(100, "Il tuo gesto viene apprezzato dallo spogliatoio.", 1)],
+        outcomes: [
+          outcome(100, "Il tuo gesto viene apprezzato dallo spogliatoio.", 1, {
+            traitsDelta: { discipline: 4, leadership: 3 },
+            shadowDelta: -5,
+          }),
+        ],
       },
       {
         id: "use-it",
         label: "Usa le informazioni a tuo vantaggio",
         hint: "Vantaggio in campo · rischio se scoperto",
         outcomes: [
-          outcome(50, "Sfrutti l'informazione e brilli in campo.", 3),
-          outcome(50, "Vieni scoperto e la tua reputazione ne risente.", -3),
+          outcome(50, "Sfrutti l'informazione e brilli in campo.", 3, {
+            shadowDelta: 8,
+            shadowFlags: { leakedTactics: true },
+          }),
+          outcome(50, "Vieni scoperto e la tua reputazione ne risente.", -3, {
+            shadowDelta: 8,
+            shadowFlags: { leakedTactics: true },
+          }),
         ],
       },
     ],
@@ -345,12 +390,16 @@ export function generateTransferWindow(player: Player, rng: Rng = Math.random): 
     options: [
       ...offers.map((c) =>
         withHint(
-          signOption(`sign-${c.id}`, `Firma per ${c.name}`, c, `Ti trasferisci al ${c.name}.`),
+          signOption(`sign-${c.id}`, `Firma per ${c.name}`, c, `Ti trasferisci al ${c.name}.`, {
+            traitsDelta: { ambition: 4, loyalty: -2 },
+          }),
           "Nuovo ambiente · stipendio ricalcolato",
         ),
       ),
       withHint(
-        signOption("stay", `Resta al ${currentClub.name}`, currentClub, `Resti al ${currentClub.name}.`),
+        signOption("stay", `Resta al ${currentClub.name}`, currentClub, `Resti al ${currentClub.name}.`, {
+          traitsDelta: { loyalty: 4 },
+        }),
         "Continuità",
       ),
     ],
@@ -422,10 +471,18 @@ export function generateClubCrisis(player: Player, rng: Rng = Math.random): Deci
         label: `Resta e lotta al ${player.club.name}`,
         club: player.club,
         hint: "Lealtà · calo OVR",
-        outcomes: [outcome(100, "Meno possibilità di vincere qualcosa quest'anno.", -2)],
+        outcomes: [
+          outcome(100, "Meno possibilità di vincere qualcosa quest'anno.", -2, {
+            traitsDelta: { leadership: 5, loyalty: 4 },
+          }),
+        ],
       },
       withHint(
-        signOption("leave", `Vai al ${alternative.name}`, alternative, `Ti trasferisci al ${alternative.name}.`),
+        signOption("leave", `Vai al ${alternative.name}`, alternative, `Ti trasferisci al ${alternative.name}.`, {
+          traitsDelta: { ambition: 3, loyalty: -3 },
+          shadowDelta: 10,
+          shadowFlags: { fanBetrayed: true },
+        }),
         "Cambio di ambiente",
       ),
     ],
@@ -480,9 +537,17 @@ export function generateControversialStatement(player: Player, rng: Rng = Math.r
         id: "apologize",
         label: "Scusati pubblicamente",
         club: player.club,
-        outcomes: [outcome(100, "Ti scusi ma il minutaggio cala.", -1)],
+        outcomes: [
+          outcome(100, "Ti scusi ma il minutaggio cala.", -1, {
+            traitsDelta: { showmanship: 5 },
+            shadowDelta: 5,
+          }),
+        ],
       },
-      signOption("leave", `Firma per ${alternative.name}`, alternative, `Lasci per il ${alternative.name}.`),
+      signOption("leave", `Firma per ${alternative.name}`, alternative, `Lasci per il ${alternative.name}.`, {
+        traitsDelta: { showmanship: 5, ambition: 2, loyalty: -2 },
+        shadowDelta: 5,
+      }),
     ],
   };
 }
@@ -507,9 +572,17 @@ export function generateControversialPost(player: Player, rng: Rng = Math.random
         id: "delete-post",
         label: "Cancella il post e scusati",
         club: player.club,
-        outcomes: [outcome(100, "Cancelli il post, ma il caso mediatico ti pesa addosso.", -1)],
+        outcomes: [
+          outcome(100, "Cancelli il post, ma il caso mediatico ti pesa addosso.", -1, {
+            traitsDelta: { showmanship: 5 },
+            shadowDelta: 5,
+          }),
+        ],
       },
-      signOption("leave", `Firma per ${alternative.name}`, alternative, `Lasci per il ${alternative.name}.`),
+      signOption("leave", `Firma per ${alternative.name}`, alternative, `Lasci per il ${alternative.name}.`, {
+        traitsDelta: { showmanship: 5, ambition: 2, loyalty: -2 },
+        shadowDelta: 5,
+      }),
     ],
   };
 }
@@ -597,7 +670,9 @@ export function generateTaxTrouble(player: Player, rng: Rng = Math.random): Deci
         id: "stay",
         label: `Resta al ${player.club.name}`,
         club: player.club,
-        outcomes: [outcome(100, "La distrazione ti pesa addosso.", -3)],
+        outcomes: [
+          outcome(100, "La distrazione ti pesa addosso.", -3, { shadowDelta: 12, shadowFlags: { taxEvaded: true } }),
+        ],
       },
       signOption("leave", `Vai al ${alternative.name}`, alternative, `Lasci per il ${alternative.name}.`),
     ],
@@ -767,7 +842,8 @@ export function nationalCallupChance(ovr: number): number {
 
 export function rollNationalCallup(player: Player, rng: Rng = Math.random): boolean {
   if (player.nationalTeam.called) return false;
-  return rng() < nationalCallupChance(player.ovr);
+  if (isNationalTeamBanned(player.shadow)) return false;
+  return rng() < nationalCallupChance(player.ovr) * shadowMultiplier(player.shadow);
 }
 
 // ---------- Coppa continentale — rigore decisivo ----------
@@ -965,7 +1041,7 @@ export function isSponsorEligible(player: Pick<Player, "popularity">): boolean {
 function economicOutcome(
   weight: number,
   resultText: string,
-  effect: { savingsDelta?: number; popularityDelta?: number },
+  effect: Pick<PlayerDelta, "savingsDelta" | "popularityDelta" | "traitsDelta" | "shadowDelta">,
 ): DecisionOutcome {
   return { weight, effect, resultText };
 }
@@ -1028,10 +1104,12 @@ export function generateSponsorDeal(player: Player, rng: Rng = Math.random): Dec
           economicOutcome(70, "L'accordo va in porto: incassi e popolarità in crescita.", {
             savingsDelta: template.savingsGain,
             popularityDelta: 4,
+            traitsDelta: { showmanship: 4 },
           }),
           economicOutcome(30, "Un dettaglio del contratto genera polemiche.", {
             savingsDelta: template.savingsGain,
             popularityDelta: -3,
+            traitsDelta: { showmanship: 4 },
           }),
         ],
       },
@@ -1040,6 +1118,69 @@ export function generateSponsorDeal(player: Player, rng: Rng = Math.random): Dec
         label: "Rifiuta",
         hint: "Nessun rischio",
         outcomes: [economicOutcome(100, "Rifiuti l'offerta, nulla cambia.", {})],
+      },
+    ],
+  };
+}
+
+// ---------- Scandalo forzato e redenzione (debito morale) ----------
+
+/**
+ * Evento forzato (non passa dal pick di categoria normale, vedi `shouldTriggerScandal` in
+ * `shadow.ts` e il wiring in `loop.ts`) quando il debito morale supera la soglia di scandalo.
+ */
+export function generateScandalDecision(player: Player): Decision {
+  return {
+    id: `scandal-${player.age}`,
+    category: "scandal",
+    title: "Scandalo mediatico",
+    description: "Una serie di voci sul tuo conto esplode sui media: la stampa chiede una presa di posizione.",
+    options: [
+      {
+        id: "come-clean",
+        label: "Gestisci con trasparenza",
+        hint: "Ripulisci la tua immagine · popolarità in calo",
+        outcomes: [
+          outcome(100, "Affronti la stampa a viso aperto: la vicenda si sgonfia lentamente.", 0, {
+            shadowDelta: -12,
+            popularityDelta: -5,
+            shadowFlags: { scandalOccurred: true },
+          }),
+        ],
+      },
+      {
+        id: "deny-everything",
+        label: "Nega tutto",
+        hint: "Nessuna ammissione · il caso resta aperto",
+        outcomes: [
+          outcome(100, "Neghi ogni accusa, ma la stampa non molla la presa.", 0, {
+            shadowDelta: 5,
+            popularityDelta: -10,
+            shadowFlags: { scandalOccurred: true },
+          }),
+        ],
+      },
+    ],
+  };
+}
+
+/** Evento narrativo unico, eleggibile solo dopo uno scandalo affrontato e sceso sotto soglia (vedi `isRedemptionEligible` in `shadow.ts`). */
+export function generateRedemptionDecision(player: Player): Decision {
+  return {
+    id: `redemption-${player.age}`,
+    category: "narrative",
+    title: "Riabilitazione pubblica",
+    description: "Dopo mesi lontano dai riflettori, hai l'occasione di raccontare la tua versione e voltare pagina.",
+    options: [
+      {
+        id: "public-rehabilitation",
+        label: "Racconta la tua storia",
+        outcomes: [
+          outcome(100, "Il pubblico apprezza la tua onestà: la pagina è voltata.", 0, {
+            popularityDelta: 6,
+            shadowFlags: { redeemed: true },
+          }),
+        ],
       },
     ],
   };

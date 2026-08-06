@@ -69,7 +69,7 @@ describe("saveGame / loadGame", () => {
     );
 
     const loaded = loadGame();
-    expect(loaded?.version).toBe(4);
+    expect(loaded?.version).toBe(5);
     expect(loaded?.player.injury).toBeNull();
     expect(loaded?.player.wallet).toEqual({ salaryEurPerCycle: 0, savingsEur: 0 });
     expect(loaded?.player.popularity).toBe(15);
@@ -78,6 +78,14 @@ describe("saveGame / loadGame", () => {
     expect(loaded?.player.currentObjective).toBeNull();
     expect(loaded?.player.records.bestSeasonGoals).toBe(0);
     expect(loaded?.player.hasSwitchedNationality).toBe(false);
+    expect(loaded?.player.traits).toEqual({
+      loyalty: 50,
+      ambition: 50,
+      showmanship: 50,
+      discipline: 50,
+      leadership: 50,
+    });
+    expect(loaded?.player.shadow).toBe(0);
   });
 
   it("dovrebbe migrare un save v2 privo dei campi soddisfazione aggiungendo i default", () => {
@@ -98,11 +106,12 @@ describe("saveGame / loadGame", () => {
     );
 
     const loaded = loadGame();
-    expect(loaded?.version).toBe(4);
+    expect(loaded?.version).toBe(5);
     expect(loaded?.player.milestonesReached).toEqual([]);
     expect(loaded?.player.currentObjective).toBeNull();
     expect(loaded?.player.records.peakMarketValueEur).toBe(samplePlayer().marketValueEur);
     expect(loaded?.player.hasSwitchedNationality).toBe(false);
+    expect(loaded?.player.shadow).toBe(0);
   });
 
   it("dovrebbe migrare un save v3 privo del flag hasSwitchedNationality aggiungendo il default", () => {
@@ -120,8 +129,38 @@ describe("saveGame / loadGame", () => {
     );
 
     const loaded = loadGame();
-    expect(loaded?.version).toBe(4);
+    expect(loaded?.version).toBe(5);
     expect(loaded?.player.hasSwitchedNationality).toBe(false);
+    expect(loaded?.player.shadow).toBe(0);
+  });
+
+  it("dovrebbe migrare un save v4 privo di traits/shadow aggiungendo i default neutri", () => {
+    const legacyPlayer = samplePlayer() as unknown as Record<string, unknown>;
+    delete legacyPlayer.traits;
+    delete legacyPlayer.shadow;
+    delete legacyPlayer.shadowFlags;
+    window.localStorage.setItem(
+      "carriera:save",
+      JSON.stringify({
+        version: 4,
+        player: legacyPlayer,
+        speed: "normal",
+        context: INITIAL_LOOP_CONTEXT,
+        recentCategories: [],
+      }),
+    );
+
+    const loaded = loadGame();
+    expect(loaded?.version).toBe(5);
+    expect(loaded?.player.traits).toEqual({
+      loyalty: 50,
+      ambition: 50,
+      showmanship: 50,
+      discipline: 50,
+      leadership: 50,
+    });
+    expect(loaded?.player.shadow).toBe(0);
+    expect(loaded?.player.shadowFlags).toEqual({});
   });
 });
 
@@ -163,5 +202,19 @@ describe("loadArchive / appendToArchive", () => {
     expect(entry.finalSavingsEur).toBe(player.wallet.savingsEur);
     expect(entry.finalPopularity).toBe(player.popularity);
     expect(entry.careerTitle).toBe("Carriera solida");
+    expect(entry.archetypeId).toBeUndefined();
+    expect(entry.shadowTitle).toBeNull();
+  });
+
+  it("buildArchiveEntry dovrebbe popolare archetypeId/shadowTitle da traits/shadow", () => {
+    const player: Player = {
+      ...samplePlayer(),
+      traits: { loyalty: 80, ambition: 50, showmanship: 50, discipline: 50, leadership: 50 },
+      shadow: 60,
+      shadowFlags: { scandalOccurred: true },
+    };
+    const entry = buildArchiveEntry(player);
+    expect(entry.archetypeId).toBe("problem");
+    expect(entry.shadowTitle).toBe("Carriera controversa");
   });
 });

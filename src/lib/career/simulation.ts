@@ -1,8 +1,17 @@
-import type { Decision, DecisionCategory, DecisionOption, GameSpeed, Player, PlayerIdentity } from "@/types/career";
+import type {
+  ArchetypeId,
+  Decision,
+  DecisionCategory,
+  DecisionOption,
+  GameSpeed,
+  Player,
+  PlayerIdentity,
+} from "@/types/career";
 import { createPlayer } from "./engine";
 import { generateAcademyOffer } from "./decisions";
 import { INITIAL_LOOP_CONTEXT, pickNextDecision, pushRecentCategory, resolveCycle, type LoopContext } from "./loop";
 import type { Rng } from "./progression";
+import { deriveArchetype } from "./traits";
 
 /** Tetto di sicurezza contro loop infiniti se un bug futuro rompe checkRetirement. */
 const MAX_SIMULATED_CYCLES = 60;
@@ -18,6 +27,14 @@ export interface SimulatedCareerResult {
   peakOvr: number;
   /** Cicli "cup-upset" vinti (titolo di stagione "giantKiller" assegnato) — per misurare il win rate reale. */
   cupUpsetWinCount: number;
+  /** Archetipo dominante a fine carriera, se emerso — per misurarne la distribuzione. */
+  finalArchetype: ArchetypeId | null;
+  /** Debito morale finale, 0-100 — per bucket di distribuzione nel report. */
+  finalShadow: number;
+  /** true se è scattato almeno uno scandalo forzato durante la carriera. */
+  hadScandal: boolean;
+  /** true se il giocatore ha completato l'evento di redenzione dopo uno scandalo. */
+  redeemed: boolean;
 }
 
 /**
@@ -73,5 +90,16 @@ export function simulateCareer(
     context = next.context;
   }
 
-  return { player, cyclesPlayed, injuryCount, categoryPicks, peakOvr, cupUpsetWinCount };
+  return {
+    player,
+    cyclesPlayed,
+    injuryCount,
+    categoryPicks,
+    peakOvr,
+    cupUpsetWinCount,
+    finalArchetype: deriveArchetype(player.traits, player.shadow).primary,
+    finalShadow: player.shadow,
+    hadScandal: player.shadowFlags?.scandalOccurred ?? false,
+    redeemed: player.shadowFlags?.redeemed ?? false,
+  };
 }

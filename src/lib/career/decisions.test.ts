@@ -17,7 +17,9 @@ import {
   generateLoanOffer,
   generateLoanReturn,
   generateNationalitySwitch,
+  generateRedemptionDecision,
   generateReturnHome,
+  generateScandalDecision,
   generateSponsorDeal,
   generateTaxTrouble,
   generateTransferWindow,
@@ -129,6 +131,16 @@ describe("generateTransferWindow", () => {
     const offers = decision.options.filter((o) => o.id !== "stay");
     expect(offers.every((o) => o.club!.id !== player.club!.id)).toBe(true);
   });
+
+  it("firmare dovrebbe alzare ambition/abbassare loyalty, restare dovrebbe alzare loyalty", () => {
+    const player = playerAt();
+    const decision = generateTransferWindow(player, FIXED_RNG);
+    const stay = decision.options.find((o) => o.id === "stay")!;
+    const sign = decision.options.find((o) => o.id !== "stay")!;
+
+    expect(stay.outcomes[0].effect.traitsDelta).toEqual({ loyalty: 4 });
+    expect(sign.outcomes[0].effect.traitsDelta).toEqual({ ambition: 4, loyalty: -2 });
+  });
 });
 
 describe("generateLoanOffer", () => {
@@ -165,6 +177,18 @@ describe("generateClubCrisis", () => {
     expect(stay?.outcomes[0].effect.ovrDelta).toBeLessThan(0);
     expect(leave?.club?.id).not.toBe(player.club!.id);
   });
+
+  it("resta dovrebbe alzare leadership/loyalty, lasciare dovrebbe alzare ambition/shadow e abbassare loyalty", () => {
+    const player = playerAt();
+    const decision = generateClubCrisis(player, FIXED_RNG);
+    const stay = decision.options.find((o) => o.id === "stay-and-fight")!;
+    const leave = decision.options.find((o) => o.id === "leave")!;
+
+    expect(stay.outcomes[0].effect.traitsDelta).toEqual({ leadership: 5, loyalty: 4 });
+    expect(leave.outcomes[0].effect.traitsDelta).toEqual({ ambition: 3, loyalty: -3 });
+    expect(leave.outcomes[0].effect.shadowDelta).toBe(10);
+    expect(leave.outcomes[0].effect.shadowFlags).toEqual({ fanBetrayed: true });
+  });
 });
 
 describe("generateCompetitionForSpot e generateControversialStatement", () => {
@@ -181,6 +205,18 @@ describe("generateCompetitionForSpot e generateControversialStatement", () => {
     const leave = decision.options.find((o) => o.id === "leave");
     expect(leave?.club?.prestige).toBeLessThan(player.club!.prestige);
   });
+
+  it("generateControversialStatement dovrebbe alzare showmanship/shadow su entrambe le opzioni", () => {
+    const player = playerAt();
+    const decision = generateControversialStatement(player, FIXED_RNG);
+    const apologize = decision.options.find((o) => o.id === "apologize")!;
+    const leave = decision.options.find((o) => o.id === "leave")!;
+
+    expect(apologize.outcomes[0].effect.traitsDelta).toEqual({ showmanship: 5 });
+    expect(apologize.outcomes[0].effect.shadowDelta).toBe(5);
+    expect(leave.outcomes[0].effect.traitsDelta).toEqual({ showmanship: 5, ambition: 2, loyalty: -2 });
+    expect(leave.outcomes[0].effect.shadowDelta).toBe(5);
+  });
 });
 
 describe("generateControversialPost", () => {
@@ -191,6 +227,17 @@ describe("generateControversialPost", () => {
     const leave = decision.options.find((o) => o.id === "leave");
     expect(deletePost?.outcomes[0].effect.ovrDelta).toBeLessThan(0);
     expect(leave?.club?.prestige).toBeLessThan(player.club!.prestige);
+  });
+
+  it("dovrebbe alzare showmanship/shadow su entrambe le opzioni", () => {
+    const player = playerAt();
+    const decision = generateControversialPost(player, FIXED_RNG);
+    const deletePost = decision.options.find((o) => o.id === "delete-post")!;
+    const leave = decision.options.find((o) => o.id === "leave")!;
+
+    expect(deletePost.outcomes[0].effect.traitsDelta).toEqual({ showmanship: 5 });
+    expect(deletePost.outcomes[0].effect.shadowDelta).toBe(5);
+    expect(leave.outcomes[0].effect.shadowDelta).toBe(5);
   });
 });
 
@@ -326,6 +373,32 @@ describe("LIFESTYLE_DECISIONS — nuovi eventi", () => {
     const rejectIt = mysteriousSubstance.options.find((o) => o.id === "reject-it")!;
     expect(rejectIt.outcomes.every((o) => !o.effect.injury && !o.effect.ovrDelta)).toBe(true);
   });
+
+  it("'Sostanza misteriosa' dovrebbe alzare shadow su entrambi gli esiti di 'Prendilo', di più se squalificato", () => {
+    const mysteriousSubstance = LIFESTYLE_DECISIONS.find((d) => d.id === "mysterious-substance")!;
+    const takeIt = mysteriousSubstance.options.find((o) => o.id === "take-it")!;
+    const success = takeIt.outcomes.find((o) => !o.effect.injury)!;
+    const suspension = takeIt.outcomes.find((o) => o.effect.injury)!;
+
+    expect(success.effect.shadowDelta).toBe(15);
+    expect(success.effect.shadowFlags).toEqual({ doped: true });
+    expect(suspension.effect.shadowDelta).toBe(25);
+    expect(suspension.effect.shadowFlags).toEqual({ doped: true });
+
+    const rejectIt = mysteriousSubstance.options.find((o) => o.id === "reject-it")!;
+    expect(rejectIt.outcomes[0].effect.shadowDelta).toBe(-5);
+  });
+
+  it("'Test di onestà': usare le informazioni dovrebbe alzare shadow, segnalarle dovrebbe abbassarlo", () => {
+    const honestyTest = LIFESTYLE_DECISIONS.find((d) => d.id === "honesty-test")!;
+    const useIt = honestyTest.options.find((o) => o.id === "use-it")!;
+    const reportIt = honestyTest.options.find((o) => o.id === "report-it")!;
+
+    expect(useIt.outcomes.every((o) => o.effect.shadowDelta === 8)).toBe(true);
+    expect(useIt.outcomes.every((o) => o.effect.shadowFlags?.leakedTactics === true)).toBe(true);
+    expect(reportIt.outcomes[0].effect.shadowDelta).toBe(-5);
+    expect(reportIt.outcomes[0].effect.traitsDelta).toEqual({ discipline: 4, leadership: 3 });
+  });
 });
 
 describe("generateEndOfCycle", () => {
@@ -349,6 +422,14 @@ describe("eventi condizionati dal contesto", () => {
     const decision = generateTaxTrouble(player, FIXED_RNG);
     const leave = decision.options.find((o) => o.id === "leave");
     expect(leave?.club?.country).not.toBe(player.club!.country);
+  });
+
+  it("generateTaxTrouble: restare (gestione sporca) dovrebbe alzare shadow", () => {
+    const player = playerAt();
+    const decision = generateTaxTrouble(player, FIXED_RNG);
+    const stay = decision.options.find((o) => o.id === "stay")!;
+    expect(stay.outcomes[0].effect.shadowDelta).toBe(12);
+    expect(stay.outcomes[0].effect.shadowFlags).toEqual({ taxEvaded: true });
   });
 
   it("isReturnHomeEligible dovrebbe essere falso se il club è già nel paese di nazionalità", () => {
@@ -402,6 +483,17 @@ describe("nationalCallupChance e rollNationalCallup", () => {
     const player = { ...playerAt(), ovr: 90 }; // chance ≈ 0.314
     expect(rollNationalCallup(player, () => 0.1)).toBe(true);
     expect(rollNationalCallup(player, () => 0.9)).toBe(false);
+  });
+
+  it("rollNationalCallup dovrebbe essere bloccato sopra la soglia di ban (shadow >= 75)", () => {
+    const player = { ...playerAt(), ovr: 90, shadow: 75 };
+    expect(rollNationalCallup(player, () => 0)).toBe(false);
+  });
+
+  it("rollNationalCallup dovrebbe essere moltiplicato dallo shadowMultiplier sotto la soglia di ban", () => {
+    const player = { ...playerAt(), ovr: 90, shadow: 50 }; // chance ≈ 0.314 * 0.75 ≈ 0.235
+    expect(rollNationalCallup(player, () => 0.2)).toBe(true);
+    expect(rollNationalCallup(player, () => 0.3)).toBe(false);
   });
 });
 
@@ -568,6 +660,41 @@ describe("generateSponsorDeal", () => {
     const decision = generateSponsorDeal(player, FIXED_RNG);
     expect(decision.category).toBe("sponsor");
     expect(decision.options.map((o) => o.id)).toEqual(["accept", "decline"]);
+  });
+
+  it("accettare dovrebbe alzare showmanship su entrambi gli esiti pesati", () => {
+    const player = { ...playerAt(), popularity: 40 };
+    const decision = generateSponsorDeal(player, FIXED_RNG);
+    const accept = decision.options.find((o) => o.id === "accept")!;
+    expect(accept.outcomes.every((o) => o.effect.traitsDelta?.showmanship === 4)).toBe(true);
+  });
+});
+
+describe("generateScandalDecision e generateRedemptionDecision", () => {
+  it("generateScandalDecision dovrebbe avere categoria scandal e due opzioni deterministiche", () => {
+    const player = playerAt();
+    const decision = generateScandalDecision(player);
+    expect(decision.category).toBe("scandal");
+    expect(decision.options.map((o) => o.id)).toEqual(["come-clean", "deny-everything"]);
+    for (const option of decision.options) {
+      expect(option.outcomes).toHaveLength(1);
+      expect(option.outcomes[0].effect.shadowFlags).toEqual({ scandalOccurred: true });
+    }
+  });
+
+  it("gestire con trasparenza dovrebbe abbassare shadow, negare dovrebbe alzarlo", () => {
+    const decision = generateScandalDecision(playerAt());
+    const comeClean = decision.options.find((o) => o.id === "come-clean")!;
+    const deny = decision.options.find((o) => o.id === "deny-everything")!;
+    expect(comeClean.outcomes[0].effect.shadowDelta).toBeLessThan(0);
+    expect(deny.outcomes[0].effect.shadowDelta).toBeGreaterThan(0);
+  });
+
+  it("generateRedemptionDecision dovrebbe avere categoria narrative e impostare shadowFlags.redeemed", () => {
+    const decision = generateRedemptionDecision(playerAt());
+    expect(decision.category).toBe("narrative");
+    expect(decision.options).toHaveLength(1);
+    expect(decision.options[0].outcomes[0].effect.shadowFlags).toEqual({ redeemed: true });
   });
 });
 

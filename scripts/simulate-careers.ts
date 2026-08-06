@@ -1,5 +1,5 @@
 import { it } from "vitest";
-import type { AwardType, DecisionCategory, PlayerIdentity, Position } from "@/types/career";
+import type { ArchetypeId, AwardType, DecisionCategory, PlayerIdentity, Position } from "@/types/career";
 import { simulateCareer } from "@/lib/career/simulation";
 
 /**
@@ -55,8 +55,36 @@ it("simula molte carriere e stampa le frequenze osservate", () => {
     "85-89": 0,
     "90+": 0,
   };
+  const archetypeCounts: Record<ArchetypeId | "nessuno", number> = {
+    flagbearer: 0,
+    mercenary: 0,
+    showman: 0,
+    pro: 0,
+    leader: 0,
+    problem: 0,
+    nessuno: 0,
+  };
+  const shadowBuckets: Record<string, number> = {
+    "0-24": 0,
+    "25-49": 0,
+    "50-74": 0,
+    "75-89": 0,
+    "90+": 0,
+  };
+  let scandalCount = 0;
+  let redeemedCount = 0;
 
-  for (const { player, categoryPicks, cyclesPlayed, peakOvr, cupUpsetWinCount } of results) {
+  for (const {
+    player,
+    categoryPicks,
+    cyclesPlayed,
+    peakOvr,
+    cupUpsetWinCount,
+    finalArchetype,
+    finalShadow,
+    hadScandal,
+    redeemed,
+  } of results) {
     totalTrophies += player.trophies.length;
     totalAwards += player.awards.length;
     for (const award of player.awards) awardCounts[award.type] += 1;
@@ -73,6 +101,14 @@ it("simula molte carriere e stampa le frequenze osservate", () => {
       const key = cat as DecisionCategory;
       categoryTotals[key] = (categoryTotals[key] ?? 0) + (count ?? 0);
     }
+    archetypeCounts[finalArchetype ?? "nessuno"] += 1;
+    if (finalShadow < 25) shadowBuckets["0-24"] += 1;
+    else if (finalShadow < 50) shadowBuckets["25-49"] += 1;
+    else if (finalShadow < 75) shadowBuckets["50-74"] += 1;
+    else if (finalShadow < 90) shadowBuckets["75-89"] += 1;
+    else shadowBuckets["90+"] += 1;
+    if (hadScandal) scandalCount += 1;
+    if (redeemed) redeemedCount += 1;
   }
 
   console.log(`\n=== Simulazione di ${CAREER_COUNT} carriere ===\n`);
@@ -108,5 +144,18 @@ it("simula molte carriere e stampa le frequenze osservate", () => {
     console.log(`  Cicli innescati: ${cupUpsetCycles} (${pct(cupUpsetCycles, totalCyclesPlayed)} dei cicli totali)`);
     console.log(`  Vinti: ${totalCupUpsetWins} (${pct(totalCupUpsetWins, cupUpsetCycles)} dei cicli innescati)`);
   }
+
+  console.log(`\n--- Archetipo finale ---`);
+  for (const [id, count] of Object.entries(archetypeCounts)) {
+    console.log(`  ${id}: ${pct(count, CAREER_COUNT)}`);
+  }
+
+  console.log(`\n--- Debito morale (shadow) finale ---`);
+  for (const [bucket, count] of Object.entries(shadowBuckets)) {
+    console.log(`  ${bucket}: ${pct(count, CAREER_COUNT)}`);
+  }
+  const scandalCycles = categoryTotals["scandal"] ?? 0;
+  console.log(`  Carriere con almeno 1 scandalo: ${pct(scandalCount, CAREER_COUNT)} (${pct(scandalCycles, totalCyclesPlayed)} dei cicli totali)`);
+  console.log(`  Carriere redente: ${pct(redeemedCount, CAREER_COUNT)}`);
   console.log("");
 });

@@ -2,7 +2,9 @@ import { Flag, Trophy as TrophyIcon } from "lucide-react";
 import type { ArchivedCareer, Player } from "@/types/career";
 import { AWARD_LABELS } from "@/lib/career/award-labels";
 import { hallOfFameWinsFor, pickBestCareerTitle } from "@/lib/career/satisfaction";
+import { deriveShadowTitle } from "@/lib/career/shadow";
 import { peakOvr, summarizeClubHistory } from "@/lib/career/summary";
+import { ARCHETYPE_LABELS, deriveArchetype } from "@/lib/career/traits";
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
 import { AwardBadge } from "./AwardBadge";
@@ -50,6 +52,8 @@ export function CareerSummary({ player, onRestart, archive = [] }: CareerSummary
   const awards = [...player.awards].sort((a, b) => a.age - b.age);
   const bestTitle = pickBestCareerTitle(player.seasonTitles);
   const recentTitles = [...player.seasonTitles].slice(-4).reverse();
+  const archetype = deriveArchetype(player.traits, player.shadow);
+  const shadowTitle = deriveShadowTitle(player.shadow, player.shadowFlags?.redeemed ?? false);
 
   const highlightTrophies = [...trophies].slice(-3).reverse();
   const highlightAwards = [...awards].slice(-2).reverse();
@@ -91,6 +95,8 @@ export function CareerSummary({ player, onRestart, archive = [] }: CareerSummary
           <p className="text-xs text-(--color-text-muted) sm:text-sm">
             Ritirato a {player.age} anni · {player.clubHistory.length}{" "}
             {player.clubHistory.length === 1 ? "ciclo" : "cicli"} · {bestTitle}
+            {archetype.primary ? ` · Stile: ${ARCHETYPE_LABELS[archetype.primary]}` : ""}
+            {shadowTitle ? ` · ${shadowTitle}` : ""}
           </p>
         </div>
 

@@ -71,6 +71,15 @@ describe("availableCategories", () => {
     };
     expect(availableCategories(veteran, INITIAL_LOOP_CONTEXT)).toContain("narrative");
   });
+
+  it("dovrebbe includere narrative per un giocatore eleggibile alla redenzione", () => {
+    const redeemable: Player = {
+      ...playerAt(),
+      shadow: 20,
+      shadowFlags: { scandalOccurred: true },
+    };
+    expect(availableCategories(redeemable, INITIAL_LOOP_CONTEXT)).toContain("narrative");
+  });
 });
 
 describe("shouldTriggerContinentalFinal", () => {
@@ -117,6 +126,27 @@ describe("shouldTriggerCupUpset", () => {
 
   it("dovrebbe rispettare la soglia di probabilità", () => {
     expect(shouldTriggerCupUpset(playerAt(SAMPDORIA), INITIAL_LOOP_CONTEXT, () => 0.99)).toBe(false);
+  });
+});
+
+describe("pickNextDecision — scandalo forzato", () => {
+  it("dovrebbe generare uno scandalo forzato quando shadow supera la soglia", () => {
+    const player = { ...playerAt(JUVENTUS), ovr: 70, shadow: 60 };
+    const { decision, category } = pickNextDecision(player, INITIAL_LOOP_CONTEXT, [], () => 0);
+    expect(category).toBe("scandal");
+    expect(decision.category).toBe("scandal");
+  });
+
+  it("non dovrebbe ripetere lo scandalo se è già capitato di recente", () => {
+    const player = { ...playerAt(JUVENTUS), ovr: 70, shadow: 60 };
+    const { category } = pickNextDecision(player, INITIAL_LOOP_CONTEXT, ["scandal"], () => 0);
+    expect(category).not.toBe("scandal");
+  });
+
+  it("non dovrebbe scattare sotto la soglia di shadow", () => {
+    const player = { ...playerAt(JUVENTUS), ovr: 70, shadow: 40 };
+    const { category } = pickNextDecision(player, INITIAL_LOOP_CONTEXT, [], () => 0);
+    expect(category).not.toBe("scandal");
   });
 });
 
@@ -248,6 +278,15 @@ describe("resolveCycle", () => {
     const result = resolveCycle(player, INITIAL_LOOP_CONTEXT, "loan", option, "normal", () => 0.99);
 
     expect(result.context.loanParentClub).toEqual(JUVENTUS);
+  });
+
+  it("dovrebbe alzare leadership quando scatta la convocazione in nazionale", () => {
+    const player = { ...playerAt(), ovr: 95 };
+    const option = { id: "sign", label: "Firma", club: JUVENTUS, outcomes: [{ weight: 100, effect: {}, resultText: "Firmato." }] };
+    const result = resolveCycle(player, INITIAL_LOOP_CONTEXT, "transfer", option, "normal", () => 0);
+
+    expect(result.nationalCallup).toBe(true);
+    expect(result.player.traits.leadership).toBeGreaterThan(player.traits.leadership);
   });
 
   it("dovrebbe assegnare il trofeo continentale se la finale è vinta", () => {

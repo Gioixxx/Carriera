@@ -5,6 +5,8 @@ import { Award as AwardIcon, HeartCrack, Target, Trophy as TrophyIcon } from "lu
 import type { Player } from "@/types/career";
 import { countries } from "@/data/countries";
 import { useCountUp } from "@/hooks/useMotion";
+import { ARCHETYPE_LABELS, deriveArchetype } from "@/lib/career/traits";
+import { SHADOW_RUMOR_THRESHOLD } from "@/lib/career/shadow";
 import { cn } from "@/lib/utils";
 import { ClubCrest } from "./ClubCrest";
 import { JerseyBadge } from "./JerseyBadge";
@@ -32,6 +34,9 @@ export function PlayerCard({ player, compact = false, flashRecords }: PlayerCard
   const awardCount = player.awards.length;
 
   const isGoalkeeper = player.position === "GK";
+  const archetype = deriveArchetype(player.traits, player.shadow);
+  const showArchetypeChip = player.clubHistory.length >= 4 && archetype.primary !== null;
+  const showRumorsChip = player.shadow >= SHADOW_RUMOR_THRESHOLD;
   const displayOvr = useCountUp(player.ovr, 800);
   const displayApps = useCountUp(player.career.apps, 800);
   const displayGoals = useCountUp(player.career.goals, 800);
@@ -90,6 +95,19 @@ export function PlayerCard({ player, compact = false, flashRecords }: PlayerCard
             >
               <HeartCrack size={10} aria-hidden="true" />
               Infortunato
+            </span>
+          ) : null}
+          {showArchetypeChip ? (
+            <span className="ml-1.5 rounded bg-(--color-accent)/15 px-1.5 py-0.5 text-[10px] font-semibold tracking-wide text-(--color-accent) uppercase">
+              Stile: {ARCHETYPE_LABELS[archetype.primary!]}
+            </span>
+          ) : null}
+          {showRumorsChip ? (
+            <span
+              className="ml-1.5 rounded bg-(--color-warning)/15 px-1.5 py-0.5 text-[10px] font-semibold tracking-wide text-(--color-warning) uppercase"
+              title="Girano voci poco lusinghiere sul tuo conto"
+            >
+              Rumors
             </span>
           ) : null}
           <p

@@ -1,6 +1,7 @@
 import type { Award, AwardType, Club, Player, StatLine, Trophy } from "@/types/career";
 import type { Confederation } from "@/data/countries";
 import { clamp, type Rng } from "./progression";
+import { shadowMultiplier } from "./shadow";
 
 const CONFEDERATION_TOURNAMENT: Record<Confederation, string> = {
   UEFA: "Europei",
@@ -109,12 +110,12 @@ const TOP_SCORER_ROLL_CHANCE = 0.5;
 const BALLON_DOR_ROLL_CHANCE = 0.3;
 
 export function rollAward(
-  player: Pick<Player, "ovr" | "club">,
+  player: Pick<Player, "ovr" | "club" | "shadow">,
   seasonStats: StatLine,
   age: number,
   rng: Rng = Math.random,
 ): Award | null {
-  if (rng() >= awardChance(player.ovr)) return null;
+  if (rng() >= awardChance(player.ovr) * shadowMultiplier(player.shadow)) return null;
 
   const club = player.club ?? undefined;
   let type: AwardType = "player-of-the-season";

@@ -58,10 +58,34 @@ Funzionalità e idee a lungo termine. Prioritizzato pre-sprint → confluisce in
 - **Criteri accettazione:** 8 club reali per ciascun paese con `crestUrl` verificato HTTP 200 individualmente (mai il payload JSON da solo), prestige 3/3/2/2/1/1/0/0, lega/coppa nazionale (Saudi Pro League/Saudi King Cup idLeague 4668/5649, Qatar Stars League/Emir of Qatar Cup idLeague 4663/4971 — già confermati, badge non ancora fetchati) aggiunte a `leagues`/`competition-badges.ts`.
 - **Stima:** Piccola — stesso pattern già usato per gli altri 12 paesi, serve solo completare la ricerca crest interrotta.
 
+### Pool di offerte/eventi filtrati per archetipo/shadow (parte "lettura" di §1/§3)
+- **Priorità:** Media
+- **Tipo:** Feature
+- **Area:** `lib/career/decisions.ts`, `lib/career/loop.ts`
+- **Descrizione:** la sessione Traits/archetipo + Shadow (2026-08-06, vedi [[decisions]]) ha implementato solo la parte "scrittura" (scelte → delta → archetipo/shadow) e un moltiplicatore su formule già esistenti (award/callup) — deliberatamente esclusa la parte "lettura": un giocatore "Bandiera" che vede meno offerte di trasferimento "mercenarie", un "Mercenario" che vede offerte più ricche/meno club-progetto, sponsor "discutibili" più facili con shadow in fascia rumor (25-49). Nessuna decisione oggi legge lo stato comportamentale per pesare *quali* opzioni/offerte vengono generate — sarebbe la prima istanza di questo pattern nel codice.
+- **Criteri accettazione:** almeno un pool di offerte (es. `generateTransferWindow`) pesato per archetipo dominante, verificato con l'harness (`npm run simulate`, estendendo la `pickOption` per perseguire deliberatamente un archetipo) prima di fissare qualunque peso — stesso standard già usato per OVR/award.
+- **Stima:** Media — richiede prima di misurare la reachability reale di un archetipo con una `pickOption` non uniforme (vedi [[tech-debt]]), poi introdurre la prima istanza di generazione pesata da stato comportamentale.
+
+### Relazioni NPC persistenti (§2 del documento archetipo/shadow)
+- **Priorità:** Media
+- **Tipo:** Feature
+- **Area:** nuovo `lib/career/relations.ts`, `types/career.ts`, `lib/career/loop.ts`, `lib/career/decisions.ts`
+- **Descrizione:** terza meccanica proposta dall'utente insieme a Traits/archetipo (§1) e Shadow (§3), esplicitamente rimandata a una sessione dedicata — 3-4 relazioni leggere (allenatore/agente/rivale/mentore), ognuna un'identità stabile generata una volta + un intero −2…+2 di affinità, con eventi condizionati (es. "il mister ti chiede di cambiare ruolo", "il tuo agente propone un deal grigio" — quest'ultimo un ponte naturale verso `shadowDelta`, già esistente). L'utente stesso l'ha messa per ultima nell'ordine di implementazione ("dopo che i delta esistono").
+- **Criteri accettazione:** vedi la proposta completa dell'utente in questa sessione (2026-08-06) per il modello dati (`Relation`/`RelationId`), gli eventi esempio e le regole anti-scope-creep ("max 4 relazioni", "coach si resetta al transfer", "rival nasce solo se OVR ≥ club median o dopo N cicli").
+- **Stima:** Media-grande — il modello dati è piccolo, il contenuto (copy per 4 relazioni × più eventi ciascuna) è il costo reale, per stima dell'utente stesso.
+
+### Ritiro forzato/squalifica multi-ciclo a shadow≥90
+- **Priorità:** Bassa
+- **Tipo:** Feature
+- **Area:** `lib/career/engine.ts` (`checkRetirement`), `lib/career/shadow.ts`
+- **Descrizione:** ultima riga della tabella soglie shadow proposta dall'utente (§3): sopra 90, ritiro forzato raro oppure squalifica multi-ciclo (come un `Injury` ma di tipo "sospensione"). Deliberatamente escluso dalla sessione 2026-08-06 — il pezzo più raro e rischioso da bilanciare del sistema shadow, sproporzionato rispetto all'effort "piccola-media" stimato dall'utente per il resto.
+- **Criteri accettazione:** con l'harness esteso già in `simulation.ts` (bucket shadow 90+), misurare quanto è raggiungibile shadow≥90 prima di implementare l'effetto — probabilmente richiede prima di alzare la frequenza degli eventi shadow-positivi, dato che a shadow-tuning invariato la fascia 90+ risulta già ~0% su 2000 carriere casuali.
+- **Stima:** Piccola una volta misurata la reachability — riuso diretto del pattern `Injury`/`tickInjury` già esistente per una sospensione multi-ciclo.
+
 ## Priorità
 - **Alta:** —
-- **Media:** —
-- **Bassa:** promozione/retrocessione estesa oltre i 4 paesi attuali; trofeo continentale di club assegnabile offscreen; nuovo evento "Sostanza misteriosa" (doping); nuovo evento "Fan backlash" (da ricercare); club per Arabia Saudita e Qatar (completare l'espansione mondo)
+- **Media:** pool offerte/eventi filtrati per archetipo/shadow; relazioni NPC persistenti (§2, vedi sopra)
+- **Bassa:** promozione/retrocessione estesa oltre i 4 paesi attuali; trofeo continentale di club assegnabile offscreen; nuovo evento "Sostanza misteriosa" (doping); nuovo evento "Fan backlash" (da ricercare); club per Arabia Saudita e Qatar (completare l'espansione mondo); ritiro forzato/squalifica multi-ciclo a shadow≥90 (vedi sopra)
 
 ## Archiviato
 - **Icone trofeo/premio inline sulla riga della tabella carriera** — già implementata (non un nuovo item): osservata nell'originale durante un playtest dal vivo il 2026-08-06 e inizialmente registrata per errore come backlog aperto, senza verificare lo stato attuale del codice. `CareerTable.tsx` (`TrophyChip`/`AwardChip`, righe 12-36) mostra già icone trofeo/premio per riga, aggregate per `stint.ageTo` — introdotto nel commit `28d5b6f` (2026-08-06) ma non documentato esplicitamente all'epoca (stesso pattern già visto con "Momenti di carriera celebrativi", vedi [[decisions]]). Corretto durante la verifica pre-implementazione di questo stesso item.

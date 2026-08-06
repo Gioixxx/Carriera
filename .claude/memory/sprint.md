@@ -6,8 +6,9 @@ updated: [2026-08-06]
 > Aggiornato da /sprint — sessione 2026-08-06: espansione mondo (12 nuovi paesi, 96 club reali su
 > CONCACAF/CAF/AFC) + nuova meccanica "Giant Killer" (sorpresa di coppa) + strumento diagnostico
 > `sync-league-rosters.ts`, committato e rilasciato come v0.4.0. Arabia Saudita e Qatar interrotti
-> su richiesta esplicita dell'utente, vedi [[backlog]]. Vedi voce dedicata più sotto e
-> [[decisions]] per il dettaglio completo.
+> su richiesta esplicita dell'utente, vedi [[backlog]]. **Sessione successiva stesso giorno:**
+> Traits/archetipo di carriera + Shadow (debito morale), non ancora committata/rilasciata — vedi
+> voce dedicata più sotto e [[decisions]] per il dettaglio completo.
 
 # Sprint Corrente
 Stato lavoro in corso. Aggiornato con /sprint. Backlog in [[backlog]], debito in [[tech-debt]].
@@ -342,6 +343,23 @@ Stato lavoro in corso. Aggiornato con /sprint. Backlog in [[backlog]], debito in
   `scripts/build-launcher.ps1` (FileVersion 0.4.0.0 verificato) e allegato alla [release GitHub
   v0.4.0](https://github.com/Gioixxx/Carriera/releases/tag/v0.4.0). **Non verificato
   manualmente nel browser** (stesso gap ereditato dalla voce sopra) — vedi [[tech-debt]].
+
+- [x] **Traits/archetipo di carriera + Shadow (debito morale)** (2026-08-06, non ancora
+  committato a fine di questa voce): su proposta dell'utente in 3 parti (§1 archetipo, §2
+  relazioni NPC, §3 debito morale), implementati §3+§1 in un'unica sessione seguendo l'ordine
+  suggerito dall'utente stesso; §2 (relazioni NPC) resta interamente fuori scope, vedi
+  [[backlog]]. Nuovi `traits.ts`/`shadow.ts`, retrofit di `traitsDelta`/`shadowDelta` su
+  transfer/club-crisis/controversial-post-statement/tax-trouble/sponsor/4 eventi lifestyle
+  esistenti, nuovo scandalo forzato (categoria `"scandal"`, stesso trigger pattern di
+  continental-final/cup-upset) + evento di redenzione, moltiplicatore shadow su award/callup,
+  migrazione storage v4→v5, chip UI su `PlayerCard`/`CareerSummary`/`CareerArchive`. **Harness
+  esteso e usato per tarare**: la prima misurazione mostrava 5 archetipi su 6 sostanzialmente
+  irraggiungibili sotto scelta casuale (stesso pattern già visto con l'OVR) — diagnosticato un
+  touchpoint mancante (leadership↔convocazione, già previsto dall'utente ma non cablato) più
+  soglie troppo alte; dopo il fix tutti e 6 gli archetipi e lo scandalo/redenzione risultano
+  non nulli su 2000 carriere simulate. Vedi [[decisions]] per il dettaglio completo. 342 test
+  verdi (era 297), `tsc`/eslint (solo i 4 errori pre-esistenti)/`npm run build` puliti. **Non
+  verificato manualmente nel browser** (sessione di dominio/harness) — vedi [[tech-debt]].
 
 ## Note tecniche emerse in fase 6
 - jsdom 30 + Node 22+ non espone `window.localStorage` di default (ExperimentalWarning nativa) — polyfill minimale in `vitest.setup.ts`, non è un problema di codice applicativo

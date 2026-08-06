@@ -146,6 +146,29 @@ export interface CycleObjective {
   target: number;
 }
 
+/** Vettori di personalità nascosti, 0-100, spostati dagli outcome delle scelte. */
+export interface Traits {
+  loyalty: number;
+  ambition: number;
+  showmanship: number;
+  discipline: number;
+  leadership: number;
+}
+
+/** Stile di carriera derivato a runtime da `traits`/`shadow` (vedi `deriveArchetype`). */
+export type ArchetypeId = "flagbearer" | "mercenary" | "showman" | "pro" | "leader" | "problem";
+
+/** Flag narrativi/di bookkeeping legati al debito morale (`shadow`). */
+export interface ShadowFlags {
+  doped?: boolean;
+  leakedTactics?: boolean;
+  taxEvaded?: boolean;
+  fanBetrayed?: boolean;
+  /** Bookkeeping interno per l'eleggibilità alla redenzione — non narrativo. */
+  scandalOccurred?: boolean;
+  redeemed?: boolean;
+}
+
 export interface Player extends PlayerIdentity {
   age: number;
   ovr: number;
@@ -168,6 +191,11 @@ export interface Player extends PlayerIdentity {
   currentObjective: CycleObjective | null;
   /** true se il giocatore ha già cambiato nazionalità una volta (evento non ripetibile). */
   hasSwitchedNationality?: boolean;
+  /** Vettori di personalità, 0-100 ciascuno, punto di partenza neutro (50). */
+  traits: Traits;
+  /** Debito morale privato e cumulativo, 0-100, default 0. */
+  shadow: number;
+  shadowFlags?: ShadowFlags;
 }
 
 /** Effetto applicabile al giocatore da un outcome di decisione. */
@@ -177,6 +205,9 @@ export interface PlayerDelta {
   savingsDelta?: number;
   /** undefined = nessuna modifica, null = guarigione esplicita, oggetto = nuovo infortunio. */
   injury?: Injury | null;
+  traitsDelta?: Partial<Traits>;
+  shadowDelta?: number;
+  shadowFlags?: Partial<ShadowFlags>;
 }
 
 export type DecisionCategory =
@@ -191,7 +222,9 @@ export type DecisionCategory =
   | "continental-final"
   | "cup-upset"
   | "narrative"
-  | "sponsor";
+  | "sponsor"
+  /** Categoria forzata (mai nel pool normale) quando `shadow` supera la soglia di scandalo. */
+  | "scandal";
 
 export interface DecisionOutcome {
   /** Peso relativo tra gli outcome della stessa opzione — i pesi di un'opzione sommano a 100. */
@@ -245,4 +278,8 @@ export interface ArchivedCareer {
   finalPopularity: number;
   /** Miglior titolo di stagione della carriera, o fallback narrativo. */
   careerTitle: string;
+  /** Archetipo dominante a fine carriera, se emerso (vedi `deriveArchetype`). */
+  archetypeId?: ArchetypeId;
+  /** Titolo derivato dal debito morale finale ("Carriera controversa"/"Dal buio alla luce"), se applicabile. */
+  shadowTitle?: string | null;
 }

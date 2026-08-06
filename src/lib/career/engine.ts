@@ -11,6 +11,8 @@ import type {
 import { clamp, projectOvr, projectStats, type Rng } from "./progression";
 import { computeMarketValue } from "./market";
 import { resignSalary } from "./wallet";
+import { applyTraitsDelta, NEUTRAL_TRAITS } from "./traits";
+import { applyShadowDelta } from "./shadow";
 
 export const STARTING_AGE = 16;
 export const STARTING_OVR = 50;
@@ -61,6 +63,9 @@ export function createPlayer(identity: PlayerIdentity): Player {
     },
     seasonTitles: [],
     currentObjective: null,
+    traits: NEUTRAL_TRAITS,
+    shadow: 0,
+    shadowFlags: {},
   };
 }
 
@@ -152,6 +157,9 @@ export function applyDelta(player: Player, delta: PlayerDelta): Player {
       delta.savingsDelta !== undefined
         ? { ...player.wallet, savingsEur: player.wallet.savingsEur + delta.savingsDelta }
         : player.wallet,
+    traits: delta.traitsDelta ? applyTraitsDelta(player.traits, delta.traitsDelta) : player.traits,
+    shadow: delta.shadowDelta !== undefined ? applyShadowDelta(player.shadow, delta.shadowDelta) : player.shadow,
+    shadowFlags: delta.shadowFlags ? { ...player.shadowFlags, ...delta.shadowFlags } : player.shadowFlags,
   };
 }
 

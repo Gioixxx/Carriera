@@ -47,7 +47,9 @@ import {
   generateLoanOffer,
   generateLoanReturn,
   generateNationalitySwitch,
+  generateRedemptionDecision,
   generateReturnHome,
+  generateScandalDecision,
   generateSponsorDeal,
   generateTaxTrouble,
   generateTransferWindow,
@@ -67,7 +69,12 @@ import {
 } from "./decisions";
 import { rollAward, rollClubTrophies, rollNationalTrophies } from "./trophies";
 import { applyClubTierMovement } from "./club-progression";
+import { isRedemptionEligible, shouldTriggerScandal } from "./shadow";
+import { applyTraitsDelta } from "./traits";
 import { getCountry } from "@/data/countries";
+
+/** Convocazione in nazionale come fonte di leadership (vedi §1: "capitano, difesa compagni, nazionale"). */
+const NATIONAL_CALLUP_LEADERSHIP_BONUS = 6;
 
 export interface LoopContext {
   /** Club "di appartenenza" mentre si è in prestito altrove; null se non in prestito. */
@@ -140,7 +147,8 @@ export function availableCategories(player: Player, context: LoopContext): Decis
     isReturnHomeEligible(player) ||
     isUnexpectedProspectEligible(player) ||
     isTriumphantReturnEligible(player) ||
-    isNationalitySwitchEligible(player)
+    isNationalitySwitchEligible(player) ||
+    isRedemptionEligible(player)
   ) {
     categories.push("narrative");
   }
@@ -218,6 +226,9 @@ function pickNarrativeDecision(player: Player, recentDecisionIds: string[], rng:
   if (isNationalitySwitchEligible(player)) {
     generators.push({ kind: "nationality-switch", build: () => generateNationalitySwitch(player, rng) });
   }
+  if (isRedemptionEligible(player)) {
+    generators.push({ kind: "redemption", build: () => generateRedemptionDecision(player) });
+  }
   if (generators.length === 0) {
     throw new Error("Nessun evento narrativo disponibile per questo giocatore");
   }
@@ -252,6 +263,10 @@ export function pickNextDecision(
       category: "cup-upset",
       context,
     };
+  }
+
+  if (shouldTriggerScandal(player, recentCategories)) {
+    return { decision: generateScandalDecision(player), category: "scandal", context };
   }
 
   const categories = availableCategories(player, context);
@@ -488,7 +503,11 @@ export function resolveCycle(
   let nationalCallup = false;
   let nationalGoalsThisCycle = 0;
   if (rollNationalCallup(nextPlayer, rng)) {
-    nextPlayer = { ...nextPlayer, nationalTeam: { ...nextPlayer.nationalTeam, called: true } };
+    nextPlayer = {
+      ...nextPlayer,
+      nationalTeam: { ...nextPlayer.nationalTeam, called: true },
+      traits: applyTraitsDelta(nextPlayer.traits, { leadership: NATIONAL_CALLUP_LEADERSHIP_BONUS }),
+    };
     nationalCallup = true;
   }
 

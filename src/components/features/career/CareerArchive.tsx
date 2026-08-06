@@ -2,6 +2,7 @@ import { Trophy as TrophyIcon } from "lucide-react";
 import type { ArchivedCareer } from "@/types/career";
 import { countries } from "@/data/countries";
 import { computeHallOfFame } from "@/lib/career/satisfaction";
+import { ARCHETYPE_LABELS } from "@/lib/career/traits";
 import { Button } from "@/components/ui/Button";
 import { CountryFlag } from "./CountryFlag";
 import { OvrBadge } from "./OvrBadge";
@@ -93,6 +94,11 @@ export function CareerArchive({ entries, onBack }: CareerArchiveProps) {
                     {isHof ? (
                       <span className="shrink-0 rounded bg-(--color-accent)/15 px-1.5 py-0.5 text-[10px] font-semibold tracking-wide text-(--color-accent) uppercase">
                         HoF
+                      </span>
+                    ) : null}
+                    {entry.archetypeId ? (
+                      <span className="shrink-0 rounded bg-(--color-surface-raised) px-1.5 py-0.5 text-[10px] font-semibold tracking-wide text-(--color-text-muted) uppercase">
+                        {ARCHETYPE_LABELS[entry.archetypeId]}
                       </span>
                     ) : null}
                   </div>

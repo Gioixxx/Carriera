@@ -162,6 +162,32 @@ describe("applyDelta", () => {
     expect(healed.injury).toBeNull();
     expect(untouched.injury).toEqual(injured.injury);
   });
+
+  it("dovrebbe fondere traitsDelta con i vettori esistenti, con clamp 0-100", () => {
+    const player = createPlayer(IDENTITY);
+    const next = applyDelta(player, { traitsDelta: { loyalty: 10, ambition: -1000 } });
+
+    expect(next.traits.loyalty).toBe(60);
+    expect(next.traits.ambition).toBe(0);
+    expect(next.traits.showmanship).toBe(50);
+  });
+
+  it("dovrebbe applicare shadowDelta con clamp 0-100", () => {
+    const player = createPlayer(IDENTITY);
+    const higher = applyDelta(player, { shadowDelta: 15 });
+    const untouched = applyDelta(player, {});
+
+    expect(higher.shadow).toBe(15);
+    expect(untouched.shadow).toBe(0);
+  });
+
+  it("dovrebbe fondere shadowFlags senza sovrascrivere i flag già presenti", () => {
+    const player = createPlayer(IDENTITY);
+    const first = applyDelta(player, { shadowFlags: { doped: true } });
+    const second = applyDelta(first, { shadowFlags: { leakedTactics: true } });
+
+    expect(second.shadowFlags).toEqual({ doped: true, leakedTactics: true });
+  });
 });
 
 describe("resolveOutcome", () => {

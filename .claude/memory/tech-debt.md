@@ -111,10 +111,28 @@ Registro debito tecnico con priorità. Aggiornato da /session-end. Origine spess
 - **Impatto:** minimo — lo script è uno strumento diagnostico manuale, non parte del gioco.
 - **Risoluzione suggerita:** trovare e verificare il nome `strLeague` esatto per "Liga Profesional" argentina (probabilmente legato al formato del torneo corrente, che cambia più spesso in Argentina rispetto ad altri paesi) e aggiungerlo a `TSDB_LEAGUE_NAME_OVERRIDES`.
 
+### Traits/archetipo + Shadow non verificati end-to-end nel browser
+- **Priorità:** Media
+- **Area:** `lib/career/traits.ts`, `lib/career/shadow.ts`, `PlayerCard.tsx`, `CareerSummary.tsx`, `CareerArchive.tsx`
+- **Data:** 2026-08-06
+- **Descrizione:** sessione di dominio/harness — 342 test verdi + `npm run simulate` (tutti e 6 gli archetipi e lo scandalo/redenzione confermati non nulli su 2000 carriere), ma nessuna carriera è stata giocata a mano. Non verificato a vista: il chip "Stile: X" che compare su `PlayerCard` dopo 4 cicli, il chip "Rumors" a shadow≥25, l'evento scandalo forzato che appare davvero come `DecisionPanel` standard, l'evento di redenzione nel pool narrative, l'archetipo/titolo shadow-derivato nel riepilogo di fine carriera e nell'archivio.
+- **Perché rimandato:** stessa convenzione già stabilita nel progetto per questo tipo di sessione (dominio/bilanciamento) — verificato via test + harness, non manualmente.
+- **Impatto:** rischio medio — è UI nuova non banale (chip condizionali, nuova categoria di decisione forzata), un bug di rendering o di wiring (es. il chip che non appare mai, o lo scandalo che non si presenta davvero come decisione giocabile) sarebbe visibile solo giocando abbastanza a lungo da accumulare shadow o cicli.
+- **Risoluzione suggerita:** giocare/simulare una carriera fino a 4+ cicli per vedere il chip "Stile"; forzare (via scelte ripetute rischiose: doping, post controversi, tradire il club in crisi) l'accumulo di shadow fino a 50+ per vedere lo scandalo forzato e, gestendolo con trasparenza, verificare che poi scenda sotto 30 per innescare la redenzione.
+
+### Archetipo/shadow molto rari sotto scelta uniforme casuale — reachability di un giocatore reale non misurata
+- **Priorità:** Bassa
+- **Area:** `lib/career/traits.ts`, `lib/career/shadow.ts`
+- **Data:** 2026-08-06
+- **Descrizione:** l'harness (`pickUniformOption`, sceglie a caso tra le opzioni) misura solo un "pavimento" pessimistico: un archetipo richiede scelte *direzionalmente consistenti* (es. sempre "resta" per Bandiera), cosa che una scelta uniforme casuale raramente produce per costruzione — a differenza di OVR/trofei che accumulano lungo un solo binario indipendente dalla scelta. Dopo la taratura, "nessun archetipo" resta comunque il risultato più comune (77.9% su 2000 carriere) e `problem`/scandalo-redenzione restano sotto l'1%.
+- **Perché rimandato:** coerente con la nota già esistente su `simulation.ts` ("il giocatore simulato... sottostima le frequenze che richiedono scelte mirate rispetto a un giocatore reale") — non è chiaro se serva altro tuning finché non si osserva come si comporta un giocatore reale che persegue deliberatamente uno stile.
+- **Impatto:** rischio basso — se un giocatore reale che sceglie sempre "resta"/"professionista" non raggiunge comunque un archetipo entro una carriera tipica (~11-12 cicli), l'obiettivo "rendere gli archetipi raggiungibili e sentiti" fallirebbe nonostante l'harness dica che sono "possibili".
+- **Risoluzione suggerita:** giocare (o estendere l'harness con una `pickOption` che persegue deliberatamente un archetipo, es. sempre "resta"/sempre "professionista") per misurare la reachability reale, non solo quella sotto scelta casuale.
+
 ## Priorità
 - **Alta:** —
-- **Media:** momenti celebrativi/timeline non verificati end-to-end; sistema "satisfaction" (Hall of Fame/record/milestone/titoli) non verificato end-to-end; bottone "Chiudi" non verificato nell'exe; ricalibrazione OVR/soglie "grande momento" non verificata end-to-end; espansione mondo/Giant Killer non verificate end-to-end (vedi sopra)
-- **Bassa:** soglia di ritiro automatico; generatori club-crisis con pesi di base uniformi tra loro; trofeo di club forse troppo comune dopo la ricalibrazione OVR (vedi sopra); promozione di campionato mai osservata esplicitamente nell'originale (vedi sopra); copertura parziale di `sync-league-rosters.ts` (vedi sopra)
+- **Media:** momenti celebrativi/timeline non verificati end-to-end; sistema "satisfaction" (Hall of Fame/record/milestone/titoli) non verificato end-to-end; bottone "Chiudi" non verificato nell'exe; ricalibrazione OVR/soglie "grande momento" non verificata end-to-end; espansione mondo/Giant Killer non verificate end-to-end; traits/archetipo + shadow non verificati end-to-end (vedi sopra)
+- **Bassa:** soglia di ritiro automatico; generatori club-crisis con pesi di base uniformi tra loro; trofeo di club forse troppo comune dopo la ricalibrazione OVR (vedi sopra); promozione di campionato mai osservata esplicitamente nell'originale (vedi sopra); copertura parziale di `sync-league-rosters.ts` (vedi sopra); archetipo/shadow rari sotto scelta uniforme casuale, reachability reale non misurata (vedi sopra)
 
 ## Archiviato
 - **Finestra di ritiro probabilistico forse più ampia di 34-40** — risolto 2026-08-06: `RETIREMENT_RISK_START_AGE` in `engine.ts` abbassata da 34 a 31, formula passata da quadratica a cubica dopo aver verificato con `npm run simulate` che il solo allargamento con esponente invariato spostava troppo peso verso i ritiri anticipati (auto-cap a 40 anni sceso dal 49.5% al 22.2%, contro un ~50% osservato nella ricerca). Con la cubica l'auto-cap torna al 43.8%, con solo una coda minoritaria di ritiri a 32-34 anni (3.5%+0.1%). Vedi [[decisions]] per il dettaglio numerico completo.

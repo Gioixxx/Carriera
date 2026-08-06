@@ -119,19 +119,19 @@ describe("awardChance", () => {
 
 describe("rollAward", () => {
   it("dovrebbe restituire null se l'OVR è sotto soglia", () => {
-    const player = { ovr: 80, club: JUVENTUS };
+    const player = { ovr: 80, club: JUVENTUS, shadow: 0 };
     expect(rollAward(player, { apps: 30, goals: 20, assists: 10 }, 27, () => 0)).toBeNull();
   });
 
   it("dovrebbe restituire un award con club associato se il roll è favorevole", () => {
-    const player = { ovr: 92, club: JUVENTUS };
+    const player = { ovr: 92, club: JUVENTUS, shadow: 0 };
     const award = rollAward(player, { apps: 30, goals: 20, assists: 10 }, 27, () => 0);
     expect(award).not.toBeNull();
     expect(award?.club).toEqual(JUVENTUS);
   });
 
   it("dovrebbe restituire null se il giocatore è svincolato ma comunque gestire club undefined", () => {
-    const player = { ovr: 92, club: null };
+    const player = { ovr: 92, club: null, shadow: 0 };
     const award = rollAward(player, { apps: 30, goals: 20, assists: 10 }, 27, () => 0);
     expect(award?.club).toBeUndefined();
   });
