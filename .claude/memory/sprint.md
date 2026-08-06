@@ -5,8 +5,9 @@ updated: [2026-08-06]
 ---
 > Aggiornato da /sprint — sessione 2026-08-06: espansione mondo (12 nuovi paesi, 96 club reali su
 > CONCACAF/CAF/AFC) + nuova meccanica "Giant Killer" (sorpresa di coppa) + strumento diagnostico
-> `sync-league-rosters.ts`. Arabia Saudita e Qatar interrotti su richiesta esplicita dell'utente,
-> vedi [[backlog]]. Vedi voce dedicata più sotto e [[decisions]] per il dettaglio completo.
+> `sync-league-rosters.ts`, committato e rilasciato come v0.4.0. Arabia Saudita e Qatar interrotti
+> su richiesta esplicita dell'utente, vedi [[backlog]]. Vedi voce dedicata più sotto e
+> [[decisions]] per il dettaglio completo.
 
 # Sprint Corrente
 Stato lavoro in corso. Aggiornato con /sprint. Backlog in [[backlog]], debito in [[tech-debt]].
@@ -315,7 +316,7 @@ Stato lavoro in corso. Aggiornato con /sprint. Backlog in [[backlog]], debito in
   v0.3.6](https://github.com/Gioixxx/Carriera/releases/tag/v0.3.6). 275 test verdi.
 
 - [x] **Espansione mondo (12 nuovi paesi, 96 club) + meccanica "Giant Killer" + sync-rosters**
-  (2026-08-06, non ancora committato a fine di questa voce): su richiesta esplicita dell'utente di
+  (2026-08-06, commit b96d085/86736a1): su richiesta esplicita dell'utente di
   brainstormare nuove meccaniche, scelta la direzione "espansione mondo" tra 4 proposte. Messico/
   USA/Canada (CONCACAF), Marocco/Senegal/Nigeria/Ghana/Egitto/Costa d'Avorio (CAF), Giappone/Corea
   del Sud/Australia (AFC) — 12 dei 14 paesi pianificati, ricerca delegata a 3 agenti in background
@@ -331,6 +332,16 @@ Stato lavoro in corso. Aggiornato con /sprint. Backlog in [[backlog]], debito in
   eslint/`npm run build` puliti, ogni URL nuovo (stemmi/badge) verificato con una richiesta HTTP
   diretta prima di committarlo. **Non verificato manualmente nel browser** (sessione di codice/
   dati) — vedi [[tech-debt]].
+
+- [x] **Release v0.4.0 pubblicata** (2026-08-06, commit 941e140 + tag v0.4.0): bump
+  `package.json`/`package-lock.json` 0.3.6→0.4.0 (minor, dato il volume della feature: 96 nuovi
+  club/12 paesi + nuova meccanica di gioco, stesso criterio già usato per la v0.3.0). Verificato
+  prima del commit: 297 test verdi, `tsc`/`npm run build` puliti, lint con solo i 4 errori
+  `react-hooks/set-state-in-effect` pre-esistenti (confermato via `git diff` che i file coinvolti
+  in questa sessione non li hanno introdotti). `dist/Carriera.exe` rigenerato via
+  `scripts/build-launcher.ps1` (FileVersion 0.4.0.0 verificato) e allegato alla [release GitHub
+  v0.4.0](https://github.com/Gioixxx/Carriera/releases/tag/v0.4.0). **Non verificato
+  manualmente nel browser** (stesso gap ereditato dalla voce sopra) — vedi [[tech-debt]].
 
 ## Note tecniche emerse in fase 6
 - jsdom 30 + Node 22+ non espone `window.localStorage` di default (ExperimentalWarning nativa) — polyfill minimale in `vitest.setup.ts`, non è un problema di codice applicativo
