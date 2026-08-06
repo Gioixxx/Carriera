@@ -12,9 +12,12 @@ export interface UseBackgroundMusic {
 }
 
 /**
- * Musica di sottofondo in loop. L'avvio della riproduzione è demandato al primo gesto
- * dell'utente (pointerdown/keydown ovunque nella pagina): i browser bloccano `play()` con audio
- * prima di un'interazione, e il menu principale è il primo schermo mostrato.
+ * Musica di sottofondo in loop. Nel launcher desktop (WebView2, avviato con
+ * `--autoplay-policy=no-user-gesture-required`, vedi MainForm.cs) `play()` riesce subito al
+ * mount, quindi la musica parte insieme alla schermata del menu. In un browser normale (dev
+ * server, o l'app aperta via URL invece che tramite l'exe) quel flag non c'è: i browser bloccano
+ * `play()` con audio prima di un'interazione, quindi lì resta come fallback l'avvio al primo
+ * gesto dell'utente (pointerdown/keydown ovunque nella pagina).
  */
 export function useBackgroundMusic(): UseBackgroundMusic {
   const audioRef = useRef<HTMLAudioElement | null>(null);
@@ -37,17 +40,32 @@ export function useBackgroundMusic(): UseBackgroundMusic {
   }, [muted]);
 
   useEffect(() => {
+    let startedImmediately = false;
     const tryPlay = () => {
-      audioRef.current?.play().catch(() => {
-        // Best-effort: se il browser rifiuta ancora, resta silenzioso finché non arriva un
-        // gesto valido successivo.
-      });
+      audioRef.current?.play().then(
+        () => {
+          startedImmediately = true;
+        },
+        () => {
+          // Best-effort: se il browser rifiuta ancora, resta silenzioso finché non arriva un
+          // gesto valido successivo.
+        },
+      );
     };
-    window.addEventListener("pointerdown", tryPlay);
-    window.addEventListener("keydown", tryPlay);
+
+    // Tentativo immediato: riesce nel launcher desktop (autoplay-policy disabilitata lato
+    // WebView2), fallisce silenziosamente in un browser normale senza quel flag.
+    tryPlay();
+
+    const tryPlayOnGesture = () => {
+      if (startedImmediately) return;
+      tryPlay();
+    };
+    window.addEventListener("pointerdown", tryPlayOnGesture);
+    window.addEventListener("keydown", tryPlayOnGesture);
     return () => {
-      window.removeEventListener("pointerdown", tryPlay);
-      window.removeEventListener("keydown", tryPlay);
+      window.removeEventListener("pointerdown", tryPlayOnGesture);
+      window.removeEventListener("keydown", tryPlayOnGesture);
     };
   }, []);
 

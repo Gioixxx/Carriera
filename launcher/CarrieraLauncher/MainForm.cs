@@ -77,7 +77,18 @@ internal sealed class MainForm : Form
                 Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
                 "Carriera",
                 "WebView2");
-            var environment = await CoreWebView2Environment.CreateAsync(userDataFolder: userDataFolder);
+            // Il browser normale richiede un gesto dell'utente prima di permettere audio con
+            // autoplay: in questo host, senza il flag, la musica di sottofondo restava silenziosa
+            // finché l'utente non cliccava una voce del menu. Qui non è una pagina web pubblica ma
+            // il nostro stesso gioco eseguito nella sua unica finestra dedicata, quindi disabilitare
+            // la policy è sicuro e intenzionale (non applicabile al browser normale dell'utente).
+            var options = new CoreWebView2EnvironmentOptions
+            {
+                AdditionalBrowserArguments = "--autoplay-policy=no-user-gesture-required",
+            };
+            var environment = await CoreWebView2Environment.CreateAsync(
+                options: options,
+                userDataFolder: userDataFolder);
 
             var splashShownAt = DateTime.UtcNow;
             await _webView.EnsureCoreWebView2Async(environment);
