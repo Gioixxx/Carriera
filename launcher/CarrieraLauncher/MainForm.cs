@@ -81,6 +81,12 @@ internal sealed class MainForm : Form
 
             var splashShownAt = DateTime.UtcNow;
             await _webView.EnsureCoreWebView2Async(environment);
+
+            // Il bottone "Chiudi" del menu principale chiama window.close() lato JS: nei browser
+            // normali viene ignorato (nessun window.open() da script), ma WebView2 espone questo
+            // evento apposta per lasciare all'host la decisione — qui coincide con chiudere la
+            // finestra dell'app.
+            _webView.CoreWebView2.WindowCloseRequested += (_, _) => Close();
             // Lo sfondo resta visibile finché la pagina non ha finito di caricare, con un minimo
             // forzato (MinSplashDuration) perché il caricamento da server locale è troppo rapido
             // per farlo notare altrimenti; poi lascia spazio al gioco vero e proprio.

@@ -67,9 +67,18 @@ Registro debito tecnico con priorità. Aggiornato da /session-end. Origine spess
 - **Impatto:** rischio medio — logica di selezione (rank titoli, Hall of Fame su 4 categorie, cap 12 titoli) non banale, un bug qui sarebbe visibile solo dopo diverse carriere giocate/archiviate, quindi difficile da notare per caso.
 - **Risoluzione suggerita:** giocare/archiviare almeno 2-3 carriere con profili diversi (una con OVR alto, una con tanti trofei, una con alta popolarità) per vedere la Hall of Fame popolarsi correttamente in `CareerArchive`; forzare un ciclo con più record infranti insieme per verificare la lista nel banner.
 
+### Bottone "Chiudi" del menu principale non verificato nell'eseguibile desktop
+- **Priorità:** Media
+- **Area:** `launcher/CarrieraLauncher/MainForm.cs`, `components/features/career/MainMenu.tsx`
+- **Data:** 2026-08-06
+- **Descrizione:** il bottone "Chiudi" del nuovo menu principale chiama `window.close()` lato JS; `MainForm.cs` è stato modificato per sottoscrivere `CoreWebView2.WindowCloseRequested` (l'evento che WebView2 espone apposta per questo caso) e chiamare `Close()` sulla finestra. La modifica compila (verificato solo staticamente, non è stata rifatta la build .NET) ma **non è stata verificata eseguendo l'exe rigenerato** — il flusso completo (click "Chiudi" → evento intercettato → finestra chiusa) è verificato solo lato browser (dove `window.close()` è correttamente un no-op silenzioso, comportamento atteso).
+- **Perché rimandato:** questa sessione ha lavorato solo sull'export Next.js via dev server (`npm run dev`), senza rigenerare `dist/Carriera.exe` con `scripts/build-launcher.ps1` né lanciare l'eseguibile.
+- **Impatto:** rischio medio — se l'evento non si comporta come documentato (es. differenze di versione del runtime WebView2), il bottone "Chiudi" risulterebbe silenziosamente rotto solo nella build desktop, l'unico posto dove ha un effetto reale.
+- **Risoluzione suggerita:** prima della prossima release, rigenerare l'exe con `scripts/build-launcher.ps1` e verificare manualmente che il bottone "Chiudi" chiuda davvero la finestra dell'app.
+
 ## Priorità
 - **Alta:** —
-- **Media:** probabilità trofei/award/nazionale non validate con playtest umano reale (harness statistico costruito, vedi sopra); momenti celebrativi/timeline non verificati end-to-end; sistema "satisfaction" (Hall of Fame/record/milestone/titoli) non verificato end-to-end (vedi sopra)
+- **Media:** probabilità trofei/award/nazionale non validate con playtest umano reale (harness statistico costruito, vedi sopra); momenti celebrativi/timeline non verificati end-to-end; sistema "satisfaction" (Hall of Fame/record/milestone/titoli) non verificato end-to-end (vedi sopra); bottone "Chiudi" non verificato nell'exe (vedi sopra)
 - **Bassa:** soglia di ritiro automatico; generatori club-crisis con pesi di base uniformi tra loro (vedi sopra)
 
 ## Archiviato

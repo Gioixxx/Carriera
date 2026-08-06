@@ -4,6 +4,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { TrendingDown, TrendingUp } from "lucide-react";
 import type { ArchivedCareer, GameSpeed, PlayerIdentity } from "@/types/career";
 import { useCareerGame, type CycleOutcomeSummary } from "@/hooks/useCareerGame";
+import { useBackgroundMusic } from "@/hooks/useBackgroundMusic";
 import { usePrefersReducedMotion } from "@/hooks/useMotion";
 import { AWARD_LABELS } from "@/lib/career/award-labels";
 import { loadArchive } from "@/lib/career/storage";
@@ -19,14 +20,16 @@ import { CareerTimeline } from "./CareerTimeline";
 import { CompetitionBadge } from "./CompetitionBadge";
 import { DecisionPanel } from "./DecisionPanel";
 import { IdentityForm } from "./IdentityForm";
+import { MainMenu } from "./MainMenu";
 import { buildCareerMoments, MomentOverlay, type CareerMoment } from "./MomentOverlay";
 import { OfferPanel } from "./OfferPanel";
 import { PenaltyShootout } from "./PenaltyShootout";
 import { PlayerCard } from "./PlayerCard";
+import { SettingsPanel } from "./SettingsPanel";
 import { SpeedSelect } from "./SpeedSelect";
 import { ClubCrest } from "./ClubCrest";
 
-type Step = "speed" | "identity" | "archive";
+type Step = "menu" | "speed" | "identity" | "archive" | "settings";
 type ResolvePhase = "season" | "moments" | "outcome" | null;
 
 const DECISION_EXIT_MS = 320;
@@ -305,11 +308,12 @@ function SetupStepDots({ current }: { current: Step }) {
 }
 
 export function CareerGame() {
-  const [step, setStep] = useState<Step>("speed");
+  const [step, setStep] = useState<Step>("menu");
   const [speed, setSpeed] = useState<GameSpeed | null>(null);
   const [archiveEntries, setArchiveEntries] = useState<ArchivedCareer[]>([]);
   const { state, startCareer, chooseOption, restart, isResuming } = useCareerGame();
   const prefersReducedMotion = usePrefersReducedMotion();
+  const { audioRef, volume, muted, setVolume, setMuted } = useBackgroundMusic();
 
   // Letto in un effect (non lazy initializer) per lo stesso motivo di useCareerGame: window non
   // esiste in SSR, evita un hydration mismatch tra il render server e il primo render client.
@@ -407,6 +411,20 @@ export function CareerGame() {
     setStep("speed");
   }, []);
 
+  const handleGoMenu = useCallback(() => {
+    setStep("menu");
+  }, []);
+
+  const handleShowSettings = useCallback(() => {
+    setStep("settings");
+  }, []);
+
+  const handleQuit = useCallback(() => {
+    // No-op nei browser normali (i browser bloccano window.close() su tab non aperte da script);
+    // nel launcher desktop il WebView2 host intercetta questa richiesta e chiude la finestra.
+    window.close();
+  }, []);
+
   const handleChoose = useCallback(
     (optionId: string) => {
       if (cycleBusy.current || resolvePhase !== null || decisionExiting) return;
@@ -452,8 +470,10 @@ export function CareerGame() {
   const showPlayShell = Boolean(state && (!isRetired || awaitingResolve));
 
   const isSetup = !showPlaying;
+  const isMenu = isSetup && step === "menu";
   const isIdentity = isSetup && step === "identity";
   const isArchive = isSetup && step === "archive";
+  const isSettings = isSetup && step === "settings";
   const outcomeKey = state?.lastOutcome
     ? `${state.player.age}-${state.lastOutcome.optionLabel}-${state.lastOutcome.outcomeText}`
     : "none";
@@ -474,6 +494,8 @@ export function CareerGame() {
               : "max-w-3xl gap-3 overflow-y-auto py-4 sm:py-6",
       )}
     >
+      <audio ref={audioRef} src="/audio/passaggio-di-spogliatoio.mp3" loop preload="auto" className="hidden" />
+
       {showPlaying ? (
         <header className="flex shrink-0 items-center justify-between gap-4">
           <p className="font-display text-lg tracking-[0.2em] gold-metal-text">CARRIERA</p>
@@ -486,7 +508,14 @@ export function CareerGame() {
         </header>
       ) : (
         <header className="flex shrink-0 flex-col gap-2">
-          <div className="flex justify-end">
+          <div className="flex items-center justify-between">
+            {!isMenu ? (
+              <Button variant="ghost" onClick={handleGoMenu} className="px-0 text-xs">
+                ← Menu
+              </Button>
+            ) : (
+              <span />
+            )}
             <ThemeToggle />
           </div>
           <div className="text-center">
@@ -498,19 +527,21 @@ export function CareerGame() {
                 ? "Crea la tua identità"
                 : isArchive
                   ? "Le mie carriere"
-                  : "Costruisci la tua carriera da calciatore"}
+                  : isSettings
+                    ? "Impostazioni"
+                    : "Costruisci la tua carriera da calciatore"}
             </h1>
             {isIdentity ? (
               <p className="mt-0.5 font-display text-xs tracking-[0.3em] gold-metal-text">
                 Passo 2 di 2
               </p>
-            ) : !isArchive ? (
+            ) : isMenu ? (
               <p className="mt-0.5 text-sm text-(--color-text-muted)">
                 Scegli chi sei, affronta le decisioni che contano, scrivi la tua leggenda.
               </p>
             ) : null}
           </div>
-          {!isArchive ? <SetupStepDots current={step} /> : null}
+          {step === "speed" || step === "identity" ? <SetupStepDots current={step} /> : null}
         </header>
       )}
 
@@ -518,6 +549,28 @@ export function CareerGame() {
         <p className="text-center text-sm text-(--color-text-muted)">Caricamento…</p>
       ) : (
         <>
+          {!showPlaying && step === "menu" ? (
+            <Card key="step-menu" className="animate-step-in flex flex-col gap-4 p-5 sm:p-7">
+              <MainMenu
+                onSinglePlayer={() => setStep("speed")}
+                onSettings={handleShowSettings}
+                onQuit={handleQuit}
+              />
+            </Card>
+          ) : null}
+
+          {!showPlaying && step === "settings" ? (
+            <Card key="step-settings" className="animate-step-in flex flex-col gap-4 p-5 sm:p-7">
+              <SettingsPanel
+                volume={volume}
+                muted={muted}
+                onVolumeChange={setVolume}
+                onMutedChange={setMuted}
+                onBack={handleGoMenu}
+              />
+            </Card>
+          ) : null}
+
           {!showPlaying && step === "speed" ? (
             <Card key="step-speed" className="animate-step-in flex flex-col gap-4 p-5 sm:p-7">
               <SpeedSelect onSelect={handleSpeedSelected} />

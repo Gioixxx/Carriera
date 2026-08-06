@@ -157,6 +157,20 @@ Stato lavoro in corso. Aggiornato con /sprint. Backlog in [[backlog]], debito in
   con le sessioni "codice puro" precedenti) — verificato invece via test dedicati e via
   `npm run simulate` prima/dopo per confermare che nessuna frequenza sia collassata a zero.
 
+- [x] **Menu principale + musica di sottofondo con volume regolabile** (2026-08-06, non ancora
+  committato a fine di questa voce): nuovo step `"menu"` (default, prima di `"speed"`) con 4
+  voci — Giocatore singolo, Multiplayer (disabilitato, "In fase di sviluppo"), Impostazioni
+  (nuovo `SettingsPanel.tsx`: slider volume + mute), Chiudi (`window.close()`, intercettato lato
+  launcher desktop via `CoreWebView2.WindowCloseRequested` in `MainForm.cs`). Musica di
+  sottofondo fornita dall'utente committata come asset statico in
+  `public/audio/passaggio-di-spogliatoio.mp3`, riprodotta in loop da un `<audio>` persistente
+  gestito da `hooks/useBackgroundMusic.ts` (volume/mute salvati in `localStorage` via nuovo
+  `lib/audio-settings.ts`). Vedi [[decisions]] per il ragionamento completo. 274 test (era 269),
+  `tsc`/eslint puliti. Verificato end-to-end nel browser via dev server (menu → impostazioni →
+  slider volume live sull'elemento audio + persistenza in localStorage dopo reload → toggle mute
+  → "Giocatore singolo" → flusso esistente invariato). **Non verificato nell'eseguibile
+  desktop** (exe non rigenerato in questa sessione) — vedi [[tech-debt]].
+
 ## Note tecniche emerse in fase 6
 - jsdom 30 + Node 22+ non espone `window.localStorage` di default (ExperimentalWarning nativa) — polyfill minimale in `vitest.setup.ts`, non è un problema di codice applicativo
 - `ClubStint` ora ha un campo `ovr` (OVR del giocatore alla fine di quel ciclo) — necessario per la CareerTable, che deve mostrare l'OVR storico per riga, non quello attuale

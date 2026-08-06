@@ -2,6 +2,8 @@
 
 **Simulatore testuale della carriera di un calciatore** · v0.2.0
 
+[![Downloads](https://img.shields.io/github/downloads/Gioixxx/Carriera/total)](https://github.com/Gioixxx/Carriera/releases)
+
 [Repository](https://github.com/Gioixxx/Carriera) · [Download Windows](https://github.com/Gioixxx/Carriera/releases/latest)
 
 ---
