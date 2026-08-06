@@ -9,6 +9,13 @@ Snapshot automatici del lavoro in corso, salvati da `save_context.py` su PreComp
 (feature `enforcementHooks`) e ricaricati all'avvio da `session_start.py`. Gestito automaticamente:
 le entry sotto sono sovrascritte per `sessionId` (rolling, ultime ~10). Vedi [[sprint]] per i task attivi.
 
+<!-- session:cf5600b0-806c-4c52-a842-a00f621da3de -->
+### Aggiungere menu e musica di sottofondo al gioco — 2026-08-06
+- **Branch:** main · **Quando:** 2026-08-06→2026-08-06
+- **Ultima richiesta:** nella pagina possiamo inserire un menù al momenmto metteri giocatore singolo , multiplayer (in fase di sviluippo) , impostazioni e chiudi. & 'c:\Users\Gioix\Downloads\Passaggio di Spogliatoio (1).mp3'…
+- **File toccati:** lib/audio-settings.ts, lib/audio-settings.test.ts, hooks/useBackgroundMusic.ts, career/MainMenu.tsx, career/SettingsPanel.tsx, career/CareerGame.tsx, CarrieraLauncher/MainForm.cs, memory/decisions.md, memory/tech-debt.md, memory/sprint.md
+- **Comandi:** ls; grep; sed; mkdir; cat; npx; npm; rm; sleep; curl
+
 <!-- session:af474b59-7400-477d-9d2e-c27de66b0c15 -->
 ### trophy-icons-already-implemented — 2026-08-06
 - **Branch:** main · **Quando:** 2026-08-06→2026-08-06
