@@ -305,7 +305,14 @@ Stato lavoro in corso. Aggiornato con /sprint. Backlog in [[backlog]], debito in
   spostava troppo peso verso i ritiri anticipati). 275 test verdi (era 274), `tsc`/eslint puliti.
   Vedi [[decisions]] per il dettaglio numerico prima/dopo harness. **Resta da fare**: un giro di
   ricerca browser mirato per il testo esatto di "Fan backlash" e la verifica UI della promozione
-  di campionato (Step 4 del piano, non ancora lanciato).
+  di campionato (Step 4 del piano — lanciato e poi fermato su richiesta dell'utente, da rilanciare
+  in futuro se serve).
+
+- [x] **Release v0.3.6 pubblicata** (2026-08-06, commit 36fc27d/9a52e29/ee7ab30 + tag v0.3.6):
+  bump `package.json`/`package-lock.json` 0.3.5→0.3.6 (patch: nuovo evento + ricalibrazione,
+  non un bundle di feature grande). `dist/Carriera.exe` rigenerato via `scripts/build-launcher.ps1`
+  (FileVersion 0.3.6.0 verificato) e allegato alla [release GitHub
+  v0.3.6](https://github.com/Gioixxx/Carriera/releases/tag/v0.3.6). 275 test verdi.
 
 ## Note tecniche emerse in fase 6
 - jsdom 30 + Node 22+ non espone `window.localStorage` di default (ExperimentalWarning nativa) — polyfill minimale in `vitest.setup.ts`, non è un problema di codice applicativo
