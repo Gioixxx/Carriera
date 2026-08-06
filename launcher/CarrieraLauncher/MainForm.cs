@@ -143,12 +143,26 @@ internal sealed class MainForm : Form
 
             if (result == DialogResult.Yes)
             {
+                // Prima di questo fix non c'era alcun feedback tra il click su "Sì" e la
+                // chiusura/riapertura dell'app: con i retry automatici (vedi UpdateInstaller) il
+                // download può richiedere anche un paio di minuti su rete instabile, e sembrava
+                // che l'aggiornamento "non facesse nulla". Il form si chiude da solo insieme al
+                // resto dell'app quando l'update ha successo (Application.Exit() dentro
+                // UpdateInstaller), altrimenti viene chiuso esplicitamente nel catch sotto.
+                // MainForm viene disabilitato per la durata dell'update: senza questo, il menu
+                // sotto (WebView2) resta cliccabile mentre il file in uso sta per essere
+                // sostituito da sotto i piedi dell'utente.
+                using var progressForm = new UpdateProgressForm();
+                Enabled = false;
+                progressForm.Show(this);
+                var progress = new Progress<UpdateProgress>(progressForm.Report);
                 try
                 {
-                    await UpdateInstaller.DownloadAndApplyAsync(update);
+                    await UpdateInstaller.DownloadAndApplyAsync(update, progress);
                 }
                 catch (Exception ex)
                 {
+                    progressForm.Close();
                     // A differenza del controllo di versione (silenzioso, best-effort: non deve
                     // mai impedire di giocare), qui l'utente ha esplicitamente chiesto di
                     // aggiornare — un fallimento del download va segnalato, altrimenti sembra che
@@ -161,6 +175,14 @@ internal sealed class MainForm : Form
                         "Aggiornamento non riuscito",
                         MessageBoxButtons.OK,
                         MessageBoxIcon.Warning);
+                }
+                finally
+                {
+                    // Se l'update ha successo il processo esce del tutto (Application.Exit()
+                    // dentro UpdateInstaller) prima di arrivare qui, quindi questo riguarda solo
+                    // il percorso di fallimento — ma va comunque in "finally" per sicurezza, non
+                    // solo nel catch, in caso l'eccezione venga rilanciata o il flusso cambi.
+                    Enabled = true;
                 }
             }
         }

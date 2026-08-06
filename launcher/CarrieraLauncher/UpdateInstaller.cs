@@ -3,11 +3,22 @@ using System.Net;
 
 namespace CarrieraLauncher;
 
+internal enum UpdatePhase
+{
+    Downloading,
+    Finalizing,
+}
+
+internal readonly record struct UpdateProgress(UpdatePhase Phase, int Attempt, int MaxAttempts, long BytesReceived, long? TotalBytes);
+
 internal static class UpdateInstaller
 {
     private const int MaxDownloadAttempts = 5;
 
-    public static async Task DownloadAndApplyAsync(UpdateInfo update, CancellationToken ct = default)
+    public static async Task DownloadAndApplyAsync(
+        UpdateInfo update,
+        IProgress<UpdateProgress>? progress = null,
+        CancellationToken ct = default)
     {
         var currentExe = Environment.ProcessPath ?? Application.ExecutablePath;
         var tempDir = Path.Combine(Path.GetTempPath(), "CarrieraUpdate");
@@ -29,9 +40,10 @@ internal static class UpdateInstaller
         Exception? lastError = null;
         for (var attempt = 1; attempt <= MaxDownloadAttempts; attempt++)
         {
+            progress?.Report(new UpdateProgress(UpdatePhase.Downloading, attempt, MaxDownloadAttempts, 0, null));
             try
             {
-                await DownloadOnceAsync(update.DownloadUrl, newExePath, ct);
+                await DownloadOnceAsync(update.DownloadUrl, newExePath, attempt, progress, ct);
                 await LogAsync(logPath, $"Download completato al tentativo {attempt}/{MaxDownloadAttempts}.", ct);
                 lastError = null;
                 break;
@@ -54,6 +66,8 @@ internal static class UpdateInstaller
                 $"Download dell'aggiornamento fallito dopo {MaxDownloadAttempts} tentativi: {lastError.Message}",
                 lastError);
         }
+
+        progress?.Report(new UpdateProgress(UpdatePhase.Finalizing, MaxDownloadAttempts, MaxDownloadAttempts, 0, null));
 
         // Un exe self-contained single-file non può sovrascrivere se stesso mentre è in
         // esecuzione: uno script esterno aspetta la chiusura del processo (poll sul PID),
@@ -112,7 +126,12 @@ internal static class UpdateInstaller
     // meta' non solleva sempre un'eccezione) e verifica la dimensione scaricata contro il
     // Content-Length dichiarato dal server, cosi' un download troncato viene sempre rilevato
     // anche quando lo stream si chiude "pulito" senza errori lato .NET.
-    private static async Task DownloadOnceAsync(string url, string destinationPath, CancellationToken ct)
+    private static async Task DownloadOnceAsync(
+        string url,
+        string destinationPath,
+        int attempt,
+        IProgress<UpdateProgress>? progress,
+        CancellationToken ct)
     {
         long? expectedSize;
         using (var http = new HttpClient { Timeout = TimeSpan.FromMinutes(5) })
@@ -126,9 +145,22 @@ internal static class UpdateInstaller
             using var response = await http.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, ct);
             response.EnsureSuccessStatusCode();
             expectedSize = response.Content.Headers.ContentLength;
+            progress?.Report(new UpdateProgress(UpdatePhase.Downloading, attempt, MaxDownloadAttempts, 0, expectedSize));
+
             await using var fs = File.Create(destinationPath);
             await using var download = await response.Content.ReadAsStreamAsync(ct);
-            await download.CopyToAsync(fs, ct);
+
+            // Lettura a blocchi invece di CopyToAsync in un colpo solo: e' l'unico modo per
+            // sapere quanti byte sono arrivati finora e riportarlo alla UI (barra di progresso).
+            var buffer = new byte[81920];
+            long totalRead = 0;
+            int read;
+            while ((read = await download.ReadAsync(buffer, ct)) > 0)
+            {
+                await fs.WriteAsync(buffer.AsMemory(0, read), ct);
+                totalRead += read;
+                progress?.Report(new UpdateProgress(UpdatePhase.Downloading, attempt, MaxDownloadAttempts, totalRead, expectedSize));
+            }
         }
 
         var downloadedSize = new FileInfo(destinationPath).Length;
