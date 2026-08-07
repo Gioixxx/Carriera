@@ -22,11 +22,35 @@ function targetPrestige(ovr: number): number {
   return 0;
 }
 
+/**
+ * Campionati dell'espansione mondo 2026-08-06 (CONCACAF/CAF/AFC): il prestige locale (0-3) misura
+ * il rilievo del club nel proprio paese, non il livello globale del campionato — un club di
+ * prestige 3 qui non compete realisticamente per un giocatore già affermato. Esclusi dal pool di
+ * offerte quando il giocatore punta a un prestige ≥2 (OVR ≥84); restano pienamente eleggibili per
+ * giocatori più giovani/meno quotati, dove un'offerta da questi campionati è plausibile.
+ */
+const EMERGING_MARKET_COUNTRIES = new Set([
+  "Mexico",
+  "United States",
+  "Canada",
+  "Morocco",
+  "Senegal",
+  "Nigeria",
+  "Ghana",
+  "Egypt",
+  "Ivory Coast",
+  "Japan",
+  "South Korea",
+  "Australia",
+]);
+
 function eligibleClubs(ovr: number, excludeId?: string): Club[] {
   const prestige = targetPrestige(ovr);
-  return clubs.filter(
-    (c) => c.id !== excludeId && Math.abs(c.prestige - prestige) <= 1,
-  );
+  return clubs.filter((c) => {
+    if (c.id === excludeId) return false;
+    if (prestige >= 2 && EMERGING_MARKET_COUNTRIES.has(c.country)) return false;
+    return Math.abs(c.prestige - prestige) <= 1;
+  });
 }
 
 function shuffle<T>(items: T[], rng: Rng): T[] {
@@ -106,14 +130,14 @@ export function generateAcademyOffer(
   rng: Rng = Math.random,
 ): Decision {
   const homeClubs = clubsByCountry(identity.nationality).filter((c) => c.prestige <= 1);
-  const pool = homeClubs.length >= 3 ? homeClubs : clubs.filter((c) => c.prestige <= 1);
-  const offers = pickClubs(pool, 3, rng);
+  const pool = homeClubs.length >= 4 ? homeClubs : clubs.filter((c) => c.prestige <= 1);
+  const offers = pickClubs(pool, 4, rng);
   return {
     id: "academy-offer",
     category: "transfer",
     title: "Offerta dal settore giovanile",
     description:
-      "Tre club vogliono aggiungerti al loro progetto giovanile. Scegli dove inizia la tua carriera.",
+      "Quattro club vogliono aggiungerti al loro progetto giovanile. Scegli dove inizia la tua carriera.",
     options: offers.map((c) =>
       signOption(`sign-${c.id}`, `Firma per ${c.name}`, c, `Inizi la carriera al ${c.name}.`),
     ),
@@ -380,7 +404,7 @@ export function generateTransferWindow(player: Player, rng: Rng = Math.random): 
     throw new Error("Serve un club corrente per generare una finestra di mercato");
   }
   const currentClub = player.club;
-  const offers = pickClubs(eligibleClubs(player.ovr, currentClub.id), 2, rng);
+  const offers = pickClubs(eligibleClubs(player.ovr, currentClub.id), 3, rng);
   return {
     id: `transfer-window-${player.age}`,
     category: "transfer",
@@ -413,7 +437,7 @@ export function generateLoanOffer(player: Player, rng: Rng = Math.random): Decis
   }
   const offers = pickClubs(
     eligibleClubs(Math.max(player.ovr - 8, 0), player.club.id),
-    3,
+    4,
     rng,
   );
   return {
@@ -432,7 +456,7 @@ export function generateLoanReturn(
   parentClub: Club,
   rng: Rng = Math.random,
 ): Decision {
-  const offers = pickClubs(eligibleClubs(player.ovr, player.club?.id ?? parentClub.id), 2, rng);
+  const offers = pickClubs(eligibleClubs(player.ovr, player.club?.id ?? parentClub.id), 3, rng);
   const options: DecisionOption[] = offers.map((c) =>
     signOption(`loan-${c.id}`, `Vai in prestito al ${c.name}`, c, `Vai in prestito al ${c.name}.`),
   );
@@ -624,7 +648,7 @@ export function generateClubPriority(player: Player): Decision {
 }
 
 export function generateEndOfCycle(player: Player, rng: Rng = Math.random): Decision {
-  const offers = pickClubs(eligibleClubs(player.ovr, player.club?.id), 2, rng);
+  const offers = pickClubs(eligibleClubs(player.ovr, player.club?.id), 3, rng);
   return {
     id: `end-of-cycle-${player.age}`,
     category: "end-of-cycle",

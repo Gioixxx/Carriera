@@ -413,6 +413,15 @@ Stato lavoro in corso. Aggiornato con /sprint. Backlog in [[backlog]], debito in
   verificato in questo giro: overlay trofeo/premio/convocazione nazionale, focus-trap, comportamento
   con `prefers-reduced-motion` — vedi [[tech-debt]] per lo stato aggiornato.
 
+- [x] **Offerte club: 4 invece di 3 + esclusione campionati emergenti per giocatori affermati**
+  (2026-08-07, non ancora committato a fine di questa voce): su segnalazione dell'utente, offerte
+  bump 3→4 in tutti e 5 i flussi (settore giovanile/finestra di mercato/prestito/rientro
+  prestito/fine ciclo) e nuova esclusione dei 12 paesi dell'espansione mondo 2026-08-06 dal pool
+  di `eligibleClubs` quando il giocatore punta a prestige ≥2 (OVR ≥84) — vedi [[decisions]] per il
+  dettaglio completo. 342 test verdi (1 asserzione aggiornata su `generateAcademyOffer`), `tsc`
+  pulito, `npm run simulate` con frequenze stabili rispetto al baseline. **Non ancora verificato
+  manualmente nel browser.**
+
 ## Note tecniche emerse in fase 6
 - jsdom 30 + Node 22+ non espone `window.localStorage` di default (ExperimentalWarning nativa) — polyfill minimale in `vitest.setup.ts`, non è un problema di codice applicativo
 - `ClubStint` ora ha un campo `ovr` (OVR del giocatore alla fine di quel ciclo) — necessario per la CareerTable, che deve mostrare l'OVR storico per riga, non quello attuale

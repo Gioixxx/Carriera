@@ -93,9 +93,9 @@ describe("LIFESTYLE_DECISIONS", () => {
 });
 
 describe("generateAcademyOffer", () => {
-  it("dovrebbe restituire tre opzioni, tutte con un club a basso prestigio", () => {
+  it("dovrebbe restituire quattro opzioni, tutte con un club a basso prestigio", () => {
     const decision = generateAcademyOffer({ nationality: "Italy" }, FIXED_RNG);
-    expect(decision.options).toHaveLength(3);
+    expect(decision.options).toHaveLength(4);
     for (const option of decision.options) {
       expect(option.club).toBeDefined();
       expect(option.club!.prestige).toBeLessThanOrEqual(1);
