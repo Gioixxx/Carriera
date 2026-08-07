@@ -9,6 +9,20 @@ Snapshot automatici del lavoro in corso, salvati da `save_context.py` su PreComp
 (feature `enforcementHooks`) e ricaricati all'avvio da `session_start.py`. Gestito automaticamente:
 le entry sotto sono sovrascritte per `sessionId` (rolling, ultime ~10). Vedi [[sprint]] per i task attivi.
 
+<!-- session:1da85460-b5bc-492d-bf16-83dff565a459 -->
+### Fixare il layout della card e tabella stagioni — 2026-08-06
+- **Branch:** main · **Quando:** 2026-08-06→2026-08-06
+- **Ultima richiesta:** come possiamo sistemare il layout per vedere tgutto bene ? la card a sinistra troppo piccola , la taballa con le stagioni non si vede completa
+- **File toccati:** plans/come-possiamo-sistemare-il-gleaming-sketch.md, career/PlayerCard.tsx, career/CareerGame.tsx, career/OfferPanel.tsx, career/DecisionPanel.tsx, career/CareerTable.tsx, scratchpad/verify-layout.mjs, scratchpad/verify-layout.cjs, career/CareerTimeline.tsx, scratchpad/verify-responsive.cjs
+- **Comandi:** npm; jobs; grep; curl; which; (npx; npx; P=$(find; find; P=$(cat
+
+<!-- session:f5382bde-095b-4563-9b85-7558297115b5 -->
+### Rimuovere scrollbar da tutte le pagine — 2026-08-05
+- **Branch:** main · **Quando:** 2026-08-05→2026-08-05
+- **Ultima richiesta:** voglio che non ci siano scrolbar in nessuna pagina
+- **File toccati:** plans/voglio-che-non-ci-warm-micali.md, app/globals.css, app/layout.tsx, app/page.tsx, career/CareerGame.tsx, career/CareerTable.tsx, career/NationalitySelect.tsx
+- **Comandi:** (npm; pwd; which; (npx; npx
+
 <!-- session:cf5600b0-806c-4c52-a842-a00f621da3de -->
 ### Aggiungere menu e musica di sottofondo al gioco — 2026-08-06
 - **Branch:** main · **Quando:** 2026-08-06→2026-08-06

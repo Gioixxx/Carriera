@@ -395,6 +395,24 @@ Stato lavoro in corso. Aggiornato con /sprint. Backlog in [[backlog]], debito in
   mano una volta (vedi [[tech-debt]], l'auto-updater della vecchia versione punta a un
   URL/asset che non esistono più). 342 test verdi, `tsc` pulito prima del tag.
 
+- [x] **Verifica end-to-end nel browser: fix layout card/tabella + overlay momenti + ricalibrazione OVR**
+  (2026-08-07): il fix di layout della sessione precedente (card giocatore troppo piccola, tabella
+  stagioni non completamente visibile — session-log 2026-08-06, mai formalizzato come voce di
+  sprint/decisione a parte) è stato verificato giocando una carriera di test dal vivo (dev server,
+  6 cicli, 16→28 anni). Confermato: `PlayerCard` mostra tutte le info senza tagli; `CareerTable`
+  ("Storico") con più di 4 stagioni eccede la viewport ma **nessuna riga viene tagliata** — il
+  contenuto resta raggiungibile tramite lo scroll naturale della pagina (non uno scroll interno al
+  componente), verificato sia scrollando sia via `read_page`/`scroll_to` che tutte le righe esistono
+  nel DOM e sono raggiungibili. Verificato anche in tema chiaro, nessuna regressione. Bonus emerso
+  dallo stesso giro di test, rilevante per due item aperti in [[tech-debt]]: l'overlay di
+  `MomentOverlay` per i traguardi OVR (60, 70) e il banner "record infranti" post-refactor
+  (2026-08-06, vedi [[decisions]]) funzionano entrambi correttamente come renderizzati; la
+  ricalibrazione OVR/soglie (vedi [[decisions]]) ha prodotto in game un'offerta reale dal Tottenham
+  Hotspur (Premier League) a OVR 74 dopo soli 6 cicli — prima conferma **in gameplay reale**, non
+  solo da harness/test, che le soglie ritarate producono offerte da top club raggiungibili. Non
+  verificato in questo giro: overlay trofeo/premio/convocazione nazionale, focus-trap, comportamento
+  con `prefers-reduced-motion` — vedi [[tech-debt]] per lo stato aggiornato.
+
 ## Note tecniche emerse in fase 6
 - jsdom 30 + Node 22+ non espone `window.localStorage` di default (ExperimentalWarning nativa) — polyfill minimale in `vitest.setup.ts`, non è un problema di codice applicativo
 - `ClubStint` ora ha un campo `ovr` (OVR del giocatore alla fine di quel ciclo) — necessario per la CareerTable, che deve mostrare l'OVR storico per riga, non quello attuale
