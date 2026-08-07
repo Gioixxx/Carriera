@@ -1,7 +1,7 @@
 ---
 type: tech-debt
 tags: [memory, tech-debt]
-updated: [2026-08-06]
+updated: [2026-08-07]
 ---
 
 # Tech Debt
@@ -75,7 +75,7 @@ Registro debito tecnico con priorità. Aggiornato da /session-end. Origine spess
 - **Perché rimandato:** sessione dedicata al recupero della memoria disallineata, non a un giro di test funzionale.
 - **Impatto:** rischio medio — è UI nuova e non banale (focus trap, coda di overlay multipli, animazioni condizionate), un bug qui sarebbe visibile all'utente ad ogni trofeo/premio vinto.
 - **Risoluzione suggerita:** prima della prossima release, giocare una carriera fino a ottenere almeno un trofeo, un premio e una convocazione in nazionale nella stessa sessione per vedere la coda di overlay in sequenza; testare anche con `prefers-reduced-motion: reduce` attivo nel sistema.
-- **Aggiornamento 2026-08-07:** verifica parziale in browser (vedi [[sprint]]) — l'overlay di `MomentOverlay` per i traguardi OVR (kind "milestone", testato su OVR 60 e 70) e il banner persistente "record infranti" (introdotto nel refactor 2026-08-06, vedi [[decisions]]) funzionano entrambi correttamente. **Restano non verificati**: overlay trofeo/premio/convocazione nazionale, focus-trap, comportamento con `prefers-reduced-motion: reduce` — voce non ancora archiviabile.
+- **Aggiornamento 2026-08-07:** verifica parziale in browser (vedi [[sprint]]) — l'overlay di `MomentOverlay` per i traguardi OVR (kind "milestone", testato su OVR 60/70/80) e il banner persistente "record infranti" funzionano correttamente. **Aggiornamento 2026-08-07 (stessa giornata, sessione successiva)**: in un secondo giro di playtest (verifica offerte 4/campionati emergenti) sono stati osservati anche l'overlay trofeo (Coppa Italia, DFB-Pokal, Mondiale — testo/icona/badge corretti), l'overlay convocazione in nazionale ("Convocato in nazionale!") e l'overlay premio individuale ("Giocatore della stagione") — tutti renderizzati correttamente in sequenza durante lo stesso ciclo di gioco. **Restano non verificati**: focus-trap esplicito, comportamento con `prefers-reduced-motion: reduce`, coda con 3+ overlay nello stesso ciclo — voce non ancora archiviabile ma rischio residuo ridotto.
 
 ### Sistema "satisfaction" (Hall of Fame, record personali, milestone OVR, titoli di stagione) non verificato end-to-end nel browser
 - **Priorità:** Media
@@ -85,6 +85,7 @@ Registro debito tecnico con priorità. Aggiornato da /session-end. Origine spess
 - **Perché rimandato:** sessione di aggiornamento memoria, non di test funzionale — stesso pattern già visto con i momenti celebrativi (vedi voce sopra, ancora aperta).
 - **Impatto:** rischio medio — logica di selezione (rank titoli, Hall of Fame su 4 categorie, cap 12 titoli) non banale, un bug qui sarebbe visibile solo dopo diverse carriere giocate/archiviate, quindi difficile da notare per caso.
 - **Risoluzione suggerita:** giocare/archiviare almeno 2-3 carriere con profili diversi (una con OVR alto, una con tanti trofei, una con alta popolarità) per vedere la Hall of Fame popolarsi correttamente in `CareerArchive`; forzare un ciclo con più record infranti insieme per verificare la lista nel banner.
+- **Aggiornamento 2026-08-07:** l'overlay del premio individuale ("Giocatore della stagione", vedi [[sprint]]) è stato osservato funzionante in un playtest. **Restano non verificati**: Hall of Fame su `CareerArchive` con più carriere, "miglior titolo" in `CareerSummary`, banner con più record infranti insieme — voce non ancora archiviabile.
 
 ### Bottone "Chiudi" del menu principale non verificato nell'eseguibile desktop
 - **Priorità:** Media
@@ -121,6 +122,7 @@ Registro debito tecnico con priorità. Aggiornato da /session-end. Origine spess
 - **Perché rimandato:** stessa convenzione già stabilita nel progetto per questo tipo di sessione (dominio/bilanciamento) — verificato via test + harness, non manualmente.
 - **Impatto:** rischio medio — è UI nuova non banale (chip condizionali, nuova categoria di decisione forzata), un bug di rendering o di wiring (es. il chip che non appare mai, o lo scandalo che non si presenta davvero come decisione giocabile) sarebbe visibile solo giocando abbastanza a lungo da accumulare shadow o cicli.
 - **Risoluzione suggerita:** giocare/simulare una carriera fino a 4+ cicli per vedere il chip "Stile"; forzare (via scelte ripetute rischiose: doping, post controversi, tradire il club in crisi) l'accumulo di shadow fino a 50+ per vedere lo scandalo forzato e, gestendolo con trasparenza, verificare che poi scenda sotto 30 per innescare la redenzione.
+- **Aggiornamento 2026-08-07:** il chip "Stile: Leader" è comparso correttamente su `PlayerCard` dopo 4+ cicli in un playtest (vedi [[sprint]]). **Restano non verificati**: chip "Rumors" a shadow≥25, evento scandalo forzato, evento di redenzione, archetipo/titolo shadow-derivato in `CareerSummary`/`CareerArchive` — voce non ancora archiviabile.
 
 ### Archetipo/shadow molto rari sotto scelta uniforme casuale — reachability di un giocatore reale non misurata
 - **Priorità:** Bassa

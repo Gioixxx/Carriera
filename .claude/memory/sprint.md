@@ -419,7 +419,21 @@ Stato lavoro in corso. Aggiornato con /sprint. Backlog in [[backlog]], debito in
   esclusione dei 12 paesi dell'espansione mondo 2026-08-06 dal pool di `eligibleClubs` quando il
   giocatore punta a prestige ≥2 (OVR ≥84) — vedi [[decisions]] per il dettaglio completo. 342 test
   verdi (1 asserzione aggiornata su `generateAcademyOffer`), `tsc` pulito, `npm run simulate` con
-  frequenze stabili rispetto al baseline. **Non ancora verificato manualmente nel browser.**
+  frequenze stabili rispetto al baseline.
+
+- [x] **Verifica end-to-end nel browser: offerte 4x + esclusione campionati emergenti**
+  (2026-08-07): due carriere di test giocate dal vivo. Sotto OVR 84 confermato che i 12 campionati
+  emergenti (Ghana, Costa d'Avorio, Canada, Giappone, Marocco, Messico osservati) compaiono
+  regolarmente nelle offerte, comportamento invariato e corretto. Sopra OVR 84 — raggiunto forzando
+  `ovr`/`age` nel salvataggio via `localStorage` con `javascript_tool` del browser, dato che la
+  crescita naturale nel playtest si fermava a OVR 83 prima della fase di declino — il "Rientro dal
+  prestito" a OVR 88 ha mostrato **solo** club dai campionati big (Racing Club/Argentina,
+  Girona/Spagna, Manchester City/Inghilterra, Mönchengladbach/Germania), zero campionati emergenti:
+  conferma diretta in UI che l'esclusione funziona esattamente al confine previsto. Confermate anche
+  4 offerte in ogni flusso (settore giovanile, prestito, rientro, finestra di mercato, fine ciclo).
+  Bonus dallo stesso giro di playtest: overlay trofeo/convocazione nazionale/premio individuale e
+  chip archetipo "Stile: Leader" osservati funzionanti per la prima volta — vedi [[tech-debt]] per
+  l'aggiornamento delle voci correlate (nessuna archiviata, restano aspetti minori da verificare).
 
 - [x] **Release v0.5.1 pubblicata** (2026-08-07, commit be89329 + tag v0.5.1): bump
   `package.json`/`package-lock.json` 0.5.0→0.5.1 (patch, coerente col criterio già usato per
