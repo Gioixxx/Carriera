@@ -1,13 +1,13 @@
 # Launcher desktop
 
-Eseguibile Windows del gioco (`dist/Carriera.exe`), per chi vuole giocare senza clonare il
+Eseguibile Windows del gioco (`dist/MyRoad.exe`), per chi vuole giocare senza clonare il
 repo/installare Node. È un piccolo host WinForms + WebView2 che serve l'export statico del
 gioco su `http://127.0.0.1:<porta libera>/` (via `HttpListener` su file incorporati
 nell'assembly) e lo mostra in una finestra nativa, senza chrome del browser.
 
 ## Download
 
-[GitHub Release](https://github.com/Gioixxx/Carriera/releases/latest) — scarica `Carriera.exe`
+[GitHub Release](https://github.com/Gioixxx/MyRoad/releases/latest) — scarica `MyRoad.exe`
 dagli asset e avvialo. Non è più committato nel repo (vedi `.gitignore`): l'unico modo per
 ottenerlo senza buildarlo localmente è la Release.
 
@@ -24,33 +24,33 @@ ottenerlo senza buildarlo localmente è la Release.
   runtime dall'exe stesso (`Icon.ExtractAssociatedIcon`) per la finestra, senza incorporarla due
   volte.
 
-## Rigenerare `dist/Carriera.exe`
+## Rigenerare `dist/MyRoad.exe`
 
 ```powershell
 powershell -File scripts/build-launcher.ps1
 ```
 
 Lo script: builda l'export statico (`npm run build`), lo copia in
-`launcher/CarrieraLauncher/wwwroot/` (rigenerato ad ogni run, non versionato), pubblica il
+`launcher/MyRoadLauncher/wwwroot/` (rigenerato ad ogni run, non versionato), pubblica il
 progetto .NET come singolo file self-contained per `win-x64` con l'`AssemblyVersion` presa da
 `package.json.version` (nessun numero di versione duplicato nel `.csproj`), copia il risultato in
-`dist/Carriera.exe` (non versionato — vedi `.gitignore` — va allegato a mano a una GitHub
+`dist/MyRoad.exe` (non versionato — vedi `.gitignore` — va allegato a mano a una GitHub
 Release dopo la build).
 
 Richiede: Node/npm (già usati dal resto del progetto) e .NET SDK 10+ (`dotnet --version`).
 
 ## Aggiornamento automatico
 
-All'avvio, il launcher controlla in background `api.github.com/repos/Gioixxx/Carriera/releases/latest`
+All'avvio, il launcher controlla in background `api.github.com/repos/Gioixxx/MyRoad/releases/latest`
 e confronta il tag (`vX.Y.Z`) con la propria `AssemblyVersion`. Se trova una versione più recente
-con un asset `Carriera.exe` allegato, chiede conferma e — su "Sì" — la scarica, sostituisce
+con un asset `MyRoad.exe` allegato, chiede conferma e — su "Sì" — la scarica, sostituisce
 l'eseguibile in uso e si riavvia da solo (`UpdateChecker.cs`/`UpdateInstaller.cs`). Qualsiasi
 errore (nessuna connessione, rate limit, ecc.) viene ignorato in silenzio: l'avvio del gioco non
 dipende mai dall'esito del controllo.
 
 Per questo, chi taglia una nuova release deve **far combaciare il tag git con
 `package.json.version`**: bump della versione in `package.json` → rebuild (`build-launcher.ps1`,
-che stampa la versione usata) → `git tag vX.Y.Z` → `gh release create` con `dist/Carriera.exe`
+che stampa la versione usata) → `git tag vX.Y.Z` → `gh release create` con `dist/MyRoad.exe`
 allegato.
 
 ## Note

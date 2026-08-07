@@ -2,7 +2,7 @@ using System.Reflection;
 using Microsoft.Web.WebView2.Core;
 using Microsoft.Web.WebView2.WinForms;
 
-namespace CarrieraLauncher;
+namespace MyRoadLauncher;
 
 internal sealed class MainForm : Form
 {
@@ -23,7 +23,7 @@ internal sealed class MainForm : Form
     {
         _server = server;
 
-        Text = "Carriera";
+        Text = "My Road - L'Ascesa";
         Width = 1280;
         Height = 860;
         StartPosition = FormStartPosition.CenterScreen;
@@ -75,7 +75,7 @@ internal sealed class MainForm : Form
             // che qui coinciderebbe con la cartella del repo git.
             var userDataFolder = Path.Combine(
                 Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
-                "Carriera",
+                "MyRoad",
                 "WebView2");
             // Il browser normale richiede un gesto dell'utente prima di permettere audio con
             // autoplay: in questo host, senza il flag, la musica di sottofondo restava silenziosa
@@ -118,7 +118,7 @@ internal sealed class MainForm : Form
                 "WebView2 Runtime non trovato o non avviabile. Su Windows 11 è incluso di serie; "
                     + "su Windows 10 installalo da https://developer.microsoft.com/microsoft-edge/webview2/ "
                     + $"e riprova.\n\nDettagli: {ex.Message}",
-                "Carriera",
+                "My Road - L'Ascesa",
                 MessageBoxButtons.OK,
                 MessageBoxIcon.Error);
             Close();
@@ -136,7 +136,7 @@ internal sealed class MainForm : Form
             if (update is null) return;
 
             var result = MessageBox.Show(
-                $"È disponibile una nuova versione di Carriera ({update.Version}). Aggiornare ora?",
+                $"È disponibile una nuova versione di My Road - L'Ascesa ({update.Version}). Aggiornare ora?",
                 "Aggiornamento disponibile",
                 MessageBoxButtons.YesNo,
                 MessageBoxIcon.Information);
@@ -171,7 +171,7 @@ internal sealed class MainForm : Form
                         "Download dell'aggiornamento non riuscito nonostante alcuni tentativi automatici, "
                             + "la versione attuale resta invariata. Riprova più tardi: potrebbe essere una "
                             + "connessione instabile.\n\nDettagli: "
-                            + $"{ex.Message}\n\nLog completo in %TEMP%\\CarrieraUpdate\\update-log.txt",
+                            + $"{ex.Message}\n\nLog completo in %TEMP%\\MyRoadUpdate\\update-log.txt",
                         "Aggiornamento non riuscito",
                         MessageBoxButtons.OK,
                         MessageBoxIcon.Warning);

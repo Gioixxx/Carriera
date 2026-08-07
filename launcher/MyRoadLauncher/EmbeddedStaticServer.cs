@@ -2,7 +2,7 @@ using System.Net;
 using System.Net.Sockets;
 using System.Reflection;
 
-namespace CarrieraLauncher;
+namespace MyRoadLauncher;
 
 /// <summary>
 /// Serve l'export statico del gioco (incorporato come embedded resource nell'assembly)

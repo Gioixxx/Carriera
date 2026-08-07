@@ -1,7 +1,7 @@
 using System.Diagnostics;
 using System.Net;
 
-namespace CarrieraLauncher;
+namespace MyRoadLauncher;
 
 internal enum UpdatePhase
 {
@@ -21,9 +21,9 @@ internal static class UpdateInstaller
         CancellationToken ct = default)
     {
         var currentExe = Environment.ProcessPath ?? Application.ExecutablePath;
-        var tempDir = Path.Combine(Path.GetTempPath(), "CarrieraUpdate");
+        var tempDir = Path.Combine(Path.GetTempPath(), "MyRoadUpdate");
         Directory.CreateDirectory(tempDir);
-        var newExePath = Path.Combine(tempDir, "Carriera.new.exe");
+        var newExePath = Path.Combine(tempDir, "MyRoad.new.exe");
         var scriptPath = Path.Combine(tempDir, "apply-update.bat");
         var logPath = Path.Combine(tempDir, "update-log.txt");
 
@@ -136,7 +136,7 @@ internal static class UpdateInstaller
         long? expectedSize;
         using (var http = new HttpClient { Timeout = TimeSpan.FromMinutes(5) })
         {
-            http.DefaultRequestHeaders.UserAgent.ParseAdd("CarrieraLauncher");
+            http.DefaultRequestHeaders.UserAgent.ParseAdd("MyRoadLauncher");
             using var request = new HttpRequestMessage(HttpMethod.Get, url)
             {
                 Version = HttpVersion.Version11,

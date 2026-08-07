@@ -1,4 +1,4 @@
-namespace CarrieraLauncher;
+namespace MyRoadLauncher;
 
 internal static class Program
 {
@@ -16,7 +16,7 @@ internal static class Program
         {
             MessageBox.Show(
                 $"Impossibile avviare il server locale del gioco:\n{ex.Message}",
-                "Carriera",
+                "My Road - L'Ascesa",
                 MessageBoxButtons.OK,
                 MessageBoxIcon.Error);
             return;

@@ -1,24 +1,24 @@
-# Carriera
+# My Road - L'Ascesa
 
-**Simulatore testuale della carriera di un calciatore** · v0.2.0
+**Simulatore testuale della carriera di un calciatore** · v0.5.0
 
-[![Downloads](https://img.shields.io/github/downloads/Gioixxx/Carriera/total)](https://github.com/Gioixxx/Carriera/releases)
+[![Downloads](https://img.shields.io/github/downloads/Gioixxx/MyRoad/total)](https://github.com/Gioixxx/MyRoad/releases)
 
-[Repository](https://github.com/Gioixxx/Carriera) · [Download Windows](https://github.com/Gioixxx/Carriera/releases/latest)
+[Repository](https://github.com/Gioixxx/MyRoad) · [Download Windows](https://github.com/Gioixxx/MyRoad/releases/latest)
 
 ---
 
 ## Italiano
 
-### Cos'è Carriera
+### Cos'è My Road - L'Ascesa
 
-Carriera è un gioco browser/desktop in cui guidi la carriera di un calciatore attraverso scelte narrative, statistiche, trasferimenti, trofei e convocazioni in nazionale. Tutto in italiano, con nomi reali di club, leghe e competizioni. Nessun backend: i salvataggi restano nel browser o nell'eseguibile locale.
+My Road - L'Ascesa è un gioco browser/desktop in cui guidi la carriera di un calciatore attraverso scelte narrative, statistiche, trasferimenti, trofei e convocazioni in nazionale. Tutto in italiano, con nomi reali di club, leghe e competizioni. Nessun backend: i salvataggi restano nel browser o nell'eseguibile locale.
 
 ### Come giocare
 
 | Percorso | Istruzioni |
 |----------|------------|
-| **Giocatore** | Scarica [`Carriera.exe`](https://github.com/Gioixxx/Carriera/releases/latest) dalla GitHub Release — nessuna installazione di Node richiesta |
+| **Giocatore** | Scarica [`MyRoad.exe`](https://github.com/Gioixxx/MyRoad/releases/latest) dalla GitHub Release — nessuna installazione di Node richiesta |
 | **Browser / sviluppo** | `npm install` → `npm run dev` → apri [http://localhost:3000](http://localhost:3000) |
 
 L'eseguibile **non** è committato nel repository (vedi `.gitignore`): si distribuisce solo tramite GitHub Release.
@@ -45,8 +45,8 @@ L'eseguibile **non** è committato nel repository (vedi `.gitignore`): si distri
 **Requisiti:** Node.js 20+, npm.
 
 ```bash
-git clone https://github.com/Gioixxx/Carriera.git
-cd Carriera
+git clone https://github.com/Gioixxx/MyRoad.git
+cd MyRoad
 npm install
 npm run dev      # dev server
 npm run build    # export statico in out/
@@ -72,7 +72,7 @@ Il motore di gioco in `src/lib/career/` è puro e testabile, separato dalla UI R
 
 ### Build eseguibile Windows
 
-Per rigenerare `dist/Carriera.exe`:
+Per rigenerare `dist/MyRoad.exe`:
 
 ```powershell
 powershell -File scripts/build-launcher.ps1
@@ -80,7 +80,7 @@ powershell -File scripts/build-launcher.ps1
 
 Requisiti aggiuntivi: .NET SDK 10+ (`dotnet --version`).
 
-Checklist per una release: bump di `package.json.version` → build con lo script sopra → tag git `vX.Y.Z` → allegare `dist/Carriera.exe` alla GitHub Release (necessario per l'auto-updater del launcher).
+Checklist per una release: bump di `package.json.version` → build con lo script sopra → tag git `vX.Y.Z` → allegare `dist/MyRoad.exe` alla GitHub Release (necessario per l'auto-updater del launcher).
 
 Documentazione completa su packaging, WebView2 e aggiornamenti automatici: [`launcher/README.md`](launcher/README.md).
 
@@ -93,15 +93,15 @@ Documentazione completa su packaging, WebView2 e aggiornamenti automatici: [`lau
 
 ## English
 
-### What is Carriera
+### What is My Road - L'Ascesa
 
-Carriera is a browser/desktop game where you guide a footballer's career through narrative choices, stats, transfers, trophies, and national team call-ups. Fully in Italian, with real club, league, and competition names. No backend: saves stay in the browser or local executable.
+My Road - L'Ascesa is a browser/desktop game where you guide a footballer's career through narrative choices, stats, transfers, trophies, and national team call-ups. Fully in Italian, with real club, league, and competition names. No backend: saves stay in the browser or local executable.
 
 ### How to play
 
 | Path | Instructions |
 |------|--------------|
-| **Player** | Download [`Carriera.exe`](https://github.com/Gioixxx/Carriera/releases/latest) from the GitHub Release — no Node installation required |
+| **Player** | Download [`MyRoad.exe`](https://github.com/Gioixxx/MyRoad/releases/latest) from the GitHub Release — no Node installation required |
 | **Browser / development** | `npm install` → `npm run dev` → open [http://localhost:3000](http://localhost:3000) |
 
 The executable is **not** committed to the repository (see `.gitignore`): it is distributed only via GitHub Release.
@@ -128,8 +128,8 @@ The executable is **not** committed to the repository (see `.gitignore`): it is 
 **Requirements:** Node.js 20+, npm.
 
 ```bash
-git clone https://github.com/Gioixxx/Carriera.git
-cd Carriera
+git clone https://github.com/Gioixxx/MyRoad.git
+cd MyRoad
 npm install
 npm run dev      # dev server
 npm run build    # static export to out/
@@ -155,7 +155,7 @@ The game engine in `src/lib/career/` is pure and testable, separate from the Rea
 
 ### Windows executable build
 
-To regenerate `dist/Carriera.exe`:
+To regenerate `dist/MyRoad.exe`:
 
 ```powershell
 powershell -File scripts/build-launcher.ps1
@@ -163,7 +163,7 @@ powershell -File scripts/build-launcher.ps1
 
 Additional requirements: .NET SDK 10+ (`dotnet --version`).
 
-Release checklist: bump `package.json.version` → build with the script above → git tag `vX.Y.Z` → attach `dist/Carriera.exe` to the GitHub Release (required for the launcher's auto-updater).
+Release checklist: bump `package.json.version` → build with the script above → git tag `vX.Y.Z` → attach `dist/MyRoad.exe` to the GitHub Release (required for the launcher's auto-updater).
 
 Full documentation on packaging, WebView2, and automatic updates: [`launcher/README.md`](launcher/README.md).
 

@@ -20,7 +20,7 @@ const bebasNeue = Bebas_Neue({
 });
 
 export const metadata: Metadata = {
-  title: "Carriera",
+  title: "My Road - L'Ascesa",
   description: "Simulatore testuale della carriera di un calciatore",
 };
 

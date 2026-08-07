@@ -1,20 +1,20 @@
 using System.Reflection;
 using System.Text.Json;
 
-namespace CarrieraLauncher;
+namespace MyRoadLauncher;
 
 internal sealed record UpdateInfo(Version Version, string DownloadUrl);
 
 internal static class UpdateChecker
 {
-    private const string ReleasesApiUrl = "https://api.github.com/repos/Gioixxx/Carriera/releases/latest";
+    private const string ReleasesApiUrl = "https://api.github.com/repos/Gioixxx/MyRoad/releases/latest";
 
     public static async Task<UpdateInfo?> CheckAsync(CancellationToken ct = default)
     {
         try
         {
             using var http = new HttpClient { Timeout = TimeSpan.FromSeconds(5) };
-            http.DefaultRequestHeaders.UserAgent.ParseAdd("CarrieraLauncher");
+            http.DefaultRequestHeaders.UserAgent.ParseAdd("MyRoadLauncher");
 
             using var response = await http.GetAsync(ReleasesApiUrl, ct);
             if (!response.IsSuccessStatusCode) return null;
@@ -30,7 +30,7 @@ internal static class UpdateChecker
             if (latest <= current) return null;
 
             var asset = root.GetProperty("assets").EnumerateArray()
-                .FirstOrDefault(a => a.GetProperty("name").GetString() == "Carriera.exe");
+                .FirstOrDefault(a => a.GetProperty("name").GetString() == "MyRoad.exe");
             if (asset.ValueKind != JsonValueKind.Object) return null;
 
             var url = asset.GetProperty("browser_download_url").GetString();

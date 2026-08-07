@@ -6,8 +6,8 @@
     <UseWindowsForms>true</UseWindowsForms>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
-    <AssemblyName>Carriera</AssemblyName>
-    <RootNamespace>CarrieraLauncher</RootNamespace>
+    <AssemblyName>MyRoad</AssemblyName>
+    <RootNamespace>MyRoadLauncher</RootNamespace>
     <InvariantGlobalization>true</InvariantGlobalization>
     <ApplicationIcon>assets/app.ico</ApplicationIcon>
   </PropertyGroup>

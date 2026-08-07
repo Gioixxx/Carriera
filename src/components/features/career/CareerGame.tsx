@@ -520,7 +520,7 @@ export function CareerGame() {
           </div>
           <div className="text-center">
             <p className="font-display text-[10px] tracking-[0.35em] gold-metal-text">
-              Carriera
+              My Road - L&apos;Ascesa
             </p>
             <h1 className="font-display text-2xl text-(--color-text) sm:text-3xl">
               {isIdentity

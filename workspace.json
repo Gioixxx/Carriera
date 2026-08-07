@@ -1,11 +1,11 @@
 {
-    "name":  "Carriera",
+    "name":  "My Road - L'Ascesa",
     "kit":  "custom",
     "stack":  "nextjs",
     "claudeLibsVersion":  "1.30.2",
     "buildCommand":  "npm run build",
     "testCommand":  "npm test",
-    "githubRepo":  "Gioixxx/Carriera",
+    "githubRepo":  "Gioixxx/MyRoad",
     "createdAt":  "2026-08-04",
     "features":  {
                      "memoryOllama":  true,

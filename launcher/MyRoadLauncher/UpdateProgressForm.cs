@@ -1,4 +1,4 @@
-namespace CarrieraLauncher;
+namespace MyRoadLauncher;
 
 /// <summary>
 /// Finestra non modale mostrata durante il download/applicazione di un aggiornamento: prima non
@@ -30,7 +30,7 @@ internal sealed class UpdateProgressForm : Form
 
     public UpdateProgressForm()
     {
-        Text = "Aggiornamento Carriera";
+        Text = "Aggiornamento My Road - L'Ascesa";
         FormBorderStyle = FormBorderStyle.FixedDialog;
         ControlBox = false;
         MinimizeBox = false;
