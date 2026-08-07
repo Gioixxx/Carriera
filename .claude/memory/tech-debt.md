@@ -129,10 +129,29 @@ Registro debito tecnico con priorità. Aggiornato da /session-end. Origine spess
 - **Impatto:** rischio basso — se un giocatore reale che sceglie sempre "resta"/"professionista" non raggiunge comunque un archetipo entro una carriera tipica (~11-12 cicli), l'obiettivo "rendere gli archetipi raggiungibili e sentiti" fallirebbe nonostante l'harness dica che sono "possibili".
 - **Risoluzione suggerita:** giocare (o estendere l'harness con una `pickOption` che persegue deliberatamente un archetipo, es. sempre "resta"/sempre "professionista") per misurare la reachability reale, non solo quella sotto scelta casuale.
 
+### Installazioni esistenti di Carriera.exe non riceveranno l'update verso una release rinominata
+- **Priorità:** Media
+- **Area:** `launcher/MyRoadLauncher/UpdateChecker.cs`/`UpdateInstaller.cs`
+- **Data:** 2026-08-07
+- **Descrizione:** il rename "Carriera" → "My Road - L'Ascesa" (vedi [[decisions]]) ha cambiato, lato client, sia l'URL dell'API GitHub interrogata (`repos/Gioixxx/Carriera` → `repos/Gioixxx/MyRoad`) sia il nome asset atteso (`Carriera.exe` → `MyRoad.exe`). Questi valori sono **hardcoded nel binario già installato**: chiunque abbia oggi `Carriera.exe` continuerà a interrogare il vecchio URL finché non lo aggiorna manualmente almeno una volta (GitHub mantiene un redirect sul repo rinominato, ma l'asset `Carriera.exe` non esisterà più nelle release future).
+- **Perché rimandato:** N/A — non più rimandato, vedi aggiornamento sotto.
+- **Impatto:** rischio medio — se non gestito, chi ha installato l'app prima del rename resta bloccato sull'ultima versione pre-rename senza alcun avviso (il controllo update fallisce silenziosamente per design, vedi [[decisions]] sull'auto-updater).
+- **Risoluzione suggerita:** nelle note della prossima release rinominata, segnalare esplicitamente che chi ha `Carriera.exe` deve scaricare `MyRoad.exe` a mano dalla nuova release GitHub una volta; valutare se lasciare temporaneamente anche un asset `Carriera.exe` (duplicato) nella prima release post-rename per non rompere il check automatico di chi non ha ancora letto l'annuncio.
+- **Aggiornamento 2026-08-07:** release [v0.5.0](https://github.com/Gioixxx/MyRoad/releases/tag/v0.5.0) pubblicata con `MyRoad.exe` e note di rilascio che avvisano esplicitamente chi ha `Carriera.exe` di scaricare manualmente il nuovo eseguibile una volta — mitigazione applicata (avviso testuale), non risolta tecnicamente (nessun asset `Carriera.exe` duplicato lasciato nella release, opzione scartata come sovra-ingegnerizzata per un singolo passaggio manuale una tantum). Resta un gap noto per chiunque non legga le note di rilascio, a priorità bassa da qui in poi.
+
+### Wordmark "My Road - L'Ascesa" non verificato visivamente nel kicker compatto di CareerGame.tsx
+- **Priorità:** Bassa
+- **Area:** `src/components/features/career/CareerGame.tsx`
+- **Data:** 2026-08-07
+- **Descrizione:** il piccolo wordmark sopra l'header (`text-[10px] tracking-[0.35em]`, pensato per un testo corto come "Carriera", 8 caratteri) ora mostra "My Road - L'Ascesa" (19 caratteri) con lo stesso trattamento CSS molto compatto — non verificato nel browser se vada a capo, trabocchi o risulti visivamente affollato con quella tracking così ampia.
+- **Perché rimandato:** sessione di rename testuale, non di design — nessun accesso a verifica visiva in questa sessione.
+- **Impatto:** rischio basso — al più un dettaglio estetico nell'header, nessun impatto funzionale.
+- **Risoluzione suggerita:** aprire il gioco nel browser e controllare il wordmark; se risulta troppo largo, valutare una forma più corta solo lì (es. "MY ROAD") mantenendo il nome completo nel titolo della scheda browser e nella schermata "Carriera conclusa"/menu.
+
 ## Priorità
 - **Alta:** —
-- **Media:** momenti celebrativi/timeline non verificati end-to-end; sistema "satisfaction" (Hall of Fame/record/milestone/titoli) non verificato end-to-end; bottone "Chiudi" non verificato nell'exe; ricalibrazione OVR/soglie "grande momento" non verificata end-to-end; espansione mondo/Giant Killer non verificate end-to-end; traits/archetipo + shadow non verificati end-to-end (vedi sopra)
-- **Bassa:** soglia di ritiro automatico; generatori club-crisis con pesi di base uniformi tra loro; trofeo di club forse troppo comune dopo la ricalibrazione OVR (vedi sopra); promozione di campionato mai osservata esplicitamente nell'originale (vedi sopra); copertura parziale di `sync-league-rosters.ts` (vedi sopra); archetipo/shadow rari sotto scelta uniforme casuale, reachability reale non misurata (vedi sopra)
+- **Media:** momenti celebrativi/timeline non verificati end-to-end; sistema "satisfaction" (Hall of Fame/record/milestone/titoli) non verificato end-to-end; bottone "Chiudi" non verificato nell'exe; ricalibrazione OVR/soglie "grande momento" non verificata end-to-end; espansione mondo/Giant Killer non verificate end-to-end; traits/archetipo + shadow non verificati end-to-end
+- **Bassa:** soglia di ritiro automatico; generatori club-crisis con pesi di base uniformi tra loro; trofeo di club forse troppo comune dopo la ricalibrazione OVR (vedi sopra); promozione di campionato mai osservata esplicitamente nell'originale (vedi sopra); copertura parziale di `sync-league-rosters.ts` (vedi sopra); archetipo/shadow rari sotto scelta uniforme casuale, reachability reale non misurata (vedi sopra); wordmark "My Road - L'Ascesa" non verificato visivamente (vedi sopra); installazioni esistenti di Carriera.exe che non leggono le note di rilascio v0.5.0 (mitigato, vedi sopra)
 
 ## Archiviato
 - **Finestra di ritiro probabilistico forse più ampia di 34-40** — risolto 2026-08-06: `RETIREMENT_RISK_START_AGE` in `engine.ts` abbassata da 34 a 31, formula passata da quadratica a cubica dopo aver verificato con `npm run simulate` che il solo allargamento con esponente invariato spostava troppo peso verso i ritiri anticipati (auto-cap a 40 anni sceso dal 49.5% al 22.2%, contro un ~50% osservato nella ricerca). Con la cubica l'auto-cap torna al 43.8%, con solo una coda minoritaria di ritiri a 32-34 anni (3.5%+0.1%). Vedi [[decisions]] per il dettaglio numerico completo.

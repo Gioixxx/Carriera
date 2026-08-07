@@ -1,14 +1,16 @@
 ---
 type: sprint
 tags: [memory, sprint]
-updated: [2026-08-06]
+updated: [2026-08-07]
 ---
 > Aggiornato da /sprint — sessione 2026-08-06: espansione mondo (12 nuovi paesi, 96 club reali su
 > CONCACAF/CAF/AFC) + nuova meccanica "Giant Killer" (sorpresa di coppa) + strumento diagnostico
 > `sync-league-rosters.ts`, committato e rilasciato come v0.4.0. Arabia Saudita e Qatar interrotti
 > su richiesta esplicita dell'utente, vedi [[backlog]]. **Sessione successiva stesso giorno:**
-> Traits/archetipo di carriera + Shadow (debito morale), non ancora committata/rilasciata — vedi
-> voce dedicata più sotto e [[decisions]] per il dettaglio completo.
+> Traits/archetipo di carriera + Shadow (debito morale), committata come 3965789, poi un refactor
+> di layout/styling (005d674) subito dopo — vedi voci dedicate più sotto. **Sessione 2026-08-07:**
+> rename completo "Carriera" → "My Road - L'Ascesa" (repo GitHub, launcher/exe, UI) — vedi
+> [[decisions]] per il dettaglio completo.
 
 # Sprint Corrente
 Stato lavoro in corso. Aggiornato con /sprint. Backlog in [[backlog]], debito in [[tech-debt]].
@@ -344,8 +346,8 @@ Stato lavoro in corso. Aggiornato con /sprint. Backlog in [[backlog]], debito in
   v0.4.0](https://github.com/Gioixxx/Carriera/releases/tag/v0.4.0). **Non verificato
   manualmente nel browser** (stesso gap ereditato dalla voce sopra) — vedi [[tech-debt]].
 
-- [x] **Traits/archetipo di carriera + Shadow (debito morale)** (2026-08-06, non ancora
-  committato a fine di questa voce): su proposta dell'utente in 3 parti (§1 archetipo, §2
+- [x] **Traits/archetipo di carriera + Shadow (debito morale)** (2026-08-06, commit 3965789):
+  su proposta dell'utente in 3 parti (§1 archetipo, §2
   relazioni NPC, §3 debito morale), implementati §3+§1 in un'unica sessione seguendo l'ordine
   suggerito dall'utente stesso; §2 (relazioni NPC) resta interamente fuori scope, vedi
   [[backlog]]. Nuovi `traits.ts`/`shadow.ts`, retrofit di `traitsDelta`/`shadowDelta` su
@@ -360,6 +362,38 @@ Stato lavoro in corso. Aggiornato con /sprint. Backlog in [[backlog]], debito in
   non nulli su 2000 carriere simulate. Vedi [[decisions]] per il dettaglio completo. 342 test
   verdi (era 297), `tsc`/eslint (solo i 4 errori pre-esistenti)/`npm run build` puliti. **Non
   verificato manualmente nel browser** (sessione di dominio/harness) — vedi [[tech-debt]].
+
+- [x] **Refactor layout/styling componenti carriera** (2026-08-07, commit 005d674, non
+  registrato in memoria al momento del commit — recuperato in questa sessione): grid columns
+  in `CareerGame.tsx`/`CareerTable.tsx` per responsività migliore, spaziature/padding in
+  `PlayerCard.tsx`, età aggiunta a `CareerTimeline.tsx`, colonne extra per le opzioni in
+  `DecisionPanel.tsx`/`OfferPanel.tsx`. Nessuna nota di decisione dedicata: modifiche di
+  rifinitura visiva senza cambi di logica di dominio.
+
+- [x] **Rename completo "Carriera" → "My Road - L'Ascesa"** (2026-08-07, commit c6da2bc):
+  su richiesta esplicita dell'utente, rinominato repo GitHub (`Gioixxx/Carriera` →
+  `Gioixxx/MyRoad`, via `gh repo rename` + `git remote set-url`), cartella/progetto
+  launcher .NET (`launcher/CarrieraLauncher/` → `launcher/MyRoadLauncher/`, namespace/
+  `AssemblyName`/testi UI in tutti i `.cs`), URL API GitHub e nome asset nell'auto-updater
+  (`Carriera.exe` → `MyRoad.exe`), `scripts/build-launcher.ps1`, `package.json`, titolo
+  browser (`layout.tsx`) e wordmark in-game (`CareerGame.tsx`), `README.md`/`launcher/
+  README.md`/`.gitignore`/`workspace.json`/`CLAUDE.md`. Decisa esplicitamente con l'utente
+  prima di procedere: sì al rename del repo GitHub, forma tecnica corta `MyRoad` (titolo
+  UI completo resta "My Road - L'Ascesa"). Non toccate le occorrenze della parola italiana
+  generica "carriera" nel testo di gioco (es. "Carriera conclusa"). Vedi [[decisions]] per
+  il dettaglio completo. Verificato `npm test` (342 verdi), `tsc --noEmit` pulito, `dotnet
+  build` sul progetto rinominato (0 errori, solo il warning MSB3277 preesistente).
+
+- [x] **Release v0.5.0 pubblicata** (2026-08-07, commit ca2196f + tag v0.5.0): bump
+  `package.json`/`package-lock.json` 0.4.0→0.5.0 (minor, coerente col criterio già usato per
+  cambi ad ampio raggio — qui il rename tocca repo/launcher/auto-updater, non solo codice di
+  gioco), corretto anche il numero di versione stale nel badge di `README.md` (mostrava
+  ancora "v0.2.0"). `dist/MyRoad.exe` rigenerato via `scripts/build-launcher.ps1`
+  (FileVersion 0.5.0.0 verificato) e allegato alla [release GitHub
+  v0.5.0](https://github.com/Gioixxx/MyRoad/releases/tag/v0.5.0), con note che segnalano
+  esplicitamente a chi ha installato il vecchio `Carriera.exe` di scaricare `MyRoad.exe` a
+  mano una volta (vedi [[tech-debt]], l'auto-updater della vecchia versione punta a un
+  URL/asset che non esistono più). 342 test verdi, `tsc` pulito prima del tag.
 
 ## Note tecniche emerse in fase 6
 - jsdom 30 + Node 22+ non espone `window.localStorage` di default (ExperimentalWarning nativa) — polyfill minimale in `vitest.setup.ts`, non è un problema di codice applicativo

@@ -1,13 +1,14 @@
 ---
 type: memory
 tags: [memory, index]
-updated: [2026-08-06]
+updated: [2026-08-07]
 ---
 
-# Carriera — Next.js
+# My Road - L'Ascesa — Next.js
 > Contesto persistente. Aggiornato da /remember. Vault Obsidian: vedi workflows/obsidian-vault.md.
+> Progetto rinominato da "Carriera" a "My Road - L'Ascesa" il 2026-08-07 — vedi [[decisions]] per il dettaglio del rename (repo GitHub, launcher/exe, UI). La cartella locale del repo resta fisicamente `C:\Dev\Carriera` (non rinominata, solo il nome logico del progetto/repo GitHub).
 
-**Stack:** Next.js 16 (App Router) · TypeScript strict · Tailwind v4 · Vitest  **Sprint:** 8/8 fasi complete (build iniziale conclusa) + feature post-build in corso  **Aggiornamento:** 2026-08-06
+**Stack:** Next.js 16 (App Router) · TypeScript strict · Tailwind v4 · Vitest  **Sprint:** 8/8 fasi complete (build iniziale conclusa) + feature post-build in corso  **Aggiornamento:** 2026-08-07
 
 ## Contesto
 Clone testuale di "Copero — Simulador de carrera" (https://copero.com.ar/juegos/simulador-carrera):
@@ -41,11 +42,12 @@ scatenare uno scandalo forzato — vedi [[sprint]].
 - @adr.md — [[adr]] — ADR formali
 
 ## Segnalibri critici
+- **Rinominato "Carriera" → "My Road - L'Ascesa" (2026-08-07)**: repo GitHub `Gioixxx/Carriera` → `Gioixxx/MyRoad` (con redirect automatico di GitHub), launcher .NET `launcher/MyRoadLauncher/` (era `CarrieraLauncher`), eseguibile `dist/MyRoad.exe` (era `Carriera.exe`), `package.json` name `my-road`, titolo browser/wordmark in-game "My Road - L'Ascesa" — vedi [[decisions]] per l'elenco completo dei file toccati. **La cartella locale resta `C:\Dev\Carriera`** (non rinominata sul filesystem).
 - **Repo pubblica dal 2026-08-05** (era privata) — da qui in poi ogni nuovo asset/scelta (immagini, exe in `dist/`, licenze) va valutato assumendo visibilità pubblica, non più "solo io la vedo".
 - Il piano di implementazione dettagliato vive FUORI dal repo, in `C:\Users\Gioix\.claude\plans\piped-bouncing-cocke.md` — leggerlo prima di riprendere lo sviluppo, contiene le meccaniche osservate su 10+ carriere giocate sul sito originale.
 - Nell'originale gli award individuali (Pallone d'Oro) e le probabilità di nazionale/coppa continentale sono praticamente irraggiungibili anche in carriere-record — il clone li implementa con soglie deliberatamente più generose (vedi [[decisions]]).
 - Stemmi club/competizioni: hotlink TheSportsDB (mai download), integrati nella UI (`Club.crestUrl`, `COMPETITION_BADGES`) — vedi [[decisions]]. Premi individuali (Pallone d'Oro ecc.): icona generica Twemoji, deliberatamente NON una foto del trofeo reale (rischio trademark diverso dagli stemmi club, vedi [[decisions]]).
-- Eseguibile Windows: `dist/Carriera.exe`, **non più committato nel repo** dal 2026-08-05 (solo `.gitignore`d, distribuito via GitHub Release) — vedi [[decisions]] per la scelta tecnica (.NET/WebView2) e per la decisione di rimuoverlo dal tracking git, e `launcher/README.md` per come rigenerarlo.
+- Eseguibile Windows: `dist/MyRoad.exe` (rinominato da `Carriera.exe` il 2026-08-07), **non più committato nel repo** dal 2026-08-05 (solo `.gitignore`d, distribuito via GitHub Release) — vedi [[decisions]] per la scelta tecnica (.NET/WebView2) e per la decisione di rimuoverlo dal tracking git, e `launcher/README.md` per come rigenerarlo.
 - Momenti celebrativi (trofeo/premio/convocazione nazionale) mostrati come overlay modale animato (`MomentOverlay.tsx`) con confetti, rispettando sempre `prefers-reduced-motion` — vedi [[decisions]].
 - Il launcher desktop ha un auto-updater (`UpdateChecker.cs`/`UpdateInstaller.cs`): controlla GitHub Releases all'avvio e si autosostituisce su conferma. **Chi taglia una release deve far combaciare il tag git (`vX.Y.Z`) con `package.json.version`**, altrimenti il check non funziona — vedi [[decisions]] e `launcher/README.md`.
 - Sistema "satisfaction" (`lib/career/satisfaction.ts`, 2026-08-06): Hall of Fame sull'archivio multi-carriera, record personali, milestone OVR, titoli di stagione — **non ancora verificato end-to-end nel browser**, vedi [[tech-debt]].
