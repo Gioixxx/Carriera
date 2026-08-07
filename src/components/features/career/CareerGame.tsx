@@ -601,7 +601,7 @@ export function CareerGame() {
             <div className="flex min-h-0 min-w-0 flex-1 flex-col gap-3">
               <CareerTimeline player={state.player} />
 
-              <div className="grid min-h-0 min-w-0 flex-1 gap-3 lg:grid-cols-[18rem_1fr] lg:items-stretch xl:grid-cols-[20rem_1fr]">
+              <div className="grid min-h-0 min-w-0 flex-1 gap-3 lg:grid-cols-[20rem_1fr] lg:items-stretch xl:grid-cols-[23rem_1fr]">
                 <div className="min-w-0 shrink-0 lg:max-h-full lg:overflow-y-auto">
                   <PlayerCard
                     player={state.player}
@@ -656,7 +656,7 @@ export function CareerGame() {
                     ) : null}
                   </div>
 
-                  <div className="flex min-h-0 min-w-0 flex-1 flex-col gap-2">
+                  <div className="flex min-h-0 min-w-0 flex-1 flex-col gap-2 lg:min-h-[22rem]">
                     <p className="shrink-0 font-display text-xs tracking-[0.2em] text-(--color-text-muted) uppercase">
                       Storico
                     </p>

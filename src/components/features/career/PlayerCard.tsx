@@ -74,7 +74,7 @@ export function PlayerCard({ player, compact = false, flashRecords }: PlayerCard
     <div
       className={cn(
         "dossier-perforated chalk-panel flex flex-col rounded-2xl gold-metal-border",
-        compact ? "gap-2.5 p-3 sm:p-4" : "gap-4 p-5",
+        compact ? "gap-2.5 p-3 sm:p-4 lg:gap-4 lg:p-5" : "gap-4 p-5",
       )}
     >
       <div className="flex items-center gap-3 sm:gap-4">
@@ -113,7 +113,7 @@ export function PlayerCard({ player, compact = false, flashRecords }: PlayerCard
           <p
             className={cn(
               "font-display truncate leading-tight text-(--color-text)",
-              compact ? "text-xl" : "text-2xl",
+              compact ? "text-xl lg:text-2xl" : "text-2xl",
             )}
           >
             {player.lastName.toUpperCase()}
@@ -238,7 +238,7 @@ export function PlayerCard({ player, compact = false, flashRecords }: PlayerCard
       <div
         className={cn(
           "flex items-center gap-4 border-t border-(--color-border) text-xs",
-          compact ? "pt-2" : "pt-3",
+          compact ? "pt-2 lg:pt-3" : "pt-3",
         )}
       >
         <span

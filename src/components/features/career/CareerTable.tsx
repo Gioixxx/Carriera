@@ -110,8 +110,8 @@ export function CareerTable({ player, pendingLabel }: CareerTableProps) {
                 key={index}
                 className="border-b border-(--color-border) last:border-0 odd:bg-(--color-surface-raised)/40"
               >
-                <td className="px-2 py-2 text-(--color-text-muted)">{stint.ageFrom}</td>
-                <td className="max-w-0 px-2 py-2">
+                <td className="px-2 py-1.5 text-(--color-text-muted)">{stint.ageFrom}</td>
+                <td className="max-w-0 px-2 py-1.5">
                   <div className="flex min-w-0 items-center gap-1.5">
                     <ClubCrest
                       crestUrl={stint.club.crestUrl}
@@ -127,14 +127,14 @@ export function CareerTable({ player, pendingLabel }: CareerTableProps) {
                     <AwardChip count={awardCount} />
                   </div>
                 </td>
-                <td className="px-2 py-2 text-right">
+                <td className="px-2 py-1.5 text-right">
                   <OvrBadge ovr={stint.ovr} size="sm" className="ml-auto" />
                 </td>
-                <td className="px-2 py-2 text-right text-(--color-text)">{stint.stats.apps}</td>
-                <td className="px-2 py-2 text-right text-(--color-text)">
+                <td className="px-2 py-1.5 text-right text-(--color-text)">{stint.stats.apps}</td>
+                <td className="px-2 py-1.5 text-right text-(--color-text)">
                   {isGoalkeeper ? (stint.stats.goalsAgainst ?? 0) : stint.stats.goals}
                 </td>
-                <td className="px-2 py-2 text-right text-(--color-text)">
+                <td className="px-2 py-1.5 text-right text-(--color-text)">
                   {isGoalkeeper ? (stint.stats.cleanSheets ?? 0) : stint.stats.assists}
                 </td>
               </tr>

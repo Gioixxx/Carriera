@@ -45,12 +45,19 @@ export function CareerTimeline({ player }: CareerTimelineProps) {
       <p className="mb-3 text-[11px] font-semibold tracking-[0.15em] text-(--color-text-muted) uppercase">
         Percorso di carriera · {STARTING_AGE}–{CAREER_MAX_AGE} anni
       </p>
-      <div className="relative h-7">
+      <div className="relative mt-3 h-7">
         <div className="absolute inset-x-0 top-3 h-1 rounded-full bg-(--color-border)" />
         <div
           className="timeline-fill absolute top-3 left-0 h-1 rounded-full bg-(--color-accent)"
           style={{ width: `${progress}%` }}
         />
+        <span
+          className="absolute top-0 -translate-x-1/2 -translate-y-full rounded-full bg-(--color-accent) px-1.5 py-0.5 font-display text-[10px] leading-none whitespace-nowrap text-(--color-on-gold) transition-[left] duration-[900ms] ease-out"
+          style={{ left: `${progress}%` }}
+          aria-hidden="true"
+        >
+          {player.age} anni
+        </span>
         {markers.map((m, i) => (
           <span
             key={`${m.kind}-${m.age}-${i}`}
